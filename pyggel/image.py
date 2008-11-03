@@ -3,35 +3,13 @@ from include import *
 import view
 
 _all_images = {}
-def load(filename, fast=False):
-    nf = filename+str(fast)
-    if nf in _all_images:
-        return _all_images[nf]
-    if fast:
-        new = FastImage(filename)
-    else:
-        new = Image(filename)
-    _all_images[nf] = new
-    return new
-
-def load_unique(filename, fast=False):
-    if fast:
-        return FastImage(filename)
-    return Image(filename)
-
 _all_textures = {}
-def load_texture(filename, flip=0):
-    nf = filename+":"+str(flip)
-    if nf in _all_textures:
-        return _all_textures[nf]
-    new = Texture(filename, flip)
-    _all_textures[nf] = new
-    return new
 
 class Texture(object):
-    def __init__(self, filename, flip=0):
+    def __init__(self, filename, flip=0, unique=False):
         self.filename = filename
         self.flip = 0
+        self.unique = False
 
         self.gl_tex = glGenTextures(1)
 
@@ -47,24 +25,47 @@ class Texture(object):
         return nw, nh
 
     def _load_file(self):
-        image = pygame.image.load(self.filename)
+        if not self.unique:
+            if self.filename in _all_textures:
+                glDeleteTextures(self.gl_tex)
+                x = _all_textures[self.filename]
+                self.gl_tex = x.gl_tex
+            else:
+                image = pygame.image.load(self.filename)
 
-        size = self._get_next_biggest(*image.get_size())
+                size = self._get_next_biggest(*image.get_size())
 
-        image = pygame.transform.scale(image, size)
+                image = pygame.transform.scale(image, size)
 
-        tdata = pygame.image.tostring(image, "RGBA", self.flip)
-        
-        glBindTexture(GL_TEXTURE_2D, self.gl_tex)
+                tdata = pygame.image.tostring(image, "RGBA", self.flip)
+                
+                glBindTexture(GL_TEXTURE_2D, self.gl_tex)
 
-        xx, xy = size
+                xx, xy = size
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, tdata)
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
+                             GL_UNSIGNED_BYTE, tdata)
+                _all_textures[self.filename] = self
+        else:
+            image = pygame.image.load(self.filename)
+
+            size = self._get_next_biggest(*image.get_size())
+
+            image = pygame.transform.scale(image, size)
+
+            tdata = pygame.image.tostring(image, "RGBA", self.flip)
+            
+            glBindTexture(GL_TEXTURE_2D, self.gl_tex)
+
+            xx, xy = size
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
+                         GL_UNSIGNED_BYTE, tdata)
 
 class Image(object):
-    def __init__(self, filename, dont_load=False):
+    def __init__(self, filename, dont_load=False, unique=False):
         self.filename = filename
+        self.unique = unique
 
         self.gl_tex = glGenTextures(1)
 
@@ -132,23 +133,54 @@ class Image(object):
         return view.screen.rect.colliderect(r)
 
     def _load_file(self):
-        self._pimage = pygame.image.load(self.filename)
+        if not self.unique:
+            if self.filename in _all_images:
+                glDeleteTextures(self.gl_tex)
+                x = _all_images[self.filename]
+                self.gl_tex = x
+                self._pimage = x._pimage
+                self._pimage2 = x._pimage2
+                self._image_size = x._image_size
+                self._altered_image_size = x._altered_image_size
+                self.offset = x.offset
+                self.gl_list = x.gl_list
+            else:
+                self._pimage = pygame.image.load(self.filename)
 
-        sx, sy = self._pimage.get_size()
-        xx, xy = self._get_next_biggest(sx, sy)
+                sx, sy = self._pimage.get_size()
+                xx, xy = self._get_next_biggest(sx, sy)
 
-        self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
-        self._pimage2.fill((0,0,0,0))
+                self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
+                self._pimage2.fill((0,0,0,0))
 
-        self._pimage2.blit(self._pimage, (0,0))
+                self._pimage2.blit(self._pimage, (0,0))
 
-        self._pimage = self._pimage2.subsurface(0,0,sx,sy)
+                self._pimage = self._pimage2.subsurface(0,0,sx,sy)
 
-        self._image_size = (sx, sy)
-        self._altered_image_size = (xx, xy)
+                self._image_size = (sx, sy)
+                self._altered_image_size = (xx, xy)
 
-        self._texturize(self._pimage2)
-        self._compile()
+                self._texturize(self._pimage2)
+                self._compile()
+                _all_images[self.filename] = self
+        else:
+            self._pimage = pygame.image.load(self.filename)
+
+            sx, sy = self._pimage.get_size()
+            xx, xy = self._get_next_biggest(sx, sy)
+
+            self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
+            self._pimage2.fill((0,0,0,0))
+
+            self._pimage2.blit(self._pimage, (0,0))
+
+            self._pimage = self._pimage2.subsurface(0,0,sx,sy)
+
+            self._image_size = (sx, sy)
+            self._altered_image_size = (xx, xy)
+
+            self._texturize(self._pimage2)
+            self._compile()
 
     def _texturize(self, image):
         tdata = pygame.image.tostring(image, "RGBA", 0)
@@ -278,9 +310,10 @@ class Image(object):
             if i[0] == obj:
                 self.to_be_blitted.remove(i)
 
-class SceneImage(object):
-    def __init__(self, image, pos):
-        self.image = image
+class SceneImage(Image):
+    def __init__(self, filename, pos):
+        Image.__init__(self, filename)
         self.pos = pos
 
-    def render(
+    def render(self):
+        pass
