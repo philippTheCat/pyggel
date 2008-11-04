@@ -63,9 +63,12 @@ class Texture(object):
                          GL_UNSIGNED_BYTE, tdata)
 
 class Image(object):
-    def __init__(self, filename, dont_load=False, unique=False):
+    def __init__(self, filename, dont_load=False, unique=False,
+                 pos=(0,0)):
         self.filename = filename
         self.unique = unique
+
+        self.pos = pos
 
         self.gl_tex = glGenTextures(1)
 
@@ -128,8 +131,8 @@ class Image(object):
 
         self._texturize(self._pimage2)
 
-    def test_on_screen(self, pos):
-        r = pygame.rect.Rect(pos, self._image_size)
+    def test_on_screen(self):
+        r = pygame.rect.Rect(self.pos, self._image_size)
         return view.screen.rect.colliderect(r)
 
     def _load_file(self):
@@ -248,11 +251,14 @@ class Image(object):
     def blit_again(self, other, pos):
         self.to_be_blitted.append([other, pos])
 
-    def render(self, pos):
-        if not self.test_on_screen(pos):
+    def render(self):
+        if not self.test_on_screen():
             return None
+
         ox, oy = self.offset
         h, w = self.get_size()
+
+        pos = self.pos
 
         glPushMatrix()
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
@@ -267,27 +273,10 @@ class Image(object):
                 x, y = i[1]
                 x += pos[0]
                 y += pos[1]
-                i[0].render((x, y))
-            view.screen.pop_clip()
-
-    def render3d(self, pos):
-        ox, oy = self.offset
-        h, w = self.get_size()
-
-        glPushMatrix()
-        glTranslatef(pos[0]+ox, pos[1]+oy, pos[1])
-        glRotatef(self.rotation[0], 1, 0, 0)
-        glRotatef(self.rotation[1], 0, 1, 0)
-        glRotatef(self.rotation[2], 0, 0, 1)
-        glCallList(self.gl_list)
-        glPopMatrix()
-        if self.to_be_blitted:
-            view.screen.push_clip((pos[0], view.screen.screen_size[1]-pos[1]-h,w,h))
-            for i in self.to_be_blitted:
-                x, y = i[1]
-                x += pos[0]
-                y += pos[1]
-                i[0].render((x, y))
+                o = i[0].pos
+                i[0].pos = (x, y)
+                i[0].render()
+                i[0].pos = o
             view.screen.pop_clip()
 
     def get_width(self):
@@ -309,11 +298,3 @@ class Image(object):
         for i in self.to_be_blitted:
             if i[0] == obj:
                 self.to_be_blitted.remove(i)
-
-class SceneImage(Image):
-    def __init__(self, filename, pos):
-        Image.__init__(self, filename)
-        self.pos = pos
-
-    def render(self):
-        pass

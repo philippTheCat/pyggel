@@ -24,7 +24,8 @@ def MTL(filename, path='', max_size="default"):
     return contents
  
 class OBJ:
-    def __init__(self, filename, swapyz=True, max_size="default"):
+    def __init__(self, filename, swapyz=True, max_size="default",
+                 pos=(0,0,0), rotation=(0,0,0)):
         """Loads a Wavefront OBJ file. """
         self.vertices = []
         self.normals = []
@@ -71,8 +72,6 @@ class OBJ:
  
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
-##        glEnable(GL_TEXTURE_2D)
-##        glFrontFace(GL_CCW)
         for face in self.faces:
             vertices, normals, texture_coords, material = face
  
@@ -93,15 +92,18 @@ class OBJ:
                     glTexCoord2fv(self.texcoords[texture_coords[i] - 1])
                 glVertex3fv(self.vertices[vertices[i] - 1])
             glEnd()
-##        glDisable(GL_TEXTURE_2D)
         glEndList()
 
-    def render(self, pos=(0,0,0), rotation=(0,0,0)):
+        self.pos = pos
+        self.rotation = rotation
+
+    def render(self):
         glPushMatrix()
-        glTranslatef(*pos)
-        glRotatef(rotation[0], 1, 0, 0)
-        glRotatef(rotation[1], 0, 1, 0)
-        glRotatef(rotation[2], 0, 0, 1)
+        glTranslatef(*self.pos)
+        rot = self.rotation
+        glRotatef(rot[0], 1, 0, 0)
+        glRotatef(rot[1], 0, 1, 0)
+        glRotatef(rot[2], 0, 0, 1)
         glCallList(self.gl_list)
         glPopMatrix()
 

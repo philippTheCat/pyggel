@@ -11,17 +11,20 @@ def main():
     light_group.add_light(my_light)
     my_light.enable(GL_LIGHT0)
 
-    camera = pyggel.camera.LookAtCamera((0,0,-5), distance=10)
+    camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
 ##    camera = pyggel.camera.LookFromCamera((0,0,10))
 
     img = pyggel.image.Image("data/tile_example.png")
-    img2 = pyggel.image.Image("data/ar.png")
+    img2 = pyggel.image.Image("data/ar.png", pos=(50,0))
 
     img.blit(img2, (0, 0))
 
-    im = img
-
     obj = pyggel.load_obj.OBJ("data/carrot.obj")
+
+    my_scene = pyggel.scene.Scene()
+    my_scene.add_2d(img)
+    my_scene.add_2d(img2)
+    my_scene.add_3d_facing(obj)
 
     clock = pygame.time.Clock()
 
@@ -37,11 +40,11 @@ def main():
 
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    if im.get_rect().collidepoint(event.pos):
-                        if im == img:
-                            im = img2
+                    if img.get_rect().collidepoint(event.pos):
+                        if img.to_be_blitted:
+                            img.clear_blits()
                         else:
-                            im = img
+                            img.blit(img2, (0, 0))
 
             if event.type == KEYDOWN:
                 if event.key == K_LEFT:
@@ -52,6 +55,10 @@ def main():
                     camera.rotx += 15
                 if event.key == K_DOWN:
                     camera.rotx -= 15
+                if event.key == K_1:
+                    camera.rotz -= 15
+                if event.key == K_2:
+                    camera.rotz += 15
 
                 if event.key == K_EQUALS:
                     camera.distance -= 1
@@ -66,21 +73,12 @@ def main():
                     camera.posz -= .25
                 if event.key == K_s:
                     camera.posz += .25
+                obj.pos = camera.get_pos()
 
         rot += 1
-
-        pyggel.view.clear_screen()
-        pyggel.view.set3d()
-        camera.push()
-        obj.render((camera.get_pos()), (rot, rot, 0))
-        obj.render((0,0,-10))
-        camera.pop()
-        pyggel.view.set2d()
-        im.render((0, 0))
-        img2.render((50, 0))
-        img2.rotate((0,0,1))
-        im.rotate((0,0,-1))
+        img.rotate((0,0,1))
+        img2.rotate((0,0,-1))
+        my_scene.render(camera)
 
         pyggel.view.refresh_screen()
-
 main()
