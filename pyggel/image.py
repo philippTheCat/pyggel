@@ -4,6 +4,7 @@ import view
 
 _all_images = {}
 _all_textures = {}
+_all_3d_images = {}
 
 class Texture(object):
     def __init__(self, filename, flip=0, unique=False):
@@ -64,7 +65,7 @@ class Texture(object):
 
 class Image(object):
     def __init__(self, filename, dont_load=False, unique=False,
-                 pos=(0,0)):
+                 pos=(0,0), rotation=(0,0,0), scale=1):
         self.filename = filename
         self.unique = unique
 
@@ -76,7 +77,8 @@ class Image(object):
             self._load_file()
 
         self.to_be_blitted = []
-        self.rotation = [0,0,0]
+        self.rotation = list(rotation)
+        self.scale = scale
 
     def rotate(self, amount):
         r = self.rotation
@@ -261,6 +263,7 @@ class Image(object):
         pos = self.pos
 
         glPushMatrix()
+        glScalef(self.scale, self.scale, self.scale)
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
@@ -298,3 +301,104 @@ class Image(object):
         for i in self.to_be_blitted:
             if i[0] == obj:
                 self.to_be_blitted.remove(i)
+
+
+class Image3D(Image):
+    def __init__(self, filename, pos=(0,0,0), rotation=(0,0,0)):
+        Image.__init__(self, filename, False, False, pos, rotation)
+
+    def render(self):
+        h, w = self.get_size()
+
+        pos = self.pos
+
+        glPushMatrix()
+        glScalef(self.scale, self.scale, self.scale)
+        glTranslatef(pos[0], pos[1], pos[2])
+        glRotatef(self.rotation[0], 1, 0, 0)
+        glRotatef(self.rotation[1], 0, 1, 0)
+        glRotatef(self.rotation[2], 0, 0, 1)
+        glCallList(self.gl_list)
+        glPopMatrix()
+
+    def blit(self, *args, **kwargs):
+        print "Image3D does not support this function!"
+
+    clear_blits = blit
+    remove_blit = blit
+    blit_again = blit
+    test_on_screen = blit
+
+    def copy(self):
+        return self #since there are no unique images, this is fine!
+
+    def _load_file(self):
+        if self.filename in _all_3d_images:
+            glDeleteTextures(self.gl_tex)
+            x = _all_3d_images[self.filename]
+            self.gl_tex = x
+            self._pimage = x._pimage
+            self._pimage2 = x._pimage2
+            self._image_size = x._image_size
+            self._altered_image_size = x._altered_image_size
+            self.offset = x.offset
+            self.gl_list = x.gl_list
+        else:
+            self._pimage = pygame.image.load(self.filename)
+
+            sx, sy = self._pimage.get_size()
+            xx, xy = self._get_next_biggest(sx, sy)
+
+            self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
+            self._pimage2.fill((0,0,0,0))
+
+            self._pimage2.blit(self._pimage, (0,0))
+
+            self._pimage = self._pimage2.subsurface(0,0,sx,sy)
+
+            self._image_size = (sx, sy)
+            self._altered_image_size = (xx, xy)
+
+            self._texturize(self._pimage2)
+            self._compile()
+            _all_3d_images[self.filename] = self
+
+    def _compile(self):
+        self.offset = self.get_width()/2, self.get_height()/2
+        self.gl_list = glGenLists(1)
+        glNewList(self.gl_list, GL_COMPILE)
+
+        dep_return=glGetBooleanv(GL_DEPTH_TEST)
+        ble_return=glGetBooleanv(GL_BLEND)
+        lig_return=glGetBooleanv(GL_LIGHTING)
+
+        glEnable(GL_TEXTURE_2D)
+
+        glBindTexture(GL_TEXTURE_2D, self.gl_tex)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
+        glDisable(GL_DEPTH_TEST)
+        glEnable(GL_BLEND)
+        glDisable(GL_LIGHTING)
+
+        glBegin(GL_QUADS)
+        glColor4f(1,1,1,1)
+        glTexCoord2f(0, 0)
+        glVertex3f(0, 0, 0)
+
+        glTexCoord2f(1, 0)
+        glVertex3f(1, 0, 0)
+
+        glTexCoord2f(1, 1)
+        glVertex3f(1, 1, 0)
+
+        glTexCoord2f(0, 1)
+        glVertex3f(0, 1, 0)
+        glEnd()
+
+        if dep_return:glEnable(GL_DEPTH_TEST)
+        if not ble_return:glDisable(GL_BLEND)
+        if lig_return:glEnable(GL_LIGHTING)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
+
+        glEndList()

@@ -65,6 +65,7 @@ def init(screen_size=None):
     glDepthFunc(GL_LEQUAL)
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
     glEnable(GL_SCISSOR_TEST)
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
 
 def set_fullscreen(boolean):
     screen.fullscreen = boolean

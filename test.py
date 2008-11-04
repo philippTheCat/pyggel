@@ -1,6 +1,8 @@
 import pyggel
 from pyggel import *
 
+import random
+
 def main():
     pyggel.view.init()
 
@@ -16,6 +18,12 @@ def main():
 
     img = pyggel.image.Image("data/tile_example.png")
     img2 = pyggel.image.Image("data/ar.png", pos=(50,0))
+    img3d = []
+    for x in xrange(10):
+        img3d.append(pyggel.image.Image3D("data/tile_example.png",
+                                          pos=(random.randint(-10, 10),
+                                               random.randint(-10, 10),
+                                               -10)))
 
     img.blit(img2, (0, 0))
 
@@ -24,7 +32,9 @@ def main():
     my_scene = pyggel.scene.Scene()
     my_scene.add_2d(img)
     my_scene.add_2d(img2)
-    my_scene.add_3d_facing(obj)
+    my_scene.add_3d(obj)
+    for i in img3d:
+        my_scene.add_3d_facing(i)
 
     clock = pygame.time.Clock()
 
