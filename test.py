@@ -6,12 +6,14 @@ import random
 def main():
     pyggel.view.init()
 
-    my_light = pyggel.light.Light((0,0,1), (0,0,0,0),
-                                  (1,1,1,1), (1,1,1,1),
-                                  (0,0,0), True)
-    light_group = pyggel.light.LightGroup()
-    light_group.add_light(my_light)
-    my_light.enable(GL_LIGHT0)
+##    my_light = pyggel.light.Light((0,0,1), (0,0,0,0),
+##                                  (1,1,1,1), (1,1,1,1),
+##                                  (0,0,0), True)
+##    light_group = pyggel.light.LightGroup()
+##    light_group.add_light(my_light)
+##    my_light.enable(GL_LIGHT0)
+
+    glDisable(GL_LIGHTING)
 
     camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
 ##    camera = pyggel.camera.LookFromCamera((0,0,10))
