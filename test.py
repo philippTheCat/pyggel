@@ -18,6 +18,7 @@ def main():
 
     img = pyggel.image.Image("data/tile_example.png")
     img2 = pyggel.image.Image("data/ar.png", pos=(50,0))
+    print img2.get_rect()
     img3d = []
     for x in xrange(10):
         img3d.append(pyggel.image.Image3D("data/tile_example.png",

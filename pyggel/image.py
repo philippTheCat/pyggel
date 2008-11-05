@@ -103,6 +103,8 @@ class Image(object):
 
         new.to_be_blitted = list(self.to_be_blitted)
 
+        new.rect = self.rect
+
         new._texturize(new._pimage2)
         new.rotation = list(self.rotation)
         new.unique = self.unique
@@ -136,6 +138,8 @@ class Image(object):
         self._image_size = (sx, sy)
         self._altered_image_size = (xx, xy)
 
+        self.rect = self._pimage.get_rect()
+
         self._texturize(self._pimage2)
 
     def test_on_screen(self):
@@ -154,6 +158,7 @@ class Image(object):
                 self._altered_image_size = x._altered_image_size
                 self.offset = x.offset
                 self.gl_list = x.gl_list
+                self.rect = self._pimage.get_rect()
             else:
                 self._pimage = pygame.image.load(self.filename)
 
@@ -171,6 +176,7 @@ class Image(object):
                 self._altered_image_size = (xx, xy)
 
                 self._texturize(self._pimage2)
+                self.rect = self._pimage.get_rect()
                 self._compile()
                 _all_images[self.filename] = self
         else:
@@ -190,6 +196,7 @@ class Image(object):
             self._altered_image_size = (xx, xy)
 
             self._texturize(self._pimage2)
+            self.rect = self._pimage.get_rect()
             self._compile()
 
     def compile_from_surface(self, surf):
@@ -209,6 +216,8 @@ class Image(object):
 
         self.unique = True
 
+        self.rect = self._pimage.get_rect()
+
         self._texturize(self._pimage2)
         self._compile()
 
@@ -224,6 +233,7 @@ class Image(object):
 
     def _compile(self):
         self.offset = self.get_width()/2, self.get_height()/2
+        self.rect.center = self.offset[0] + self.pos[0], self.offset[1] + self.pos[1]
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
 
@@ -317,7 +327,8 @@ class Image(object):
         return self._image_size
 
     def get_rect(self):
-        return self._pimage.get_rect()
+        self.rect.center = self.offset[0] + self.pos[0], self.offset[1] + self.pos[1]
+        return self.rect
 
     def clear_blits(self):
         self.to_be_blitted = []
@@ -396,6 +407,7 @@ class Image3D(Image):
             self._texturize(self._pimage2)
             self._compile()
             _all_3d_images[self.filename] = self
+        self.rect = self._pimage.get_rect()
 
     def compile_from_surface(self, surf):
         self._pimage = surf
