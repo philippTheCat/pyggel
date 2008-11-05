@@ -41,7 +41,7 @@ def main():
     rot = 0
 
     while 1:
-        clock.tick(999)
+        clock.tick(60)
         print clock.get_fps()
         for event in pyggel.get_events():
             if event.type == QUIT:
@@ -56,34 +56,34 @@ def main():
                         else:
                             img.blit(img2, (0, 0))
 
-            if event.type == KEYDOWN:
-                if event.key == K_LEFT:
-                    camera.roty -= 15
-                if event.key == K_RIGHT:
-                    camera.roty += 15
-                if event.key == K_UP:
-                    camera.rotx += 15
-                if event.key == K_DOWN:
-                    camera.rotx -= 15
-                if event.key == K_1:
-                    camera.rotz -= 15
-                if event.key == K_2:
-                    camera.rotz += 15
+        key = pygame.key.get_pressed()
+        if key[K_LEFT]:
+            camera.roty -= 15
+        if key[K_RIGHT]:
+            camera.roty += 15
+        if key[K_UP]:
+            camera.rotx += 15
+        if key[K_DOWN]:
+            camera.rotx -= 15
+        if key[K_1]:
+            camera.rotz -= 15
+        if key[K_2]:
+            camera.rotz += 15
 
-                if event.key == K_EQUALS:
-                    camera.distance -= 1
-                if event.key == K_MINUS:
-                    camera.distance += 1
+        if key[K_EQUALS]:
+            camera.distance -= 1
+        if key[K_MINUS]:
+            camera.distance += 1
 
-                if event.key == K_a:
-                    camera.posx -= .25
-                if event.key == K_d:
-                    camera.posx += .25
-                if event.key == K_w:
-                    camera.posz -= .25
-                if event.key == K_s:
-                    camera.posz += .25
-                obj.pos = camera.get_pos()
+        if key[K_a]:
+            camera.posx -= .25
+        if key[K_d]:
+            camera.posx += .25
+        if key[K_w]:
+            camera.posz -= .25
+        if key[K_s]:
+            camera.posz += .25
+        obj.pos = camera.get_pos()
 
         rot += 1
         img.rotate((0,0,1))
