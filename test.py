@@ -25,6 +25,10 @@ def main():
                                                random.randint(-10, 10),
                                                -10)))
 
+    font = pyggel.font.Font()
+    img4 = font.make_text_image("Hello World: 2D", (255, 255, 0))
+    img5 = font.make_text_image3D("Hello World: 3D", (0, 255, 255))
+
     img.blit(img2, (0, 0))
 
     obj = pyggel.load_obj.OBJ("data/carrot.obj")
@@ -32,16 +36,19 @@ def main():
     my_scene = pyggel.scene.Scene()
     my_scene.add_2d(img)
     my_scene.add_2d(img2)
+    my_scene.add_2d(img4)
     my_scene.add_3d(obj)
     for i in img3d:
         my_scene.add_3d_facing(i)
+    my_scene.add_3d_facing(img5)
 
     clock = pygame.time.Clock()
 
     rot = 0
 
     while 1:
-        clock.tick(60)
+        img5.rotation[2] += 0.5
+        clock.tick(999)
         print clock.get_fps()
         for event in pyggel.get_events():
             if event.type == QUIT:
@@ -58,31 +65,31 @@ def main():
 
         key = pygame.key.get_pressed()
         if key[K_LEFT]:
-            camera.roty -= 15
+            camera.roty -= .5
         if key[K_RIGHT]:
-            camera.roty += 15
+            camera.roty += .5
         if key[K_UP]:
-            camera.rotx += 15
+            camera.rotx += .5
         if key[K_DOWN]:
-            camera.rotx -= 15
+            camera.rotx -= .5
         if key[K_1]:
-            camera.rotz -= 15
+            camera.rotz -= .5
         if key[K_2]:
-            camera.rotz += 15
+            camera.rotz += .5
 
         if key[K_EQUALS]:
-            camera.distance -= 1
+            camera.distance -= .1
         if key[K_MINUS]:
-            camera.distance += 1
+            camera.distance += .1
 
         if key[K_a]:
-            camera.posx -= .25
+            camera.posx -= .1
         if key[K_d]:
-            camera.posx += .25
+            camera.posx += .1
         if key[K_w]:
-            camera.posz -= .25
+            camera.posz -= .1
         if key[K_s]:
-            camera.posz += .25
+            camera.posz += .1
         obj.pos = camera.get_pos()
 
         rot += 1

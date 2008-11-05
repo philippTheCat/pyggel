@@ -1,6 +1,6 @@
 from include import *
 
-import load_obj, view, image, camera, math3d, light, scene
+import load_obj, view, image, camera, math3d, light, scene, font
 
 def quit():
     view.clear_screen()

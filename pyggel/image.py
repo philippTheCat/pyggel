@@ -64,8 +64,9 @@ class Texture(object):
                          GL_UNSIGNED_BYTE, tdata)
 
 class Image(object):
-    def __init__(self, filename, dont_load=False, unique=False,
-                 pos=(0,0), rotation=(0,0,0), scale=1):
+    def __init__(self, filename, pos=(0,0),
+                 rotation=(0,0,0), scale=1,
+                 dont_load=False, unique=False):
         self.filename = filename
         self.unique = unique
 
@@ -104,6 +105,10 @@ class Image(object):
 
         new._texturize(new._pimage2)
         new.rotation = list(self.rotation)
+        new.unique = self.unique
+        new.pos = self.pos
+        new.rotation = self.rotation
+        new.scale = self.scale
 
         return new
 
@@ -186,6 +191,26 @@ class Image(object):
 
             self._texturize(self._pimage2)
             self._compile()
+
+    def compile_from_surface(self, surf):
+        self._pimage = surf
+        sx, sy = self._pimage.get_size()
+        xx, xy = self._get_next_biggest(sx, sy)
+
+        self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
+        self._pimage2.fill((0,0,0,0))
+
+        self._pimage2.blit(self._pimage, (0,0))
+
+        self._pimage = self._pimage2.subsurface(0,0,sx,sy)
+
+        self._image_size = (sx, sy)
+        self._altered_image_size = (xx, xy)
+
+        self.unique = True
+
+        self._texturize(self._pimage2)
+        self._compile()
 
     def _texturize(self, image):
         tdata = pygame.image.tostring(image, "RGBA", 0)
@@ -302,10 +327,19 @@ class Image(object):
             if i[0] == obj:
                 self.to_be_blitted.remove(i)
 
+    def __del__(self):
+        try:
+            glDeleteTextures(self.gl_tex)
+        except:
+            pass
+
 
 class Image3D(Image):
-    def __init__(self, filename, pos=(0,0,0), rotation=(0,0,0)):
-        Image.__init__(self, filename, False, False, pos, rotation)
+    def __init__(self, filename, pos=(0,0,0),
+                 rotation=(0,0,0), scale=1,
+                 dont_load=False):
+        Image.__init__(self, filename, pos, rotation,
+                       scale, dont_load, False)
 
     def render(self):
         h, w = self.get_size()
@@ -363,12 +397,31 @@ class Image3D(Image):
             self._compile()
             _all_3d_images[self.filename] = self
 
+    def compile_from_surface(self, surf):
+        self._pimage = surf
+        sx, sy = self._pimage.get_size()
+        xx, xy = self._get_next_biggest(sx, sy)
+
+        self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
+        self._pimage2.fill((0,0,0,0))
+
+        self._pimage2.blit(self._pimage, (0,0))
+
+        self._pimage = self._pimage2.subsurface(0,0,sx,sy)
+
+        self._image_size = (sx, sy)
+        self._altered_image_size = (xx, xy)
+
+        self.unique = True
+
+        self._texturize(self._pimage2)
+        self._compile()
+
     def _compile(self):
         self.offset = self.get_width()/2, self.get_height()/2
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
 
-        dep_return=glGetBooleanv(GL_DEPTH_TEST)
         ble_return=glGetBooleanv(GL_BLEND)
         lig_return=glGetBooleanv(GL_LIGHTING)
 
@@ -376,29 +429,46 @@ class Image3D(Image):
 
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-
-        glDisable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
         glDisable(GL_LIGHTING)
 
+        w = self.get_width()*1.0/self._altered_image_size[0]
+        h = self.get_height()*1.0/self._altered_image_size[1]
+
+        gw, gh = self.get_size()
+
+        if gw < gh:
+            uw = gw * 1.0 / gh
+            uh = 1
+        elif gh < gw:
+            uw = 1
+            uh = gh * 1.0 / gw
+        else:
+            uw = uh = 1
+
         glBegin(GL_QUADS)
         glColor4f(1,1,1,1)
+        glTexCoord2f(0, h)
+        glVertex3f(-uw, -uh, 0)
+
+        glTexCoord2f(w, h)
+        glVertex3f(uw, -uh, 0)
+
+        glTexCoord2f(w, 0)
+        glVertex3f(uw, uh, 0)
+
         glTexCoord2f(0, 0)
-        glVertex3f(0, 0, 0)
-
-        glTexCoord2f(1, 0)
-        glVertex3f(1, 0, 0)
-
-        glTexCoord2f(1, 1)
-        glVertex3f(1, 1, 0)
-
-        glTexCoord2f(0, 1)
-        glVertex3f(0, 1, 0)
+        glVertex3f(-uw, uh, 0)
         glEnd()
 
-        if dep_return:glEnable(GL_DEPTH_TEST)
         if not ble_return:glDisable(GL_BLEND)
         if lig_return:glEnable(GL_LIGHTING)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
 
         glEndList()
+
+    def __del__(self):
+        try:
+            glDeleteTextures(self.gl_tex)
+        except:
+            pass
