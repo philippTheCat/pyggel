@@ -34,7 +34,7 @@ def main():
 
     img.blit(img2, (0, 0))
 
-    obj = pyggel.load_obj.OBJ("data/carrot.obj")
+    obj = pyggel.mesh.OBJ("data/carrot.obj")
 
     my_scene = pyggel.scene.Scene()
     my_scene.add_2d(img)
