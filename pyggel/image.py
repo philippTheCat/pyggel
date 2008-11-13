@@ -80,6 +80,7 @@ class Image(object):
         self.to_be_blitted = []
         self.rotation = list(rotation)
         self.scale = scale
+        self.colorize = (1,1,1,1)
 
     def rotate(self, amount):
         r = self.rotation
@@ -111,6 +112,7 @@ class Image(object):
         new.pos = self.pos
         new.rotation = self.rotation
         new.scale = self.scale
+        new.colorize = self.colorize
 
         return new
 
@@ -260,7 +262,7 @@ class Image(object):
         h = self.get_height()*1.0/self._altered_image_size[1]
 
         glBegin(GL_QUADS)
-        glColor4f(1,1,1,1)
+##        glColor4f(1,1,1,1)
         glTexCoord2f(0, 0)
         glVertex3f(l, t, 0)
 
@@ -305,6 +307,7 @@ class Image(object):
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
+        glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
         view.unset_render_image_2d()
@@ -367,6 +370,7 @@ class Image3D(Image):
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
+        glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
         view.unset_render_image_3d()
@@ -464,7 +468,7 @@ class Image3D(Image):
             uw = uh = 1
 
         glBegin(GL_QUADS)
-        glColor4f(1,1,1,1)
+##        glColor4f(1,1,1,1)
         glTexCoord2f(0, h)
         glVertex3f(-uw, -uh, 0)
 

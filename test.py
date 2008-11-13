@@ -15,12 +15,15 @@ def main():
 
 ##    glDisable(GL_LIGHTING)
     pyggel.view.set_lighting(False)
+##    glViewport(0,0,320, 240)
 
     camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
 ##    camera = pyggel.camera.LookFromCamera((0,0,10))
 
     img = pyggel.image.Image("data/tile_example.png")
+    img.colorize=(1,0,0,1)
     img2 = pyggel.image.Image("data/ar.png", pos=(50,0))
+    img2.colorize=(1,1,1,0.5)
     img3d = []
     for x in xrange(10):
         img3d.append(pyggel.image.Image3D("data/tile_example.png",

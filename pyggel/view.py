@@ -69,6 +69,8 @@ def init(screen_size=None):
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_BLEND)
 
+    clear_screen()
+
 def set_fullscreen(boolean):
     screen.fullscreen = boolean
     build_screen()
