@@ -8,6 +8,7 @@ class _Screen(object):
         self.hwrender = True
         self.decorated = True
         self.shadows = False
+        self.lighting = True
 
         self.clips = [(0,0,640,480)]
         glScissor(*self.clips[0])
@@ -66,6 +67,7 @@ def init(screen_size=None):
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
     glEnable(GL_SCISSOR_TEST)
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+    glEnable(GL_BLEND)
 
 def set_fullscreen(boolean):
     screen.fullscreen = boolean
@@ -73,6 +75,16 @@ def set_fullscreen(boolean):
 
 def toggle_fullscreen():
     set_fullscreen(not screen.fullscreen)
+
+def set_lighting(boolean):
+    screen.lighting = boolean
+    if boolean:
+        glEnable(GL_LIGHTING)
+    else:
+        glDisable(GL_LIGHTING)
+
+def toggle_lighting():
+    set_lighting(not screen.lighting)
 
 def set_hardware_render(boolean):
     screen.hwrender = boolean
@@ -103,6 +115,28 @@ def set2d():
 
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
+
+def set_render_image_2d():
+    if screen.lighting:
+        glDisable(GL_LIGHTING)
+    glDisable(GL_DEPTH_TEST)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
+def unset_render_image_2d():
+    if screen.lighting:
+        glEnable(GL_LIGHTING)
+    glEnable(GL_DEPTH_TEST)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
+
+def set_render_image_3d():
+    if screen.lighting:
+        glDisable(GL_LIGHTING)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
+def unset_render_image_3d():
+    if screen.lighting:
+        glEnable(GL_LIGHTING)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
 
 def set3d():
     screen_size = screen.screen_size

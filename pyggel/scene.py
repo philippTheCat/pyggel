@@ -1,7 +1,7 @@
 from include import *
 import camera, view
 
-#####This code is not as fast as a straight "for" loop, but will remain as it will be helpful for the quadtree later...
+#####This code is not as fast as a straight "for" loop on large scenes, but will remain as it will be helpful for the quadtree later...
 ##class Node(object):
 ##    def __init__(self, parent, obj):
 ##        self.parent = parent

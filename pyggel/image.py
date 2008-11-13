@@ -237,19 +237,19 @@ class Image(object):
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
 
-        dep_return=glGetBooleanv(GL_DEPTH_TEST)
-        ble_return=glGetBooleanv(GL_BLEND)
-        lig_return=glGetBooleanv(GL_LIGHTING)
+##        dep_return=glGetBooleanv(GL_DEPTH_TEST)
+##        ble_return=glGetBooleanv(GL_BLEND)
+##        lig_return=glGetBooleanv(GL_LIGHTING)
 
         glEnable(GL_TEXTURE_2D)
 
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+##        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
-        glDisable(GL_DEPTH_TEST)
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
-        glDisable(GL_LIGHTING)
+##        glDisable(GL_DEPTH_TEST)
+##        glEnable(GL_BLEND)
+##        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+##        glDisable(GL_LIGHTING)
         off = self.offset
         l = -off[0]
         r = off[0]
@@ -274,10 +274,10 @@ class Image(object):
         glVertex3f(l, b, 0)
         glEnd()
 
-        if dep_return:glEnable(GL_DEPTH_TEST)
-        if not ble_return:glDisable(GL_BLEND)
-        if lig_return:glEnable(GL_LIGHTING)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
+##        if dep_return:glEnable(GL_DEPTH_TEST)
+##        if not ble_return:glDisable(GL_BLEND)
+##        if lig_return:glEnable(GL_LIGHTING)
+##        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
 
         glEndList()
 
@@ -297,6 +297,8 @@ class Image(object):
 
         pos = self.pos
 
+        view.set_render_image_2d()
+
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
@@ -305,6 +307,7 @@ class Image(object):
         glRotatef(self.rotation[2], 0, 0, 1)
         glCallList(self.gl_list)
         glPopMatrix()
+        view.unset_render_image_2d()
         if self.to_be_blitted:
             view.screen.push_clip((pos[0], view.screen.screen_size[1]-pos[1]-h,w,h))
             for i in self.to_be_blitted:
@@ -356,6 +359,7 @@ class Image3D(Image):
         h, w = self.get_size()
 
         pos = self.pos
+        view.set_render_image_3d()
 
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
@@ -365,6 +369,7 @@ class Image3D(Image):
         glRotatef(self.rotation[2], 0, 0, 1)
         glCallList(self.gl_list)
         glPopMatrix()
+        view.unset_render_image_3d()
 
     def blit(self, *args, **kwargs):
         print "Image3D does not support this function!"
@@ -434,15 +439,15 @@ class Image3D(Image):
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
 
-        ble_return=glGetBooleanv(GL_BLEND)
-        lig_return=glGetBooleanv(GL_LIGHTING)
+##        ble_return=glGetBooleanv(GL_BLEND)
+##        lig_return=glGetBooleanv(GL_LIGHTING)
 
-        glEnable(GL_TEXTURE_2D)
+##        glEnable(GL_TEXTURE_2D)
 
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glEnable(GL_BLEND)
-        glDisable(GL_LIGHTING)
+##        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+##        glEnable(GL_BLEND)
+##        glDisable(GL_LIGHTING)
 
         w = self.get_width()*1.0/self._altered_image_size[0]
         h = self.get_height()*1.0/self._altered_image_size[1]
@@ -473,9 +478,9 @@ class Image3D(Image):
         glVertex3f(-uw, uh, 0)
         glEnd()
 
-        if not ble_return:glDisable(GL_BLEND)
-        if lig_return:glEnable(GL_LIGHTING)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
+##        if not ble_return:glDisable(GL_BLEND)
+##        if lig_return:glEnable(GL_LIGHTING)
+##        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
 
         glEndList()
 

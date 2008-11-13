@@ -13,14 +13,14 @@ def main():
 ##    light_group.add_light(my_light)
 ##    my_light.enable(GL_LIGHT0)
 
-    glDisable(GL_LIGHTING)
+##    glDisable(GL_LIGHTING)
+    pyggel.view.set_lighting(False)
 
     camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
 ##    camera = pyggel.camera.LookFromCamera((0,0,10))
 
     img = pyggel.image.Image("data/tile_example.png")
     img2 = pyggel.image.Image("data/ar.png", pos=(50,0))
-    print img2.get_rect()
     img3d = []
     for x in xrange(10):
         img3d.append(pyggel.image.Image3D("data/tile_example.png",
