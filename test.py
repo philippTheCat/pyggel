@@ -6,15 +6,15 @@ import random
 def main():
     pyggel.view.init()
 
-##    my_light = pyggel.light.Light((0,0,1), (0,0,0,0),
-##                                  (1,1,1,1), (1,1,1,1),
-##                                  (0,0,0), True)
-##    light_group = pyggel.light.LightGroup()
-##    light_group.add_light(my_light)
-##    my_light.enable(GL_LIGHT0)
+    my_light = pyggel.light.Light((0,0,1), (0,0,0,0),
+                                  (1,1,1,1), (1,1,1,1),
+                                  (0,0,0), True)
+    light_group = pyggel.light.LightGroup()
+    light_group.add_light(my_light)
+    my_light.enable(GL_LIGHT0)
 
 ##    glDisable(GL_LIGHTING)
-    pyggel.view.set_lighting(False)
+##    pyggel.view.set_lighting(False)
 ##    glViewport(0,0,320, 240)
 
     camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
@@ -46,6 +46,7 @@ def main():
     my_scene.add_3d(obj)
     for i in img3d:
         my_scene.add_3d_facing(i)
+##        my_scene.add_3d(i)
     my_scene.add_3d_facing(img5)
 
     clock = pygame.time.Clock()
@@ -96,7 +97,8 @@ def main():
             camera.posz -= .1
         if key[K_s]:
             camera.posz += .1
-        obj.pos = camera.get_pos()
+##        obj.pos = camera.get_pos()
+##        obj.rotation = camera.get_rotation()
 
         rot += 1
         img.rotate((0,0,1))

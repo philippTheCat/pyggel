@@ -9,6 +9,8 @@ class _Screen(object):
         self.decorated = True
         self.shadows = False
         self.lighting = True
+        self.fog = True
+        self.fog_color = (.5,.5,.5,.5)
 
         self.clips = [(0,0,640,480)]
         glScissor(*self.clips[0])
@@ -70,6 +72,13 @@ def init(screen_size=None):
     glEnable(GL_BLEND)
 
     clear_screen()
+    set_fog_color((.5,.5,.5,.5))
+    glFogi(GL_FOG_MODE, GL_LINEAR)
+    glFogf(GL_FOG_DENSITY, .35)
+    glHint(GL_FOG_HINT, GL_NICEST)
+    glFogf(GL_FOG_START, 10.0)
+    glFogf(GL_FOG_END, 50.0)
+    set_fog(True)
 
 def set_fullscreen(boolean):
     screen.fullscreen = boolean
@@ -104,6 +113,20 @@ def toggle_decorated():
 
 def set_shadows(boolean):
     screen.shadows = boolean
+
+def set_fog_color(rgba):
+    glFogfv(GL_FOG_COLOR, rgba)
+    screen.fog_color = rgba
+
+def set_fog(boolean):
+    screen.fog = boolean
+    if boolean:
+        glEnable(GL_FOG)
+    else:
+        glDisable(GL_FOG)
+
+def toggle_fog():
+    set_fog(not screen.fog)
 
 def build_screen():
     pygame.display.set_mode(screen.screen_size, screen.get_params())
