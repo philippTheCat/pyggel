@@ -54,7 +54,7 @@ def main():
     rot = 0
 
     while 1:
-        img5.rotation[2] += 0.5
+##        img5.rotation[2] += 0.5
         clock.tick(999)
         print clock.get_fps()
         for event in pyggel.get_events():
