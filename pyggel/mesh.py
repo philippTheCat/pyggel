@@ -107,10 +107,12 @@ class BasicMesh(object):
         self.pos = pos
         self.rotation = rotation
         self.verts = verts
-        self._drew_verts = False
-        self._vert_list = None
 
-    def render(self):
+    def copy(self):
+        return BasicMesh(self.gl_list, list(self.pos),
+                         list(self.rotation), list(self.verts))
+
+    def render(self, camera=None):
         glPushMatrix()
         glTranslatef(*self.pos)
         rot = self.rotation
@@ -118,24 +120,4 @@ class BasicMesh(object):
         glRotatef(rot[1], 0, 1, 0)
         glRotatef(rot[2], 0, 0, 1)
         glCallList(self.gl_list)
-        glPopMatrix()
-
-    def render_collision_debug(self):
-        if not self._drew_verts:
-            self._vert_list = glGenLists(1)
-            glNewList(self._vert_list, GL_COMPILE)
-            glBegin(GL_LINE_STRIP)
-            glColor4f(1, 1, 1, 1)
-            for i in self.verts:
-                glVertex3f(*i)
-            glEnd()
-            glEndList()
-            self._drew_verts = True
-        glPushMatrix()
-        glTranslatef(*self.pos)
-        rot = self.rotation
-        glRotatef(rot[0], 1, 0, 0)
-        glRotatef(rot[1], 0, 1, 0)
-        glRotatef(rot[2], 0, 0, 1)
-        glCallList(self._vert_list)
         glPopMatrix()

@@ -15,11 +15,14 @@ def main():
 
     box = pyggel.geometry.Cube(5)
     box.pos=(0,0,0)
+    box2 = box.copy()
+    box2.pos=(0,0,-5)
 
     mscene = pyggel.scene.Scene()
-    mscene.add_3d_facing(img)
+    mscene.add_3d(img2)#_facing(img)
     mscene.add_3d(box)
-    mscene.add_3d_facing(img2)
+    mscene.add_3d(box2)
+    mscene.add_3d(img)#_facing(img2)
 
     clock = pygame.time.Clock()
 

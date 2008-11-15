@@ -21,7 +21,7 @@ class Cube(object):
                       (0,1,5,4),#top
                       (2,3,7,6))#bottom
 
-    def render(self):
+    def render(self, camera=None):
         glPushMatrix()
         glTranslatef(*self.pos)
         glScalef(.5*self.size,.5*self.size,.5*self.size)
@@ -32,3 +32,6 @@ class Cube(object):
                 glVertex3f(*self.corners[x])
             glEnd()
         glPopMatrix()
+
+    def copy(self):
+        return Cube(self.size, self.pos, self.texture)

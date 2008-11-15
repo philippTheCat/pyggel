@@ -290,7 +290,7 @@ class Image(object):
     def blit_again(self, other, pos):
         self.to_be_blitted.append([other, pos])
 
-    def render(self):
+    def render(self, camera=None):
         if not self.test_on_screen():
             return None
 
@@ -304,6 +304,8 @@ class Image(object):
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
+##        if camera:
+##            camera.set_facing_matrix()
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
@@ -358,7 +360,7 @@ class Image3D(Image):
         Image.__init__(self, filename, pos, rotation,
                        scale, dont_load, False)
 
-    def render(self):
+    def render(self, camera=None):
         h, w = self.get_size()
 
         pos = self.pos
@@ -367,6 +369,8 @@ class Image3D(Image):
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
         glTranslatef(pos[0], pos[1], pos[2])
+        if camera:
+            camera.set_facing_matrix()
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)

@@ -48,8 +48,7 @@ import camera, view
 
 class Tree(object):
     def __init__(self):
-        self.render_with_camera = [] # Leaf() #this is the only one that should have shadowing!
-        self.render_facing_camera = [] # Leaf()
+        self.render_3d = [] # Leaf()
         self.render_2d = [] # Leaf()
 
 class Scene(object):
@@ -64,9 +63,7 @@ class Scene(object):
         if self.render3d:
             view.set3d()
             camera.push()
-            for i in self.graph.render_with_camera: i.render()
-            camera.set_facing_matrix()
-            for i in self.graph.render_facing_camera: i.render()
+            for i in self.graph.render_3d: i.render(camera)
             camera.pop()
 
         if self.render2d:
@@ -77,7 +74,4 @@ class Scene(object):
         self.graph.render_2d.append(ele)
 
     def add_3d(self, ele):
-        self.graph.render_with_camera.append(ele)
-
-    def add_3d_facing(self, ele):
-        self.graph.render_facing_camera.append(ele)
+        self.graph.render_3d.append(ele)
