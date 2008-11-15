@@ -42,14 +42,14 @@ def main():
     obj2.pos = (0,0,-5)
 
     my_scene = pyggel.scene.Scene()
-##    my_scene.add_2d(img)
-##    my_scene.add_2d(img2)
-##    my_scene.add_2d(img4)
+    my_scene.add_2d(img)
+    my_scene.add_2d(img2)
+    my_scene.add_2d(img4)
     my_scene.add_3d(obj)
     my_scene.add_3d(obj2)
-##    for i in img3d:
+    for i in img3d:
 ##        my_scene.add_3d_facing(i)
-##        my_scene.add_3d(i)
+        my_scene.add_3d(i)
     my_scene.add_3d(img5)#_facing(img5)
 
     clock = pygame.time.Clock()
