@@ -7,7 +7,7 @@ def main():
     pyggel.view.set_lighting(False)
 
     camera1 = pyggel.camera.LookFromCamera((0,0,10))
-    camera2 = pyggel.camera.LookAtCamera((0,0,0), distance=10)
+    camera2 = pyggel.camera.LookAtCamera((0,0,-5), distance=10)
     camera = camera1
     font = pyggel.font.Font()
     img = font.make_text_image3D("Hello World: 3D", (255, 255, 0))
@@ -33,9 +33,6 @@ def main():
     mscene.add_3d(img4)
     mscene.add_2d(text)
 
-    print mscene.graph.render_3d_nontextured
-    print mscene.graph.render_3d_textured
-
     clock = pygame.time.Clock()
 
     while 1:
@@ -47,11 +44,14 @@ def main():
                 pyggel.quit()
                 return None
 
-            if event.type == KEYDOWN and event.key == K_RETURN:
-                if camera == camera1:
-                    camera = camera2
-                else:
-                    camera = camera1
+            if event.type == KEYDOWN:
+                if event.key == K_RETURN:
+                    if camera == camera1:
+                        camera = camera2
+                    else:
+                        camera = camera1
+                if event.key == K_SPACE:
+                    img.cant_hide = not img.cant_hide
 
         key = pygame.key.get_pressed()
         if key[K_m]:

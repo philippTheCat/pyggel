@@ -345,11 +345,16 @@ class Image3D(Image):
         Image.__init__(self, filename, pos, rotation,
                        scale, dont_load, False)
 
+        self.cant_hide = False
+
     def render(self, camera=None):
         h, w = self.get_size()
 
         pos = self.pos
-        view.set_render_image_3d()
+        if self.cant_hide:
+            view.set_render_image_2d() #this is the same as 3d except disables depth testing
+        else:
+            view.set_render_image_3d()
 
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
@@ -362,7 +367,10 @@ class Image3D(Image):
         glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
-        view.unset_render_image_3d()
+        if self.cant_hide:
+            view.unset_render_image_2d()
+        else:
+            view.unset_render_image_3d()
 
     def blit(self, *args, **kwargs):
         print "Image3D does not support this function!"
