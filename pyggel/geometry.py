@@ -1,10 +1,12 @@
 from include import *
 
 class Cube(object):
-    def __init__(self, size, pos=(0,0,0), texture=None):
+    def __init__(self, size, pos=(0,0,0), color=(1,1,1,1),
+                 texture=None):
         self.size = size
         self.pos = pos
         self.texture = texture
+        self.color = color
 
         self.corners = ((-1, -1, 1),#topleftfront
                       (1, -1, 1),#toprightfront
@@ -21,17 +23,29 @@ class Cube(object):
                       (0,1,5,4),#top
                       (2,3,7,6))#bottom
 
+        self.gl_list = glGenLists(1)
+
+        self._compile()
+
+    def _compile(self):
+        glNewList(self.gl_list, GL_COMPILE)
+        for i in self.sides:
+            glBegin(GL_QUADS)
+            for x in i:
+                glVertex3f(*self.corners[x])
+            glEnd()
+        glEndList()
+
     def render(self, camera=None):
         glPushMatrix()
         glTranslatef(*self.pos)
         glScalef(.5*self.size,.5*self.size,.5*self.size)
-        for i in self.sides:
-            glBegin(GL_QUADS)
-            glColor4f(*i)
-            for x in i:
-                glVertex3f(*self.corners[x])
-            glEnd()
+        glColor4f(*self.color)
+        glCallList(self.gl_list)
         glPopMatrix()
 
     def copy(self):
-        return Cube(self.size, self.pos, self.texture)
+        n = Cube(self.size, self.pos, self.color, self.texture)
+        glDeleteTextures(n.gl_list)
+        n.gl_list = self.gl_list
+        return n

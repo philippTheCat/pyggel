@@ -15,7 +15,7 @@ def MTL(filename, path=''):
         elif values[0] == 'map_Kd':
             # load the texture referred to by this declaration
             mtl[values[0]] = values[1]
-            tex = image.load_texture(os.path.join(path,mtl['map_Kd']), 1)
+            tex = image.Texture(os.path.join(path,mtl['map_Kd']), 1)
             texid = tex.gl_tex
         elif values[0]=="Kd":
             mtl[values[0]] = map(float, values[1:])
