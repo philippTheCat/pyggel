@@ -239,19 +239,9 @@ class Image(object):
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
 
-##        dep_return=glGetBooleanv(GL_DEPTH_TEST)
-##        ble_return=glGetBooleanv(GL_BLEND)
-##        lig_return=glGetBooleanv(GL_LIGHTING)
-
         glEnable(GL_TEXTURE_2D)
 
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
-##        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-
-##        glDisable(GL_DEPTH_TEST)
-##        glEnable(GL_BLEND)
-##        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
-##        glDisable(GL_LIGHTING)
         off = self.offset
         l = -off[0]
         r = off[0]
@@ -262,7 +252,6 @@ class Image(object):
         h = self.get_height()*1.0/self._altered_image_size[1]
 
         glBegin(GL_QUADS)
-##        glColor4f(1,1,1,1)
         glTexCoord2f(0, 0)
         glVertex3f(l, t, 0)
 
@@ -275,11 +264,6 @@ class Image(object):
         glTexCoord2f(0, h)
         glVertex3f(l, b, 0)
         glEnd()
-
-##        if dep_return:glEnable(GL_DEPTH_TEST)
-##        if not ble_return:glDisable(GL_BLEND)
-##        if lig_return:glEnable(GL_LIGHTING)
-##        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
 
         glEndList()
 
@@ -304,8 +288,7 @@ class Image(object):
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
-##        if camera:
-##            camera.set_facing_matrix()
+
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
@@ -388,13 +371,21 @@ class Image3D(Image):
     test_on_screen = blit
 
     def copy(self):
-        return self #since there are no unique images, this is fine!
+        n = Image3D(self.filename, self.pos, self.rotation, self.scale, True)
+        n._image_size = self._image_size
+        n._altered_image_size = self._altered_image_size
+        n.gl_list = self.gl_list
+        n.gl_tex = self.gl_tex
+        n._pimage = self._pimage
+        n._pimage2 = self._pimage2
+        n.offset = self.offset
+        return n
 
     def _load_file(self):
         if self.filename in _all_3d_images:
             glDeleteTextures(self.gl_tex)
             x = _all_3d_images[self.filename]
-            self.gl_tex = x
+            self.gl_tex = x.gl_tex
             self._pimage = x._pimage
             self._pimage2 = x._pimage2
             self._image_size = x._image_size
@@ -447,15 +438,7 @@ class Image3D(Image):
         self.gl_list = glGenLists(1)
         glNewList(self.gl_list, GL_COMPILE)
 
-##        ble_return=glGetBooleanv(GL_BLEND)
-##        lig_return=glGetBooleanv(GL_LIGHTING)
-
-##        glEnable(GL_TEXTURE_2D)
-
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
-##        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-##        glEnable(GL_BLEND)
-##        glDisable(GL_LIGHTING)
 
         w = self.get_width()*1.0/self._altered_image_size[0]
         h = self.get_height()*1.0/self._altered_image_size[1]
@@ -472,7 +455,6 @@ class Image3D(Image):
             uw = uh = 1
 
         glBegin(GL_QUADS)
-##        glColor4f(1,1,1,1)
         glTexCoord2f(0, h)
         glVertex3f(-uw, -uh, 0)
 
@@ -485,10 +467,6 @@ class Image3D(Image):
         glTexCoord2f(0, 0)
         glVertex3f(-uw, uh, 0)
         glEnd()
-
-##        if not ble_return:glDisable(GL_BLEND)
-##        if lig_return:glEnable(GL_LIGHTING)
-##        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
 
         glEndList()
 

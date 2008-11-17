@@ -1,55 +1,11 @@
 from include import *
 import camera, view
 
-#####This code is not as fast as a straight "for" loop on large scenes, but will remain as it will be helpful for the quadtree later...
-##class Node(object):
-##    def __init__(self, parent, obj):
-##        self.parent = parent
-##        self.obj = obj
-##        self.c1 = self.c2 = self.c3 = self.c4 = None
-##        self.weight = 1
-##
-##    def render(self):
-##        if self.obj:
-##            self.obj.render()
-##        if self.c1:
-##            self.c1.render()
-##        if self.c2:
-##            self.c2.render()
-##        if self.c3:
-##            self.c3.render()
-##        if self.c4:
-##            self.c4.render()
-##
-##    def add(self, obj):
-##        ac = [self.c1, self.c2, self.c3, self.c4]
-##        p = self.c1
-##        for i in xrange(4):
-##            ai = ac[i]
-##            if ai == None:
-##                c = Node(self, obj)
-##                ac[i] = c
-##                self.c1, self.c2, self.c3, self.c4 = ac
-##                self.add_weight()
-##                return None
-##            if ai.weight < p.weight:
-##                p = ai
-##
-##        p.add(obj)
-##
-##    def add_weight(self):
-##        self.weight += 1
-##        if self.parent:
-##            self.parent.add_weight()
-##
-##class Leaf(Node):
-##    def __init__(self):
-##        Node.__init__(self, None, None)
-
 class Tree(object):
     def __init__(self):
-        self.render_3d = [] # Leaf()
-        self.render_2d = [] # Leaf()
+        self.render_3d = []
+        self.render_2d = []
+        self.render_3d_image = []
 
 class Scene(object):
     def __init__(self):
@@ -59,11 +15,11 @@ class Scene(object):
         self.render3d = True
 
     def render(self, camera):
-        view.clear_screen()
         if self.render3d:
             view.set3d()
             camera.push()
             for i in self.graph.render_3d: i.render(camera)
+            for i in self.graph.render_3d_image: i.render(camera)
             camera.pop()
 
         if self.render2d:
@@ -75,3 +31,6 @@ class Scene(object):
 
     def add_3d(self, ele):
         self.graph.render_3d.append(ele)
+
+    def add_3d_image(self, ele):
+        self.graph.render_3d_image.append(ele)

@@ -4,25 +4,35 @@ from pyggel import *
 def main():
     pyggel.init()
 
+    pyggel.view.set_lighting(False)
+
     camera1 = pyggel.camera.LookFromCamera((0,0,10))
     camera2 = pyggel.camera.LookAtCamera((0,0,0), distance=10)
     camera = camera1
     font = pyggel.font.Font()
     img = font.make_text_image3D("Hello World: 3D", (255, 255, 0))
+    print img._pimage2.get_at((0,0))
     img.scale = 5
     img2 = font.make_text_image3D("Hello World: 3D X2!!!", (0, 255, 255))
-    img2.pos = (0, 3, 0)
+    img2.pos = (0, 1, 0)
+    img3 = img2.copy()
+    img3.pos = (0, 0, 0)
+    img4 = font.make_text_image3D("Testy...123...", (0, 255, 0))
+    img4.pos = (0, -1, 0)
+
+    text = font.make_text_image("ARG!!!!", (255, 0, 0))
+    text.scale = 10
 
     box = pyggel.geometry.Cube(5)
-    box.pos=(0,0,0)
-    box2 = box.copy()
-    box2.pos=(0,0,-5)
+    box.pos=(0,0,-5)
 
     mscene = pyggel.scene.Scene()
-    mscene.add_3d(img2)#_facing(img)
+    mscene.add_3d_image(img)
+    mscene.add_3d_image(img2)
     mscene.add_3d(box)
-    mscene.add_3d(box2)
-    mscene.add_3d(img)#_facing(img2)
+    mscene.add_3d_image(img3)
+    mscene.add_3d_image(img4)
+    mscene.add_2d(text)
 
     clock = pygame.time.Clock()
 
@@ -69,8 +79,7 @@ def main():
             if key[K_EQUALS]:
                 camera.rotz += .25
 
-        box.pos = camera2.get_pos()
-
+        pyggel.view.clear_screen()
         mscene.render(camera)
         pyggel.view.refresh_screen()
 

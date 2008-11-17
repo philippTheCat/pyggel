@@ -12,7 +12,7 @@ class _Screen(object):
         self.fog = True
         self.fog_color = (.5,.5,.5,.5)
 
-        self.clips = [(0,0,640,480)]
+        self.clips = [(0,0,self.screen_size[0],self.screen_size[1])]
         glScissor(*self.clips[0])
 
     def set_size(self, size):
@@ -142,8 +142,7 @@ def set2d():
     glLoadIdentity()
 
 def set_render_image_2d():
-    if screen.lighting:
-        glDisable(GL_LIGHTING)
+    glDisable(GL_LIGHTING)
     glDisable(GL_DEPTH_TEST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
@@ -154,8 +153,7 @@ def unset_render_image_2d():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
 
 def set_render_image_3d():
-    if screen.lighting:
-        glDisable(GL_LIGHTING)
+    glDisable(GL_LIGHTING)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
 def unset_render_image_3d():
