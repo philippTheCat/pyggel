@@ -82,6 +82,8 @@ class Image(object):
         self.scale = scale
         self.colorize = (1,1,1,1)
 
+        self.textured = True
+
     def rotate(self, amount):
         r = self.rotation
         r[0] += amount[0]

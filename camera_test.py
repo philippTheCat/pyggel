@@ -11,7 +11,6 @@ def main():
     camera = camera1
     font = pyggel.font.Font()
     img = font.make_text_image3D("Hello World: 3D", (255, 255, 0))
-    print img._pimage2.get_at((0,0))
     img.scale = 5
     img2 = font.make_text_image3D("Hello World: 3D X2!!!", (0, 255, 255))
     img2.pos = (0, 1, 0)
@@ -27,12 +26,15 @@ def main():
     box.pos=(0,0,-5)
 
     mscene = pyggel.scene.Scene()
-    mscene.add_3d_image(img)
-    mscene.add_3d_image(img2)
+    mscene.add_3d(img)
+    mscene.add_3d(img2)
     mscene.add_3d(box)
-    mscene.add_3d_image(img3)
-    mscene.add_3d_image(img4)
+    mscene.add_3d(img3)
+    mscene.add_3d(img4)
     mscene.add_2d(text)
+
+    print mscene.graph.render_3d_nontextured
+    print mscene.graph.render_3d_textured
 
     clock = pygame.time.Clock()
 

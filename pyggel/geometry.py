@@ -25,6 +25,11 @@ class Cube(object):
 
         self.gl_list = glGenLists(1)
 
+        if self.texture:
+            self.textured = True
+        else:
+            self.textured = False
+
         self._compile()
 
     def _compile(self):

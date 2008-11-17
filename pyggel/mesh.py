@@ -5,6 +5,7 @@ import image
 def MTL(filename, path=''):
     contents = {}
     mtl = None
+    textured = False
     for line in open(os.path.join(path,filename), "r"):
         if line.startswith('#'): continue
         values = line.split()
@@ -18,11 +19,12 @@ def MTL(filename, path=''):
             mtl[values[0]] = values[1]
             tex = image.Texture(os.path.join(path,mtl['map_Kd']), 1)
             texid = tex.gl_tex
+            textured = True
         elif values[0]=="Kd":
             mtl[values[0]] = map(float, values[1:])
         else:
             pass
-    return contents
+    return contents, textured
  
 def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
     """Loads a Wavefront OBJ file. """
@@ -30,6 +32,8 @@ def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
     snormals = []
     stexcoords = []
     sfaces = []
+
+    textured = False
 
     material = None
     for line in open(filename, "r"):
@@ -51,7 +55,9 @@ def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
         elif values[0] in ('usemtl', 'usemat'):
             material = values[1]
         elif values[0] == 'mtllib':
-            smtl = MTL(values[1], os.path.split(filename)[0])
+            smtl, std = MTL(values[1], os.path.split(filename)[0])
+            if std:
+                textured = True
         elif values[0] == 'f':
             face = []
             texcoords = []
@@ -98,16 +104,18 @@ def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
         for x in i[0]:
             verts.append(svertices[x-1])
 
-    return BasicMesh(gl_list, pos, rotation, verts)
+    return BasicMesh(gl_list, pos, rotation, verts, textured)
 
 
 class BasicMesh(object):
     def __init__(self, gl_list, pos=(0,0,0),
-                 rotation=(0,0,0), verts=[]):
+                 rotation=(0,0,0), verts=[],
+                 textured=False):
         self.gl_list = gl_list
         self.pos = pos
         self.rotation = rotation
         self.verts = verts
+        self.textured = textured
 
     def copy(self):
         return BasicMesh(self.gl_list, list(self.pos),

@@ -50,7 +50,7 @@ def main():
     for i in img3d:
 ##        my_scene.add_3d_facing(i)
         my_scene.add_3d(i)
-    my_scene.add_3d_image(img5)#_facing(img5)
+    my_scene.add_3d(img5)#_facing(img5)
 
     clock = pygame.time.Clock()
 
