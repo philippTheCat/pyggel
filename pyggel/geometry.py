@@ -34,10 +34,17 @@ class Cube(object):
 
     def _compile(self):
         glNewList(self.gl_list, GL_COMPILE)
+        if self.texture:
+            glBindTexture(GL_TEXTURE_2D, self.texture.gl_tex)
+
+        coords = ((0,0), (0,1), (1,1), (1,0))
         for i in self.sides:
             glBegin(GL_QUADS)
+            ix = 0
             for x in i:
+                glTexCoord2fv(coords[ix])
                 glVertex3f(*self.corners[x])
+                ix += 1
             glEnd()
         glEndList()
 

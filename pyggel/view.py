@@ -79,6 +79,9 @@ def init(screen_size=None):
     glFogf(GL_FOG_START, 10.0)
     glFogf(GL_FOG_END, 50.0)
     set_fog(True)
+    glEnable(GL_ALPHA_TEST)
+    glAlphaFunc(GL_GEQUAL, .5)
+
 
 def set_fullscreen(boolean):
     screen.fullscreen = boolean
@@ -159,6 +162,11 @@ def set_render_image_3d():
 def unset_render_image_3d():
     if screen.lighting:
         glEnable(GL_LIGHTING)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
+
+def set_textured_render():
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+def unset_textured_render():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
 
 def set3d():

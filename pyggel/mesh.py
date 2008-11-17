@@ -1,6 +1,6 @@
 from include import *
 import os
-import image
+import image, view
 
 def MTL(filename, path=''):
     contents = {}
@@ -34,6 +34,7 @@ def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
     sfaces = []
 
     textured = False
+##    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
     material = None
     for line in open(filename, "r"):
@@ -128,5 +129,7 @@ class BasicMesh(object):
         glRotatef(rot[0], 1, 0, 0)
         glRotatef(rot[1], 0, 1, 0)
         glRotatef(rot[2], 0, 0, 1)
+        view.set_textured_render()
         glCallList(self.gl_list)
+        view.unset_textured_render()
         glPopMatrix()

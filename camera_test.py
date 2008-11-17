@@ -13,16 +13,15 @@ def main():
     img = font.make_text_image3D("Hello World: 3D", (255, 255, 0))
     img.scale = 5
     img2 = font.make_text_image3D("Hello World: 3D X2!!!", (0, 255, 255))
-    img2.pos = (0, 1, 0)
+    img2.pos = (0, .7, 0)
     img3 = img2.copy()
     img3.pos = (0, 0, 0)
     img4 = font.make_text_image3D("Testy...123...", (0, 255, 0))
     img4.pos = (0, -1, 0)
 
     text = font.make_text_image("ARG!!!!", (255, 0, 0))
-    text.scale = 10
 
-    box = pyggel.geometry.Cube(5)
+    box = pyggel.geometry.Cube(5, texture=image.Texture("data/ar.png"))
     box.pos=(0,0,-5)
 
     mscene = pyggel.scene.Scene()
