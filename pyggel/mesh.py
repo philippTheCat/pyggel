@@ -1,5 +1,6 @@
 from include import *
 import os
+import image
 
 def MTL(filename, path=''):
     contents = {}
