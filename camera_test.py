@@ -26,18 +26,22 @@ def main():
 
     box = pyggel.geometry.Cube(5, texture=[image.Texture("data/ar.png")]*6)
 ##    box = pyggel.geometry.Cube(5, texture=image.Texture("data/ar.png"))
-    box.pos=(0,0,-5)
+    box.pos = (0,0,-5)
+    sphere = pyggel.geometry.Sphere(5, texture=image.Texture("data/ar.png"))
+    sphere.pos = (10, 0, 0)
 
     mscene = pyggel.scene.Scene()
     mscene.add_3d(img)
     mscene.add_3d(img2)
     mscene.add_3d(box)
+    mscene.add_3d(sphere)
     mscene.add_3d_blend(img3)
     mscene.add_3d_blend(img5)
     mscene.add_3d_always(img4)
     mscene.add_2d(text)
 
-    skybox = pyggel.geometry.Skybox(image.Texture("data/skybox2.png"))
+    skybox = pyggel.geometry.Skybox(image.Texture("data/skybox.png"))
+    skyball = pyggel.geometry.Skyball(image.Texture("data/skyball.png"))
     mscene.add_skybox(skybox)
 
     clock = pygame.time.Clock()
@@ -59,6 +63,14 @@ def main():
                         camera = camera1
                 if event.key == K_SPACE:
                     img.cant_hide = not img.cant_hide
+
+                if event.key == K_s:
+                    if mscene.graph.skybox == skybox:
+                        mscene.graph.skybox = skyball
+                    elif mscene.graph.skybox == skyball:
+                        mscene.graph.skybox = None
+                    else:
+                        mscene.graph.skybox = skybox
 
         key = pygame.key.get_pressed()
         if key[K_m]:

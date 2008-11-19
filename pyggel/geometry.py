@@ -115,3 +115,47 @@ class Skybox(Cube):
         Cube.render(self)
         glPopMatrix()
         glDepthMask(GL_TRUE)
+
+class Sphere(object):
+    def __init__(self, size, pos=(0,0,0), color=(1,1,1,1),
+                 texture=None, detail=30):
+        self.size = size
+        self.pos = pos
+        self.color = color
+        if not texture:
+            texture = blank_texture
+        self.texture = texture
+        self.detail = detail
+
+        self.gl_list = glGenLists(1)
+
+        self._compile()
+
+    def _compile(self):
+        glNewList(self.gl_list, GL_COMPILE)
+        self.texture.bind()
+        Sphere = gluNewQuadric()
+        gluQuadricTexture(Sphere, GLU_TRUE)
+        gluSphere(Sphere, self.size, self.detail, self.detail)
+        glEndList()
+
+    def render(self, camera=None):
+        glPushMatrix()
+        glTranslatef(*self.pos)
+        glColor4f(*self.color)
+        glCallList(self.gl_list)
+        glPopMatrix()
+
+class Skyball(Sphere):
+    def __init__(self, texture=None, colorize=(1,1,1,1), detail=30):
+        Sphere.__init__(self, 1, color=colorize,
+                        texture=texture, detail=detail)
+
+    def render(self, camera):
+        glDepthMask(GL_FALSE)
+        glPushMatrix()
+        camera.set_skybox_data()
+        glRotatef(90, 1, 0, 0)
+        Sphere.render(self)
+        glPopMatrix()
+        glDepthMask(GL_TRUE)
