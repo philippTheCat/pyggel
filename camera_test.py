@@ -28,6 +28,12 @@ def main():
     box.pos = (0,0,5)
     sphere = pyggel.geometry.Sphere(5, texture=image.Texture("data/ar.png"))
     sphere.pos = (10, 0, 5)
+    quads = []
+    for x in xrange(10):
+        for z in xrange(10):
+            quads.append(pyggel.geometry.Quad(5, (x*5.5,0,z*5.5),
+                                              texture=image.Texture("data/tile_example.png"),
+                                              facing="top"))
 
     mscene = pyggel.scene.Scene()
     mscene.add_3d(img)
@@ -38,6 +44,9 @@ def main():
     mscene.add_3d_blend(img5)
     mscene.add_3d_always(img4)
     mscene.add_2d(text)
+
+    for i in quads:
+        mscene.add_3d(i)
 
     skybox = pyggel.geometry.Skybox(image.Texture("data/skybox.png"))
     skyball = pyggel.geometry.Skyball(image.Texture("data/skyball.png"))

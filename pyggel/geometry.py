@@ -6,11 +6,19 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 from include import *
 import image
 
+oldgldts = glDeleteTextures
+def glDeleteTexture(arg):
+    try:
+        oldgldts(arg)
+    except:
+        pass
+
 class Cube(object):
-    def __init__(self, size, pos=(0,0,0), color=(1,1,1,1),
-                 texture=None):
+    def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
+                 color=(1,1,1,1), texture=None):
         self.size = size
         self.pos = pos
+        self.rotation = rotation
         if not texture:
             texture = blank_texture
         self.texture = texture
@@ -83,13 +91,63 @@ class Cube(object):
         glPushMatrix()
         x, y, z = self.pos
         glTranslatef(x, y, -z)
+        glRotatef(self.rotation[0], 1, 0, 0)
+        glRotatef(self.rotation[1], 0, 1, 0)
+        glRotatef(self.rotation[2], 0, 0, 1)
         glScalef(.5*self.size,.5*self.size,.5*self.size)
         glColor4f(*self.color)
         glCallList(self.gl_list)
         glPopMatrix()
 
     def copy(self):
-        n = Cube(self.size, self.pos, self.color, self.texture)
+        n = Cube(self.size, self.pos, self.rotation, self.color, self.texture)
+        glDeleteTextures(n.gl_list)
+        n.gl_list = self.gl_list
+        return n
+
+class Quad(Cube):
+    def __init__(self, size, pos=(0,0,0), rotation=(0,0,0), color=(1,1,1,1), texture=None, facing=0):
+
+        f = {"left":0,
+             "right":1,
+             "top":2,
+             "bottom":3,
+             "front":4,
+             "back":5}
+        if type(facing) is type(""):
+            facing = f[facing]
+        self.facing = facing
+
+        Cube.__init__(self, size, pos, rotation, color, texture)
+
+    def _compile(self):
+        glNewList(self.gl_list, GL_COMPILE)
+        self.texture.bind()
+
+        ox = .25
+        oy = .33
+        i = self.sides[self.facing]
+        ix = 0
+        x, y = self.split_coords[i[5]]
+        x *= ox
+        y *= oy
+
+        glBegin(GL_QUADS)
+        coords = ((0,0), (0,1), (1,1), (1,0))
+
+        for x in i[:4]:
+            glTexCoord2fv(coords[ix])
+            a, b, c = self.corners[x]
+            a *= 1.1
+            b *= 1.1
+            c *= 1.1
+            glVertex3f(a,b,c)
+            ix += 1
+        glEnd()
+        glEndList()
+
+    def copy(self):
+        n = Quad(self.size, self.pos, self.rotation, self.color, self.texture, self.facing)
         glDeleteTextures(n.gl_list)
         n.gl_list = self.gl_list
         return n
@@ -112,6 +170,12 @@ class Skybox(Cube):
         Cube.render(self)
         glPopMatrix()
         glDepthMask(GL_TRUE)
+
+    def copy(self):
+        n = Skybox(self.texture, self.colorize)
+        glDeleteTextures(n.gl_list)
+        n.gl_list = self.gl_list
+        return n
 
 class Sphere(object):
     def __init__(self, size, pos=(0,0,0), color=(1,1,1,1),
@@ -144,6 +208,12 @@ class Sphere(object):
         glCallList(self.gl_list)
         glPopMatrix()
 
+    def copy(self):
+        n = Sphere(self.size, self.pos, self.color, self.texture, self.detail)
+        glDeleteTextures(n.gl_list)
+        n.gl_list = self.gl_list
+        return n
+
 class Skyball(Sphere):
     def __init__(self, texture=None, colorize=(1,1,1,1), detail=30):
         Sphere.__init__(self, 1, color=colorize,
@@ -157,3 +227,9 @@ class Skyball(Sphere):
         Sphere.render(self)
         glPopMatrix()
         glDepthMask(GL_TRUE)
+
+    def copy(self):
+        n = Skyball(self.texture, self.colorize, self.detail)
+        glDeleteTextures(n.gl_list)
+        n.gl_list = self.gl_list
+        return n
