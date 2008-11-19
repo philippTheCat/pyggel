@@ -6,8 +6,8 @@ def main():
 
     pyggel.view.set_lighting(False)
 
-    camera1 = pyggel.camera.LookFromCamera((0,0,10))
-    camera2 = pyggel.camera.LookAtCamera((0,0,-5), distance=10)
+    camera1 = pyggel.camera.LookFromCamera((0,0,-10))
+    camera2 = pyggel.camera.LookAtCamera((0,0,5), distance=10)
     camera = camera1
     font = pyggel.font.Font()
     img = font.make_text_image3D("Hello World: 3D", (255, 255, 0))
@@ -25,10 +25,9 @@ def main():
     text = font.make_text_image("ARG!!!!", (255, 0, 0))
 
     box = pyggel.geometry.Cube(5, texture=[image.Texture("data/ar.png")]*6)
-##    box = pyggel.geometry.Cube(5, texture=image.Texture("data/ar.png"))
-    box.pos = (0,0,-5)
+    box.pos = (0,0,5)
     sphere = pyggel.geometry.Sphere(5, texture=image.Texture("data/ar.png"))
-    sphere.pos = (10, 0, 0)
+    sphere.pos = (10, 0, 5)
 
     mscene = pyggel.scene.Scene()
     mscene.add_3d(img)
@@ -79,13 +78,13 @@ def main():
             if key[K_RIGHT]:
                 camera.posx += .1
             if key[K_UP]:
-                camera.posy += .1
-            if key[K_DOWN]:
                 camera.posy -= .1
+            if key[K_DOWN]:
+                camera.posy += .1
             if key[K_MINUS]:
-                camera.posz += .1
-            if key[K_EQUALS]:
                 camera.posz -= .1
+            if key[K_EQUALS]:
+                camera.posz += .1
         elif key[K_r]:
             if key[K_LEFT]:
                 camera.roty -= .25

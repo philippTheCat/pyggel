@@ -75,7 +75,8 @@ class Cube(object):
 
     def render(self, camera=None):
         glPushMatrix()
-        glTranslatef(*self.pos)
+        x, y, z = self.pos
+        glTranslatef(x, y, -z)
         glScalef(.5*self.size,.5*self.size,.5*self.size)
         glColor4f(*self.color)
         glCallList(self.gl_list)
@@ -131,7 +132,8 @@ class Sphere(object):
 
     def render(self, camera=None):
         glPushMatrix()
-        glTranslatef(*self.pos)
+        x, y, z = self.pos
+        glTranslatef(x, y, -z)
         glColor4f(*self.color)
         glCallList(self.gl_list)
         glPopMatrix()

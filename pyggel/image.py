@@ -359,7 +359,7 @@ class Image3D(Image):
 
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
-        glTranslatef(pos[0], pos[1], pos[2])
+        glTranslatef(pos[0], pos[1], -pos[2])
         if camera:
             camera.set_facing_matrix()
         glRotatef(self.rotation[0], 1, 0, 0)

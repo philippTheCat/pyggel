@@ -41,7 +41,7 @@ def main():
 
     obj = pyggel.mesh.OBJ("data/carrot.obj")
     obj2 = obj.copy()
-    obj2.pos = (0,0,-5)
+    obj2.pos = (0,0,5)
 
     my_scene = pyggel.scene.Scene()
     my_scene.add_2d(img)
@@ -81,9 +81,9 @@ def main():
         if key[K_RIGHT]:
             camera.roty += .5
         if key[K_UP]:
-            camera.rotx += .5
-        if key[K_DOWN]:
             camera.rotx -= .5
+        if key[K_DOWN]:
+            camera.rotx += .5
         if key[K_1]:
             camera.rotz -= .5
         if key[K_2]:
@@ -98,9 +98,9 @@ def main():
             camera.posx -= .1
         if key[K_d]:
             camera.posx += .1
-        if key[K_w]:
-            camera.posz -= .1
         if key[K_s]:
+            camera.posz -= .1
+        if key[K_w]:
             camera.posz += .1
 ##        obj.pos = camera.get_pos()
 ##        obj.rotation = camera.get_rotation()

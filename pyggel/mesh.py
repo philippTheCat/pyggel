@@ -116,7 +116,8 @@ class BasicMesh(object):
 
     def render(self, camera=None):
         glPushMatrix()
-        glTranslatef(*self.pos)
+        x,y,z = self.pos
+        glTranslatef(x,y,-z)
         rot = self.rotation
         glRotatef(rot[0], 1, 0, 0)
         glRotatef(rot[1], 0, 1, 0)
