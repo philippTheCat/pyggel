@@ -121,7 +121,5 @@ class BasicMesh(object):
         glRotatef(rot[0], 1, 0, 0)
         glRotatef(rot[1], 0, 1, 0)
         glRotatef(rot[2], 0, 0, 1)
-        view.set_textured_render()
         glCallList(self.gl_list)
-        view.unset_textured_render()
         glPopMatrix()

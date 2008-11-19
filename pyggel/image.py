@@ -357,7 +357,10 @@ class Image3D(Image):
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
         glColor4f(*self.colorize)
+        glDisable(GL_LIGHTING)
         glCallList(self.gl_list)
+        if view.screen.lighting:
+            glEnable(GL_LIGHTING)
         glPopMatrix()
 
     def blit(self, *args, **kwargs):

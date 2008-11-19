@@ -5,7 +5,6 @@ def main():
     pyggel.init()
 
     pyggel.view.set_lighting(False)
-    pyggel.view.set_background_color((1,0,0))
 
     camera1 = pyggel.camera.LookFromCamera((0,0,10))
     camera2 = pyggel.camera.LookAtCamera((0,0,-5), distance=10)

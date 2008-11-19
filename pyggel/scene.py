@@ -22,7 +22,6 @@ class Scene(object):
             glEnable(GL_ALPHA_TEST)
             for i in self.graph.render_3d: i.render(camera)
             glDisable(GL_ALPHA_TEST)
-##            glEnable(GL_BLEND)
             glDepthMask(GL_FALSE)
             for i in self.graph.render_3d_blend: i.render(camera)
             glDepthMask(GL_TRUE)
@@ -33,8 +32,10 @@ class Scene(object):
 
         if self.render2d:
             view.set2d()
+            glDisable(GL_LIGHTING)
             for i in self.graph.render_2d: i.render()
-##        glDisable(GL_BLEND)
+            if view.screen.lighting:
+                glEnable(GL_LIGHTING)
 
     def add_2d(self, ele):
         self.graph.render_2d.append(ele)
