@@ -159,7 +159,10 @@ def set3d():
 def refresh_screen():
     pygame.display.flip()
 
-def clear_screen():
+def clear_screen(scene=None):
     glDisable(GL_SCISSOR_TEST)
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT)
+    if scene and scene.graph.skybox:
+        glClear(GL_DEPTH_BUFFER_BIT)
+    else:
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT)
     glEnable(GL_SCISSOR_TEST)

@@ -59,3 +59,8 @@ class Scene(object):
 
     def add_skybox(self, ele):
         self.graph.skybox = ele
+
+    def clear(self):
+        glClear(GL_DEPTH_BUFFER_BIT)
+        if not self.skybox:
+            glClear(GL_COLOR_BUFFER_BIT)

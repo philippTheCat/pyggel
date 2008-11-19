@@ -100,7 +100,7 @@ def main():
             if key[K_EQUALS]:
                 camera.rotz += .25
 
-        pyggel.view.clear_screen()
+        pyggel.view.clear_screen(mscene)
 ##        skybox.render(camera)
         mscene.render(camera)
         pyggel.view.refresh_screen()
