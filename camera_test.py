@@ -5,6 +5,7 @@ def main():
     pyggel.init()
 
     pyggel.view.set_lighting(False)
+    pyggel.view.set_background_color((1,0,0))
 
     camera1 = pyggel.camera.LookFromCamera((0,0,10))
     camera2 = pyggel.camera.LookAtCamera((0,0,-5), distance=10)
@@ -28,8 +29,8 @@ def main():
     mscene.add_3d(img)
     mscene.add_3d(img2)
     mscene.add_3d(box)
-    mscene.add_3d(img3)
-    mscene.add_3d(img4)
+    mscene.add_3d_blend(img3)
+    mscene.add_3d_always(img4)
     mscene.add_2d(text)
 
     clock = pygame.time.Clock()

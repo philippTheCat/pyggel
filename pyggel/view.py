@@ -79,9 +79,11 @@ def init(screen_size=None):
     glFogf(GL_FOG_START, 10.0)
     glFogf(GL_FOG_END, 50.0)
     set_fog(True)
-    glEnable(GL_ALPHA_TEST)
     glAlphaFunc(GL_GEQUAL, .5)
+    set_background_color()
 
+def set_background_color(col=(0,0,0)):
+    glClearColor(*col+(0,))
 
 def set_fullscreen(boolean):
     screen.fullscreen = boolean
@@ -143,31 +145,7 @@ def set2d():
 
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-
-def set_render_image_2d():
-    glDisable(GL_LIGHTING)
     glDisable(GL_DEPTH_TEST)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-
-def unset_render_image_2d():
-    if screen.lighting:
-        glEnable(GL_LIGHTING)
-    glEnable(GL_DEPTH_TEST)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
-
-def set_render_image_3d():
-    glDisable(GL_LIGHTING)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-
-def unset_render_image_3d():
-    if screen.lighting:
-        glEnable(GL_LIGHTING)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
-
-def set_textured_render():
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-def unset_textured_render():
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
 
 def set3d():
     screen_size = screen.screen_size
@@ -176,6 +154,7 @@ def set3d():
     gluPerspective(45, 1.0*screen_size[0]/screen_size[1], 0.1, 100.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
+    glEnable(GL_DEPTH_TEST)
 
 def refresh_screen():
     pygame.display.flip()
