@@ -3,7 +3,7 @@ import image
 
 class Cube(object):
     def __init__(self, size, pos=(0,0,0), color=(1,1,1,1),
-                 texture=None, interpolate=True):
+                 texture=None):
         self.size = size
         self.pos = pos
         if not texture:
@@ -35,18 +35,12 @@ class Cube(object):
 
         self.gl_list = glGenLists(1)
 
-        self._compile(interpolate)
+        self._compile()
 
-    def _compile(self, inter):
-        if inter: inter = GL_LINEAR
-        else: inter = GL_NEAREST
+    def _compile(self):
         glNewList(self.gl_list, GL_COMPILE)
         if isinstance(self.texture, image.Texture):
             self.texture.bind()
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, inter)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, inter)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
             reg_type = 0
         else:
             reg_type = 1
@@ -63,10 +57,6 @@ class Cube(object):
             else:
                 coords = ((0,0), (0,1), (1,1), (1,0))
                 self.texture[i[4]].bind()
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, inter)
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, inter)
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
 
             print coords
 
@@ -106,7 +96,7 @@ class Skybox(Cube):
                       (6,5,1,2, 3, 4),#right
                       (4,0,1,5, 4, 5),#bottom
                       (3,7,6,2, 5, 0))#top
-        self._compile(False)
+        self._compile()
 
     def render(self, camera):
         glDepthMask(GL_FALSE)
