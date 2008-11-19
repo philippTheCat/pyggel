@@ -1,3 +1,7 @@
+"""
+pyggle.camera
+This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+"""
 from include import *
 
 class Base(object):

@@ -1,3 +1,8 @@
+"""
+pyggle.geometry
+This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+"""
+
 from include import *
 import image
 

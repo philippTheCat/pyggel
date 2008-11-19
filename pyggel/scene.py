@@ -1,3 +1,8 @@
+"""
+pyggle.scene
+This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+"""
+
 from include import *
 import camera, view
 

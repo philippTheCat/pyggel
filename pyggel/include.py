@@ -1,3 +1,8 @@
+"""
+pyggle.include
+This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+"""
+
 import pygame
 from pygame.locals import *
 

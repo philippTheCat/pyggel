@@ -1,3 +1,8 @@
+"""
+pyggle.light
+This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+"""
+
 from include import *
 from math3d import get_distance
 

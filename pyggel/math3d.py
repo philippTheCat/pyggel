@@ -1,3 +1,8 @@
+"""
+pyggle.math3d
+This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+"""
+
 import math
 
 def move_with_rotation(pos, rot, amount):
