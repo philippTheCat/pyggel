@@ -19,6 +19,9 @@ def main():
     img3.pos = (0, 0, 0)
     img4 = font.make_text_image3D("Testy...123...", (0, 255, 0))
     img4.pos = (0, -1, 0)
+    img5 = img4.copy()
+    img5.colorize = (1, 0, 0, .5)
+    img5.pos = (0, .1, 0)
 
     text = font.make_text_image("ARG!!!!", (255, 0, 0))
 
@@ -30,6 +33,7 @@ def main():
     mscene.add_3d(img2)
     mscene.add_3d(box)
     mscene.add_3d_blend(img3)
+    mscene.add_3d_blend(img5)
     mscene.add_3d_always(img4)
     mscene.add_2d(text)
 
