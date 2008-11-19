@@ -20,6 +20,9 @@ class Base(object):
     def set_facing_matrix(self):
         pass
 
+    def set_skybox_data(self):
+        pass
+
 class LookFromCamera(Base):
     def __init__(self, pos=(0,0,0), rotation=(0,0,0)):
         Base.__init__(self, pos, rotation)
@@ -45,6 +48,11 @@ class LookFromCamera(Base):
         glRotatef(-self.roty, 0, 1, 0)
         glRotatef(-self.rotx, 1, 0, 0)
 
+    def set_skybox_data(self):
+        glRotatef(self.rotx, 1, 0, 0)
+        glRotatef(self.roty, 0, 1, 0)
+        glRotatef(-self.rotz, 0, 0, 1)
+
 class LookAtCamera(Base):
     def __init__(self, pos=[0,0,0], rotation=[0,0,0],
                  distance=0):
@@ -63,3 +71,8 @@ class LookAtCamera(Base):
         glRotatef(self.rotz, 0, 0, 1)
         glRotatef(self.roty, 0, 1, 0)
         glRotatef(-self.rotx, 1, 0, 0)
+
+    def set_skybox_data(self):
+        glRotatef(self.rotx, 1, 0, 0)
+        glRotatef(-self.roty, 0, 1, 0)
+        glRotatef(-self.rotz, 0, 0, 1)

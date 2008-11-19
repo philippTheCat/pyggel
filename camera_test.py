@@ -24,7 +24,8 @@ def main():
 
     text = font.make_text_image("ARG!!!!", (255, 0, 0))
 
-    box = pyggel.geometry.Cube(5, texture=image.Texture("data/ar.png"))
+    box = pyggel.geometry.Cube(5, texture=[image.Texture("data/ar.png")]*6)
+##    box = pyggel.geometry.Cube(5, texture=image.Texture("data/ar.png"))
     box.pos=(0,0,-5)
 
     mscene = pyggel.scene.Scene()
@@ -35,6 +36,9 @@ def main():
     mscene.add_3d_blend(img5)
     mscene.add_3d_always(img4)
     mscene.add_2d(text)
+
+    skybox = pyggel.geometry.Skybox(image.Texture("data/skybox2.png"))
+    mscene.add_skybox(skybox)
 
     clock = pygame.time.Clock()
 
@@ -85,6 +89,7 @@ def main():
                 camera.rotz += .25
 
         pyggel.view.clear_screen()
+##        skybox.render(camera)
         mscene.render(camera)
         pyggel.view.refresh_screen()
 

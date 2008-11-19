@@ -7,6 +7,7 @@ class Tree(object):
         self.render_3d_blend = []
         self.render_2d = []
         self.render_3d_always = []
+        self.skybox = None
 
 class Scene(object):
     def __init__(self):
@@ -16,8 +17,10 @@ class Scene(object):
         self.render3d = True
 
     def render(self, camera):
+        view.set3d()
+        if self.graph.skybox:
+            self.graph.skybox.render(camera)
         if self.render3d:
-            view.set3d()
             camera.push()
             glEnable(GL_ALPHA_TEST)
             for i in self.graph.render_3d: i.render(camera)
@@ -53,3 +56,6 @@ class Scene(object):
 
     def add_3d_always(self, ele):
         self.graph.render_3d_always.append(ele)
+
+    def add_skybox(self, ele):
+        self.graph.skybox = ele
