@@ -24,12 +24,13 @@ class Cube(object):
                       (1, -1, -1),#toprightback
                       (1, 1, -1),#bottomrightback
                       (-1, 1, -1))#bottomleftback
-        self.sides = ((3,0,1,2, 0, 1),#front
-                      (7,4,5,6, 1, 3),#back
-                      (7,4,0,3, 2, 2),#left
+
+        self.sides = ((7,4,0,3, 2, 2),#left
                       (6,5,1,2, 3, 4),#right
+                      (6,2,3,7, 5, 0),#top
                       (1,5,4,0, 4, 5),#bottom
-                      (6,2,3,7, 5, 0))#top
+                      (3,0,1,2, 0, 1),#front
+                      (7,4,5,6, 1, 3))#back
 
         self.split_coords = ((2,0),#top
                              (0,1),#back
@@ -96,12 +97,12 @@ class Cube(object):
 class Skybox(Cube):
     def __init__(self, texture, colorize=(1,1,1,1)):
         Cube.__init__(self, 1, color=colorize, texture=texture)
-        self.sides = ((2,1,0,3, 0, 1),#front
-                      (7,4,5,6, 1, 3),#back
-                      (3,0,4,7, 2, 2),#left
+        self.sides = ((3,0,4,7, 2, 2),#left
                       (6,5,1,2, 3, 4),#right
+                      (3,7,6,2, 5, 0),#top
                       (4,0,1,5, 4, 5),#bottom
-                      (3,7,6,2, 5, 0))#top
+                      (2,1,0,3, 0, 1),#front
+                      (7,4,5,6, 1, 3))#back
         self._compile()
 
     def render(self, camera):
