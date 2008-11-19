@@ -42,6 +42,8 @@ class Texture(object):
                 
                 glBindTexture(GL_TEXTURE_2D, self.gl_tex)
 
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
                 xx, xy = size
 
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
@@ -59,6 +61,7 @@ class Texture(object):
             glBindTexture(GL_TEXTURE_2D, self.gl_tex)
 
             xx, xy = size
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
                          GL_UNSIGNED_BYTE, tdata)
@@ -230,6 +233,8 @@ class Image(object):
         
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
         xx, xy = self._altered_image_size
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
@@ -285,7 +290,7 @@ class Image(object):
 
         pos = self.pos
 
-        view.set_render_image_2d()
+##        view.set_render_image_2d()
 
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
@@ -297,7 +302,7 @@ class Image(object):
         glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
-        view.unset_render_image_2d()
+##        view.unset_render_image_2d()
         if self.to_be_blitted:
             view.screen.push_clip((pos[0], view.screen.screen_size[1]-pos[1]-h,w,h))
             for i in self.to_be_blitted:
@@ -345,15 +350,11 @@ class Image3D(Image):
         Image.__init__(self, filename, pos, rotation,
                        scale, dont_load, False)
 
-        self.cant_hide = False
-
     def render(self, camera=None):
         h, w = self.get_size()
 
         pos = self.pos
-        view.set_render_image_3d()
-        if self.cant_hide:
-            glDepthFunc(GL_ALWAYS)
+##        view.set_render_image_3d()
 
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
@@ -366,9 +367,7 @@ class Image3D(Image):
         glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
-        if self.cant_hide:
-            glDepthFunc(GL_LESS)
-        view.unset_render_image_3d()
+##        view.unset_render_image_3d()
 
     def blit(self, *args, **kwargs):
         print "Image3D does not support this function!"

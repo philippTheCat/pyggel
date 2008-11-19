@@ -3,9 +3,10 @@ import camera, view
 
 class Tree(object):
     def __init__(self):
-        self.render_3d_nontextured = []
-        self.render_3d_textured = []
+        self.render_3d = []
+        self.render_3d_blend = []
         self.render_2d = []
+        self.render_3d_always = []
 
 class Scene(object):
     def __init__(self):
@@ -18,8 +19,8 @@ class Scene(object):
         if self.render3d:
             view.set3d()
             camera.push()
-            for i in self.graph.render_3d_nontextured: i.render(camera)
-            for i in self.graph.render_3d_textured: i.render(camera)
+            for i in self.graph.render_3d: i.render(camera)
+            for i in self.graph.render_3d_blend: i.render(camera)
             camera.pop()
 
         if self.render2d:
@@ -35,7 +36,10 @@ class Scene(object):
         return False
 
     def add_3d(self, ele):
-        if self.test_textured(ele):
-            self.graph.render_3d_textured.append(ele)
-        else:
-            self.graph.render_3d_nontextured.append(ele)
+        self.graph.render_3d.append(ele)
+
+    def add_3d_blend(self, ele):
+        self.graph.render_3d_blend.append(ele)
+
+    def add_3d_always(self, ele):
+        self.graph.render_3d_always.append(ele)
