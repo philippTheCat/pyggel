@@ -7,14 +7,17 @@ _all_textures = {}
 _all_3d_images = {}
 
 class Texture(object):
-    def __init__(self, filename, flip=0, unique=False):
+    def __init__(self, filename, flip=0, unique=False, dont_load=False):
         self.filename = filename
         self.flip = 0
         self.unique = False
 
         self.gl_tex = glGenTextures(1)
 
-        self._load_file()
+        if not dont_load:
+            self._load_file()
+        else:
+            self.unique = True
 
     def _get_next_biggest(self, x, y):
         nw = 16
@@ -34,37 +37,30 @@ class Texture(object):
             else:
                 image = pygame.image.load(self.filename)
 
-                size = self._get_next_biggest(*image.get_size())
-
-                image = pygame.transform.scale(image, size)
-
-                tdata = pygame.image.tostring(image, "RGBA", self.flip)
-                
-                glBindTexture(GL_TEXTURE_2D, self.gl_tex)
-
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-
-                xx, xy = size
-
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
-                             GL_UNSIGNED_BYTE, tdata)
+                self._compile(image)
                 _all_textures[self.filename] = self
         else:
             image = pygame.image.load(self.filename)
 
-            size = self._get_next_biggest(*image.get_size())
+            self._compile(image)
 
-            image = pygame.transform.scale(image, size)
+    def _compile(self, image):
+        size = self._get_next_biggest(*image.get_size())
 
-            tdata = pygame.image.tostring(image, "RGBA", self.flip)
-            
-            glBindTexture(GL_TEXTURE_2D, self.gl_tex)
+        image = pygame.transform.scale(image, size)
 
-            xx, xy = size
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        tdata = pygame.image.tostring(image, "RGBA", self.flip)
+        
+        glBindTexture(GL_TEXTURE_2D, self.gl_tex)
 
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
-                         GL_UNSIGNED_BYTE, tdata)
+        xx, xy = size
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, tdata)
+
+    def bind(self):
+        glBindTexture(GL_TEXTURE_2D, self.gl_tex)
 
 class Image(object):
     def __init__(self, filename, pos=(0,0),
@@ -290,8 +286,6 @@ class Image(object):
 
         pos = self.pos
 
-##        view.set_render_image_2d()
-
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
@@ -302,7 +296,6 @@ class Image(object):
         glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
-##        view.unset_render_image_2d()
         if self.to_be_blitted:
             view.screen.push_clip((pos[0], view.screen.screen_size[1]-pos[1]-h,w,h))
             for i in self.to_be_blitted:
@@ -354,7 +347,6 @@ class Image3D(Image):
         h, w = self.get_size()
 
         pos = self.pos
-##        view.set_render_image_3d()
 
         glPushMatrix()
         glScalef(self.scale, self.scale, self.scale)
@@ -367,7 +359,6 @@ class Image3D(Image):
         glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
-##        view.unset_render_image_3d()
 
     def blit(self, *args, **kwargs):
         print "Image3D does not support this function!"

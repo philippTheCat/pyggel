@@ -25,17 +25,14 @@ class Cube(object):
 
         self.gl_list = glGenLists(1)
 
-        if self.texture:
-            self.textured = True
-        else:
-            self.textured = False
-
         self._compile()
 
     def _compile(self):
         glNewList(self.gl_list, GL_COMPILE)
         if self.texture:
             glBindTexture(GL_TEXTURE_2D, self.texture.gl_tex)
+        else:
+            blank_texture.bind()
 
         coords = ((0,0), (0,1), (1,1), (1,0))
         for i in self.sides:

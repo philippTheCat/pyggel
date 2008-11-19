@@ -82,6 +82,7 @@ def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
         else:
             # just use diffuse colour
             glColor(*mtl['Kd'])
+            blank_texture.bind()
 
         glBegin(GL_POLYGON)
         for i in xrange(len(vertices)):
