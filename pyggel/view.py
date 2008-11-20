@@ -63,11 +63,12 @@ def init(screen_size=None):
     build_screen()
 
     glEnable(GL_TEXTURE_2D)
-    glFrontFace(GL_CCW)
+    glFrontFace(GL_CW)
     glEnable(GL_COLOR_MATERIAL)
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
     glEnable(GL_LIGHTING)
-    glEnable(GL_NORMALIZE)
+##    glEnable(GL_NORMALIZE)
     glShadeModel(GL_SMOOTH)
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)

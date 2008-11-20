@@ -31,6 +31,7 @@ def main():
 
     box = pyggel.geometry.Cube(5, texture=[image.Texture("data/ar.png")]*6)
     box.pos = (0,0,5)
+    box.rotation = list(box.rotation)
     sphere = pyggel.geometry.Sphere(5, texture=image.Texture("data/ar.png"))
     sphere.pos = (10, 0, 5)
     quads = []
@@ -113,8 +114,9 @@ def main():
             if key[K_EQUALS]:
                 camera.rotz += .25
 
+        box.rotation[1] += 1
+
         pyggel.view.clear_screen(mscene)
-##        skybox.render(camera)
         mscene.render(camera)
         pyggel.view.refresh_screen()
 
