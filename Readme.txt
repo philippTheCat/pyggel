@@ -6,9 +6,10 @@ It supports 3d models, lights, shadows, etc. as well as a wide array of 2d opera
 
 
 REQUIREMENTS:
-PyOpenGL version 3.0.0 or higher
-Pygame version 1.8.1 or higher
+PyOpenGL version 3.0.0 or higher (untested on lower, but may work)
+Pygame version 1.8.1 or higher (lower may work)
 Python version 2.5 (possibly 2.6, but no official support, higher versions to be supported later)
+Numpy version 1.2.1 or higher (untested on lower)
 
 
 SOURCE:
