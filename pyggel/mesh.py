@@ -109,11 +109,13 @@ def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
 
 class BasicMesh(object):
     def __init__(self, gl_list, pos=(0,0,0),
-                 rotation=(0,0,0), verts=[]):
+                 rotation=(0,0,0), verts=[],
+                 size=1):
         self.gl_list = gl_list
         self.pos = pos
         self.rotation = rotation
         self.verts = verts
+        self.size = size
 
     def copy(self):
         return BasicMesh(self.gl_list, list(self.pos),
@@ -127,5 +129,6 @@ class BasicMesh(object):
         glRotatef(rot[0], 1, 0, 0)
         glRotatef(rot[1], 0, 1, 0)
         glRotatef(rot[2], 0, 0, 1)
+        glScalef(self.size, self.size, self.size)
         glCallList(self.gl_list)
         glPopMatrix()
