@@ -31,7 +31,7 @@ def main():
         img3d.append(pyggel.image.Image3D("data/tile_example.png",
                                           pos=(random.randint(-10, 10),
                                                random.randint(-10, 10),
-                                               -10)))
+                                               10)))
 
     font = pyggel.font.Font()
     img4 = font.make_text_image("Hello World: 2D", (255, 255, 0))

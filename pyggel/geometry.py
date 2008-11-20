@@ -4,7 +4,7 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 """
 
 from include import *
-import image
+import image, view
 
 oldgldts = glDeleteTextures
 def glDeleteTexture(arg):
@@ -33,12 +33,18 @@ class Cube(object):
                       (1, 1, -1),#bottomrightback
                       (-1, 1, -1))#bottomleftback
 
-        self.sides = ((7,4,0,3, 2, 2),#left
-                      (6,5,1,2, 3, 4),#right
-                      (6,2,3,7, 5, 0),#top
-                      (1,5,4,0, 4, 5),#bottom
-                      (3,0,1,2, 0, 1),#front
-                      (7,4,5,6, 1, 3))#back
+        self.sides = ((7,4,0,3, 2, 2, 5),#left
+                      (6,5,1,2, 3, 4, 4),#right
+                      (6,2,3,7, 5, 0, 2),#top
+                      (1,5,4,0, 4, 5, 3),#bottom
+                      (3,0,1,2, 0, 1, 0),#front
+                      (7,4,5,6, 1, 3, 1))#back
+        self.normals = ((0, 0, 1), #front
+                        (0, 0, -1), #back
+                        (0, 1, 0), #top
+                        (0, -1, 0), #bottom
+                        (1, 0, 0), #right
+                        (-1, 0, 0)) #left
 
         self.split_coords = ((2,0),#top
                              (0,1),#back
@@ -72,9 +78,9 @@ class Cube(object):
                 coords = ((0,0), (0,1), (1,1), (1,0))
                 self.texture[i[4]].bind()
 
-            print coords
-
             glBegin(GL_QUADS)
+
+            glNormal3f(*self.normals[i[6]])
 
             for x in i[:4]:
                 glTexCoord2fv(coords[ix])
@@ -155,21 +161,24 @@ class Quad(Cube):
 class Skybox(Cube):
     def __init__(self, texture, colorize=(1,1,1,1)):
         Cube.__init__(self, 1, color=colorize, texture=texture)
-        self.sides = ((3,0,4,7, 2, 2),#left
-                      (6,5,1,2, 3, 4),#right
-                      (3,7,6,2, 5, 0),#top
-                      (4,0,1,5, 4, 5),#bottom
-                      (2,1,0,3, 0, 1),#front
-                      (7,4,5,6, 1, 3))#back
+        self.sides = ((3,0,4,7, 2, 2, 5),#left
+                      (6,5,1,2, 3, 4, 4),#right
+                      (3,7,6,2, 5, 0, 2),#top
+                      (4,0,1,5, 4, 5, 3),#bottom
+                      (2,1,0,3, 0, 1, 0),#front
+                      (7,4,5,6, 1, 3, 1))#back
         self._compile()
 
     def render(self, camera):
+        glDisable(GL_LIGHTING)
         glDepthMask(GL_FALSE)
         glPushMatrix()
         camera.set_skybox_data()
         Cube.render(self)
         glPopMatrix()
         glDepthMask(GL_TRUE)
+        if view.screen.lighting:
+            glEnable(GL_LIGHTING)
 
     def copy(self):
         n = Skybox(self.texture, self.colorize)
@@ -197,13 +206,14 @@ class Sphere(object):
         self.texture.bind()
         Sphere = gluNewQuadric()
         gluQuadricTexture(Sphere, GLU_TRUE)
-        gluSphere(Sphere, self.size, self.detail, self.detail)
+        gluSphere(Sphere, 1, self.detail, self.detail)
         glEndList()
 
     def render(self, camera=None):
         glPushMatrix()
         x, y, z = self.pos
         glTranslatef(x, y, -z)
+        glScalef(self.size, self.size, self.size)
         glColor4f(*self.color)
         glCallList(self.gl_list)
         glPopMatrix()
