@@ -6,12 +6,9 @@ import random
 def main():
     pyggel.view.init()
 
-    my_light = pyggel.light.Light((0,0,1), (0,0,0,0),
-                                  (1,1,1,1), (1,1,1,1),
+    my_light = pyggel.light.Light((0,100,0), (0.5,0.5,0.5,1),
+                                  (1,1,1,1), (50,50,50,10),
                                   (0,0,0), True)
-    light_group = pyggel.light.LightGroup()
-    light_group.add_light(my_light)
-    my_light.enable(GL_LIGHT0)
 
 ##    pyggel.view.set_lighting(False)
 
@@ -43,16 +40,22 @@ def main():
     obj2 = obj.copy()
     obj2.pos = (0,0,5)
 
+    box = pyggel.geometry.Cube(5, texture=[image.Texture("data/stickdude.png")]*6)
+    box.pos = (-5, 0, 0)
+
     my_scene = pyggel.scene.Scene()
     my_scene.add_2d(img)
     my_scene.add_2d(img2)
     my_scene.add_2d(img4)
     my_scene.add_3d(obj)
     my_scene.add_3d(obj2)
+    my_scene.add_3d(box)
     for i in img3d:
 ##        my_scene.add_3d_facing(i)
         my_scene.add_3d(i)
     my_scene.add_3d(img5)#_facing(img5)
+
+    my_scene.add_light(my_light)
 
     clock = pygame.time.Clock()
 

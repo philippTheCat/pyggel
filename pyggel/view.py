@@ -68,7 +68,7 @@ def init(screen_size=None):
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
     glEnable(GL_LIGHTING)
-##    glEnable(GL_NORMALIZE)
+    glEnable(GL_NORMALIZE)
     glShadeModel(GL_SMOOTH)
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
@@ -87,6 +87,8 @@ def init(screen_size=None):
     set_fog(True)
     glAlphaFunc(GL_GEQUAL, .5)
     set_background_color()
+
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
 
 def set_background_color(col=(0,0,0)):
     glClearColor(*col+(0,))

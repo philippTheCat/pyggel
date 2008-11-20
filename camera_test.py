@@ -9,7 +9,6 @@ def main():
     light = pyggel.light.Light((0,0,1), (0,0,0,0),
                                   (1,1,1,1), (1,1,1,1),
                                   (0,0,0), True)
-    light.enable(GL_LIGHT0)
 
     camera1 = pyggel.camera.LookFromCamera((0,0,-10))
     camera2 = pyggel.camera.LookAtCamera((0,0,5), distance=10)
@@ -57,6 +56,8 @@ def main():
     skybox = pyggel.geometry.Skybox(image.Texture("data/skybox.png"))
     skyball = pyggel.geometry.Skyball(image.Texture("data/skyball.png"))
     mscene.add_skybox(skybox)
+
+    mscene.add_light(light)
 
     clock = pygame.time.Clock()
 

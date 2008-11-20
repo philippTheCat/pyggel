@@ -13,6 +13,7 @@ class Tree(object):
         self.render_2d = []
         self.render_3d_always = []
         self.skybox = None
+        self.lights = []
 
 class Scene(object):
     def __init__(self):
@@ -27,6 +28,8 @@ class Scene(object):
             self.graph.skybox.render(camera)
         if self.render3d:
             camera.push()
+            for i in self.graph.lights:
+                i.shine()
             glEnable(GL_ALPHA_TEST)
             for i in self.graph.render_3d: i.render(camera)
             glDisable(GL_ALPHA_TEST)
@@ -69,3 +72,6 @@ class Scene(object):
         glClear(GL_DEPTH_BUFFER_BIT)
         if not self.skybox:
             glClear(GL_COLOR_BUFFER_BIT)
+
+    def add_light(self, light):
+        self.graph.lights.append(light)

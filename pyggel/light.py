@@ -6,6 +6,10 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 from include import *
 from math3d import get_distance
 
+all_lights = []
+for i in xrange(8):
+    exec "all_lights.append(GL_LIGHT%s)"%i
+
 class Light(object):
     def __init__(self, pos=(0,0,0), ambient=(0,0,0,0),
                  diffuse=(1,1,1,1), specular=(1,1,1,1),
@@ -17,50 +21,17 @@ class Light(object):
         self.diffuse = diffuse
         self.specular = specular
         self.spot_direction = spot_direction
+        try:
+            self.gl_light = all_lights.pop()
+        except:
+            self.gl_light = None
 
-        self._on = False
-        self.priority = priority
-        self.enabled = False
-        self.gl_light = None
-
-    def on(self):
-        self._on = True
-
-    def off(self):
-        self._on = False
-
-    def get_on(self):
-        return self._on
-
-    def doGL(self, gl_light):
-        self.gl_light = gl_light
-        glLightfv(gl_light, GL_AMBIENT, self.ambient)
-        glLightfv(gl_light, GL_DIFFUSE, self.diffuse)
-        glLightfv(gl_light, GL_SPECULAR, self.specular)
-        glLightfv(gl_light, GL_POSITION, self.pos+(int(not self.directional),))
-        glLightfv(gl_light, GL_SPOT_DIRECTION, self.spot_direction+(0,))
-        glEnable(gl_light)
-
-    def enable(self, gl_light):
-        self.enabled = True
-        self.doGL(gl_light)
-
-    def disable(self):
-        self.enabled = False
-
-class LightGroup(object):
-    def __init__(self):
-        self.lights = []
-        self.used_lights = []
-
-    def add_light(self, light):
-        self.lights.append(light)
-
-    def enable_by_proximity(self, pos):
-        dist = []
-        if len(self.lights) <= 8:
-            for i in self.lights:
-                if i.get_on():
-                    dist.append(i)
-        for i in xrange(len(dist)):
-            exec "dist[i].doGL(GL_LIGHT%s)"%i
+    def shine(self):
+        if not self.gl_light == None:
+            gl_light = self.gl_light
+            glLightfv(gl_light, GL_AMBIENT, self.ambient)
+            glLightfv(gl_light, GL_DIFFUSE, self.diffuse)
+            glLightfv(gl_light, GL_SPECULAR, self.specular)
+            glLightfv(gl_light, GL_POSITION, self.pos+(int(not self.directional),))
+            glLightfv(gl_light, GL_SPOT_DIRECTION, self.spot_direction+(0,))
+            glEnable(gl_light)

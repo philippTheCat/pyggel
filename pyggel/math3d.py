@@ -21,7 +21,7 @@ class Vector(object):
         self.x, self.y, self.z = pos
 
     def copy(self):
-        return Vector(self.x, self.y, self.z)
+        return Vector((self.x, self.y, self.z))
 
     def distance(self, other):
         n = self - other
@@ -87,7 +87,7 @@ class Vector(object):
 
     def normalize(self):
         L = self.length()
-        return self / Vector(L, L, L)
+        return self / Vector((L, L, L))
 
     def dot(self, other):
         x = self * other
@@ -118,7 +118,7 @@ class Vector(object):
         x = self.x/other.x if (self.x and other.x) else 0
         y = self.y/other.y if (self.y and other.y) else 0
         z = self.z/other.z if (self.z and other.z) else 0
-        return Vector(x, y, z)
+        return Vector((x, y, z))
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y and self.z == other.z
@@ -149,7 +149,7 @@ class Vector(object):
     __neg__ = invert
 
     def __abs__(self):
-        return Vector(abs(self.x), abs(self.y), abs(self.z))
+        return Vector((abs(self.x), abs(self.y), abs(self.z)))
 
     def __pow__(self, other):
         return Vector((self.x**other.x, self.y**other.y, self.z**other.z))
@@ -158,9 +158,9 @@ class Vector(object):
         return other ** self
 
     def cross(self, other):
-        return Vector(self.y * other.z - self.z * other.y,
+        return Vector((self.y * other.z - self.z * other.y,
                       self.z * other.x - self.x * other.z,
-                      self.x * other.y - self.y * other.x)
+                      self.x * other.y - self.y * other.x))
 
 class Projection(object):
     def __init__(self, min, max):
