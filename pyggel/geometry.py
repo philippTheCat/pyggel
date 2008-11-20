@@ -141,7 +141,10 @@ class Quad(Cube):
         glBegin(GL_QUADS)
         coords = ((0,0), (0,1), (1,1), (1,0))
 
-        for x in i[:4]:
+        c =  list(i[:4])
+        c.reverse()
+
+        for x in c:
             glTexCoord2fv(coords[ix])
             a, b, c = self.corners[x]
             a *= 1.1
