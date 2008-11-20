@@ -159,6 +159,7 @@ def set3d():
     screen_size = screen.screen_size
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
+    glViewport(0,0,*screen_size)
     gluPerspective(45, 1.0*screen_size[0]/screen_size[1], 0.1, 100.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()

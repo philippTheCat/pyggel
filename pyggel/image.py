@@ -17,6 +17,8 @@ class Texture(object):
         self.flip = 0
         self.unique = False
 
+        self.size = (0,0)
+
         self.gl_tex = glGenTextures(1)
 
         if not dont_load:
@@ -59,6 +61,7 @@ class Texture(object):
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
 
         xx, xy = size
+        self.size = size
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
