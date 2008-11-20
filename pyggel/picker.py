@@ -19,4 +19,19 @@ class Group(object):
         if len(self.objects[-1]) >= 512:
             self.objects.append([])
 
-    
+    def pick(self, mouse_pos):
+        x, y = mouse_pos
+
+        viewport = glGetIntegerv(GL_VIEWPORT)
+        glSelectBuffer(512)
+        glRenderMode(GL_SELECT)
+        near = []
+        far = []
+        all = []
+
+        glInitNames()
+        glMatrixMode(GL_PROJECTION)
+        previousviewmatrix = glGetDoublev(GL_PROJECTION_MATRIX)
+
+        glLoadIdentity()
+        gluPickMatrix(x, viewport[3]-y, 1, 1, viewport)

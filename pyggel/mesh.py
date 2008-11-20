@@ -83,7 +83,8 @@ def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
         if 'texture_Kd' in mtl:
             # use diffuse texmap
             glColor4f(1, 1, 1, 1)
-            glBindTexture(GL_TEXTURE_2D, mtl['texture_Kd'])
+##            glBindTexture(GL_TEXTURE_2D, mtl['texture_Kd'])
+            mtl["texture_Kd"].bind()
         else:
             # just use diffuse colour
             glColor(*mtl['Kd'])
