@@ -64,7 +64,7 @@ def main():
     while 1:
 ##        img5.rotation[2] += 0.5
         clock.tick(999)
-        print clock.get_fps()
+##        print clock.get_fps()
         for event in pyggel.get_events():
             if event.type == QUIT:
                 pyggel.quit()
@@ -113,6 +113,7 @@ def main():
         img2.rotate((0,0,-1))
 
         pyggel.view.clear_screen()
+        my_scene.pick(pygame.mouse.get_pos(), camera)
         my_scene.render(camera)
 
         pyggel.view.refresh_screen()

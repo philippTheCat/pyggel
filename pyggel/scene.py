@@ -4,7 +4,7 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 """
 
 from include import *
-import camera, view
+import camera, view, picker
 
 class Tree(object):
     def __init__(self):
@@ -14,6 +14,8 @@ class Tree(object):
         self.render_3d_always = []
         self.skybox = None
         self.lights = []
+
+        self.pick_3d = picker.Group()
 
 class Scene(object):
     def __init__(self):
@@ -58,6 +60,7 @@ class Scene(object):
 
     def add_3d(self, ele):
         self.graph.render_3d.append(ele)
+        self.graph.pick_3d.add_obj(ele)
 
     def add_3d_blend(self, ele):
         self.graph.render_3d_blend.append(ele)
@@ -75,3 +78,7 @@ class Scene(object):
 
     def add_light(self, light):
         self.graph.lights.append(light)
+
+    def pick(self, mouse_pos, camera):
+        view.set3d()
+        self.graph.pick_3d.pick(mouse_pos, camera)
