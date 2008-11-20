@@ -124,6 +124,8 @@ class Quad(Cube):
             facing = f[facing]
         self.facing = facing
 
+        self.xnorms = [1,0,3,2,5,4]
+
         Cube.__init__(self, size, pos, rotation, color, texture)
 
     def _compile(self):
@@ -141,10 +143,9 @@ class Quad(Cube):
         glBegin(GL_QUADS)
         coords = ((0,0), (0,1), (1,1), (1,0))
 
-        c =  list(i[:4])
-        c.reverse()
+        glNormal3f(*self.normals[self.xnorms[i[6]]])
 
-        for x in c:
+        for x in i[:4]:
             glTexCoord2fv(coords[ix])
             a, b, c = self.corners[x]
             a *= 1.1
