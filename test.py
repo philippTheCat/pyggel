@@ -10,12 +10,6 @@ def main():
                                   (1,1,1,1), (50,50,50,10),
                                   (0,0,0), True)
 
-##    pyggel.view.set_lighting(False)
-
-##    glDisable(GL_LIGHTING)
-##    pyggel.view.set_lighting(False)
-##    glViewport(0,0,320, 240)
-
     camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
 ##    camera = pyggel.camera.LookFromCamera((0,0,10))
 
@@ -51,9 +45,8 @@ def main():
     my_scene.add_3d(obj2)
     my_scene.add_3d(box)
     for i in img3d:
-##        my_scene.add_3d_facing(i)
         my_scene.add_3d(i)
-    my_scene.add_3d(img5)#_facing(img5)
+    my_scene.add_3d(img5)
 
     my_scene.add_light(my_light)
 
@@ -62,7 +55,6 @@ def main():
     rot = 0
 
     while 1:
-##        img5.rotation[2] += 0.5
         clock.tick(999)
 ##        print clock.get_fps()
         for event in pyggel.get_events():
@@ -105,15 +97,13 @@ def main():
             camera.posz -= .1
         if key[K_w]:
             camera.posz += .1
-##        obj.pos = camera.get_pos()
-##        obj.rotation = camera.get_rotation()
 
         rot += 1
         img.rotate((0,0,1))
         img2.rotate((0,0,-1))
 
         pyggel.view.clear_screen()
-        my_scene.pick(pygame.mouse.get_pos(), camera)
+        print my_scene.pick(pygame.mouse.get_pos(), camera).hit
         my_scene.render(camera)
 
         pyggel.view.refresh_screen()

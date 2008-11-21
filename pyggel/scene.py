@@ -16,6 +16,22 @@ class Tree(object):
         self.lights = []
 
         self.pick_3d = picker.Group()
+        self.pick_3d_blend = picker.Group()
+        self.pick_3d_always = picker.Group()
+
+class PickResult(object):
+    def __init__(self, hits, depths):
+        self.hit3d, self.hit3d_blend, self.hit3d_always = hits
+        self.dep3d, self.dep3d_blend, self.dep3d_always = depths
+
+        a, b, c = depths
+        if a == None: a = 100
+        if b == None: b = 100
+        if c == None: c = 100
+        depths = [a, b, c]
+
+        self.hit = hits[depths.index(min(depths))]
+        
 
 class Scene(object):
     def __init__(self):
@@ -53,27 +69,39 @@ class Scene(object):
     def add_2d(self, ele):
         self.graph.render_2d.append(ele)
 
-    def test_textured(self, ele):
-        if hasattr(ele, "textured") and ele.textured:
-            return True
-        return False
+    def remove_2d(self, ele):
+        self.graph.render_2d.remove(ele)
 
     def add_3d(self, ele):
         self.graph.render_3d.append(ele)
         self.graph.pick_3d.add_obj(ele)
 
+    def remove_3d(self, ele):
+        self.graph.render_3d.remove(ele)
+        self.graph.pick_3d.rem_obj(ele)
+
     def add_3d_blend(self, ele):
         self.graph.render_3d_blend.append(ele)
+        self.graph.pick_3d_blend.add_obj(ele)
+
+    def remove_3d_blend(self, ele):
+        self.graph.render_3d_blend.remove(ele)
+        self.graph.pick_3d_blend.rem_obj(ele)
 
     def add_3d_always(self, ele):
         self.graph.render_3d_always.append(ele)
+        self.graph.pick_3d_always.add_obj(ele)
+
+    def remove_3d_always(self, ele):
+        self.graph.render_3d_always.remove(ele)
+        self.graph.pick_3d_always.rem_obj(ele)
 
     def add_skybox(self, ele):
         self.graph.skybox = ele
 
     def clear(self):
         glClear(GL_DEPTH_BUFFER_BIT)
-        if not self.skybox:
+        if not self.graph.skybox:
             glClear(GL_COLOR_BUFFER_BIT)
 
     def add_light(self, light):
@@ -81,4 +109,42 @@ class Scene(object):
 
     def pick(self, mouse_pos, camera):
         view.set3d()
-        self.graph.pick_3d.pick(mouse_pos, camera)
+
+        glEnable(GL_ALPHA_TEST)
+        h1 = self.graph.pick_3d.pick(mouse_pos, camera)
+        glDisable(GL_ALPHA_TEST)
+
+        glDepthMask(GL_FALSE)
+        h2 = self.graph.pick_3d_blend.pick(mouse_pos, camera)
+        glDepthMask(GL_TRUE)
+
+        glDisable(GL_DEPTH_TEST)
+        h3 = self.graph.pick_3d_always.pick(mouse_pos, camera)
+        glEnable(GL_DEPTH_TEST)
+
+        hits = []
+        depths = []
+
+        if h1:
+            hits.append(h1[0])
+            depths.append(h1[1])
+        else:
+            hits.append(None)
+            depths.append(None)
+
+        if h2:
+            hits.append(h2[0])
+            depths.append(h2[1])
+        else:
+            hits.append(None)
+            depths.append(None)
+
+        if h3:
+            hits.append(h3[0])
+            depths.append(h3[1])
+        else:
+            hits.append(None)
+            depths.append(None)
+
+        self.clear()
+        return PickResult(hits, depths)
