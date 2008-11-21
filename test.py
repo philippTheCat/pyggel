@@ -59,7 +59,7 @@ def main():
 
     while 1:
         clock.tick(999)
-##        print clock.get_fps()
+        print clock.get_fps()
         for event in pyggel.get_events():
             if event.type == QUIT:
                 pyggel.quit()
