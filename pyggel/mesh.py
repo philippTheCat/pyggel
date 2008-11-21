@@ -5,7 +5,7 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 
 from include import *
 import os
-import image, view
+import image, view, misc
 
 def MTL(filename, path=''):
     contents = {}
@@ -15,16 +15,18 @@ def MTL(filename, path=''):
         values = line.split()
         if not values: continue
         if values[0] == 'newmtl':
-            mtl = contents[values[1]] = {}
+            contents[values[1]] = None
+            mtl = values[1]
         elif mtl is None:
             raise ValueError, "mtl file doesn't start with newmtl stmt"
         elif values[0] == 'map_Kd':
             # load the texture referred to by this declaration
-            mtl[values[0]] = values[1]
             tex = image.Texture(os.path.join(path,mtl['map_Kd']), 1)
-            texid = tex.gl_tex
+            contents[mtl] = tex
         elif values[0]=="Kd":
-            mtl[values[0]] = map(float, values[1:])
+            #create a color texture
+            tex = misc.create_empty_texture((8, 8), map(float, values[1:]))
+            contents[mtl] = tex
         else:
             pass
     return contents
@@ -78,18 +80,11 @@ def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
     glNewList(gl_list, GL_COMPILE)
     for face in sfaces:
         vertices, normals, texture_coords, material = face
-
         mtl = smtl[material]
-        if 'texture_Kd' in mtl:
-            # use diffuse texmap
-            glColor4f(1, 1, 1, 1)
-##            glBindTexture(GL_TEXTURE_2D, mtl['texture_Kd'])
-            mtl["texture_Kd"].bind()
-        else:
-            # just use diffuse colour
-            glColor(*mtl['Kd'])
+        try:
+            mtl.bind()
+        except:
             blank_texture.bind()
-
         glBegin(GL_POLYGON)
         for i in xrange(len(vertices)):
             if normals[i] > 0:
@@ -111,16 +106,18 @@ def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
 class BasicMesh(object):
     def __init__(self, gl_list, pos=(0,0,0),
                  rotation=(0,0,0), verts=[],
-                 size=1):
+                 size=1, colorize=(1,1,1,1)):
         self.gl_list = gl_list
         self.pos = pos
         self.rotation = rotation
         self.verts = verts
         self.size = size
+        self.colorize = colorize
 
     def copy(self):
         return BasicMesh(self.gl_list, list(self.pos),
-                         list(self.rotation), list(self.verts))
+                         list(self.rotation), list(self.verts),
+                         self.size, list(self.colorize))
 
     def render(self, camera=None):
         glPushMatrix()
@@ -131,5 +128,6 @@ class BasicMesh(object):
         glRotatef(rot[1], 0, 1, 0)
         glRotatef(rot[2], 0, 0, 1)
         glScalef(self.size, self.size, self.size)
+        glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()

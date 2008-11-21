@@ -55,6 +55,8 @@ def main():
 
     rot = 0
 
+    last_hit = None
+
     while 1:
         clock.tick(999)
 ##        print clock.get_fps()
@@ -104,7 +106,14 @@ def main():
         img2.rotate((0,0,-1))
 
         pyggel.view.clear_screen()
-        print my_scene.pick(pygame.mouse.get_pos(), camera).hit
+
+        hit = my_scene.pick(pygame.mouse.get_pos(), camera).hit
+        if hit:
+            hit.colorize = (1, 0, 0, 1)
+        if last_hit:
+            if not hit == last_hit:
+                last_hit.colorize = (1,1,1,1)
+        last_hit = hit
         my_scene.render(camera)
 
         pyggel.view.refresh_screen()

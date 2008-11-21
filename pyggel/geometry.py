@@ -15,14 +15,14 @@ def glDeleteTexture(arg):
 
 class Cube(object):
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
-                 color=(1,1,1,1), texture=None):
+                 colorize=(1,1,1,1), texture=None):
         self.size = size
         self.pos = pos
         self.rotation = rotation
         if not texture:
             texture = blank_texture
         self.texture = texture
-        self.color = color
+        self.colorize = colorize
 
         self.corners = ((-1, -1, 1),#topleftfront
                       (1, -1, 1),#toprightfront
@@ -101,7 +101,7 @@ class Cube(object):
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
         glScalef(.5*self.size,.5*self.size,.5*self.size)
-        glColor4f(*self.color)
+        glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
 
@@ -112,7 +112,8 @@ class Cube(object):
         return n
 
 class Quad(Cube):
-    def __init__(self, size, pos=(0,0,0), rotation=(0,0,0), color=(1,1,1,1), texture=None, facing=0):
+    def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
+                 colorize=(1,1,1,1), texture=None, facing=0):
 
         f = {"left":0,
              "right":1,
@@ -126,7 +127,7 @@ class Quad(Cube):
 
         self.xnorms = [1,0,3,2,5,4]
 
-        Cube.__init__(self, size, pos, rotation, color, texture)
+        Cube.__init__(self, size, pos, rotation, colorize, texture)
 
     def _compile(self):
         glNewList(self.gl_list, GL_COMPILE)
@@ -157,14 +158,14 @@ class Quad(Cube):
         glEndList()
 
     def copy(self):
-        n = Quad(self.size, self.pos, self.rotation, self.color, self.texture, self.facing)
+        n = Quad(self.size, self.pos, self.rotation, self.colorize, self.texture, self.facing)
         glDeleteTextures(n.gl_list)
         n.gl_list = self.gl_list
         return n
 
 class Skybox(Cube):
     def __init__(self, texture, colorize=(1,1,1,1)):
-        Cube.__init__(self, 1, color=colorize, texture=texture)
+        Cube.__init__(self, 1, colorize=colorize, texture=texture)
         self.sides = ((3,0,4,7, 2, 2, 5),#left
                       (6,5,1,2, 3, 4, 4),#right
                       (3,7,6,2, 5, 0, 2),#top
@@ -191,11 +192,11 @@ class Skybox(Cube):
         return n
 
 class Sphere(object):
-    def __init__(self, size, pos=(0,0,0), color=(1,1,1,1),
+    def __init__(self, size, pos=(0,0,0), colorize=(1,1,1,1),
                  texture=None, detail=30):
         self.size = size
         self.pos = pos
-        self.color = color
+        self.colorize = colorize
         if not texture:
             texture = blank_texture
         self.texture = texture
@@ -218,19 +219,19 @@ class Sphere(object):
         x, y, z = self.pos
         glTranslatef(x, y, -z)
         glScalef(self.size, self.size, self.size)
-        glColor4f(*self.color)
+        glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
 
     def copy(self):
-        n = Sphere(self.size, self.pos, self.color, self.texture, self.detail)
+        n = Sphere(self.size, self.pos, self.colorize, self.texture, self.detail)
         glDeleteTextures(n.gl_list)
         n.gl_list = self.gl_list
         return n
 
 class Skyball(Sphere):
     def __init__(self, texture=None, colorize=(1,1,1,1), detail=30):
-        Sphere.__init__(self, 1, color=colorize,
+        Sphere.__init__(self, 1, colorize=colorize,
                         texture=texture, detail=detail)
 
     def render(self, camera):
