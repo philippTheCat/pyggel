@@ -18,7 +18,7 @@ http://code.google.com/p/pyggel/source/checkout
 
 
 LICENSE:
-The library itself (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+The library itself (PYGGEL) is licensed under the LGPL by Matthew (RB[0]) Roe and PYGGEL contributors.
 The examples and tutorials (along with assets) are released into the public domain.
 
 
