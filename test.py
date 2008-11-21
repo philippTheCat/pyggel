@@ -5,6 +5,7 @@ import random
 
 def main():
     pyggel.view.init()
+    pyggel.view.set_debug(False)
 
     my_light = pyggel.light.Light((0,100,0), (0.5,0.5,0.5,1),
                                   (1,1,1,1), (50,50,50,10),

@@ -3,6 +3,9 @@ pyggle.view
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 """
 
+from OpenGL import error
+oglError = error
+
 from include import *
 
 class _Screen(object):
@@ -16,6 +19,8 @@ class _Screen(object):
         self.lighting = True
         self.fog = True
         self.fog_color = (.5,.5,.5,.5)
+
+        self.debug = True
 
         self.clips = [(0,0,self.screen_size[0],self.screen_size[1])]
         glScissor(*self.clips[0])
@@ -140,6 +145,16 @@ def set_fog(boolean):
 
 def toggle_fog():
     set_fog(not screen.fog)
+
+def set_debug(boolean):
+    screen.debug = boolean
+    if boolean:
+        oglError.ErrorChecker.registerChecker(None)
+    else:
+        oglError.ErrorChecker.registerChecker(lambda:None)
+
+def toggle_debug():
+    set_debug(not screen.debug)
 
 def build_screen():
     pygame.display.set_mode(screen.screen_size, screen.get_params())
