@@ -3,6 +3,7 @@ pyggle.camera
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 """
 from include import *
+from math3d import Vector
 
 class Base(object):
     def __init__(self, pos=[0,0,0], rotation=[0,0,0]):

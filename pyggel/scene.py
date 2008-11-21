@@ -42,12 +42,17 @@ class Scene(object):
 
     def render(self, camera):
         view.set3d()
+        for i in self.graph.lights:
+            if i.bind_to_camera:
+                i.position_to_camera(camera)
+                i.shine()
         if self.graph.skybox:
             self.graph.skybox.render(camera)
         if self.render3d:
             camera.push()
             for i in self.graph.lights:
-                i.shine()
+                if not i.bind_to_camera:
+                    i.shine()
             glEnable(GL_ALPHA_TEST)
             for i in self.graph.render_3d: i.render(camera)
             glDisable(GL_ALPHA_TEST)
