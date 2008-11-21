@@ -99,11 +99,6 @@ class Scene(object):
     def add_skybox(self, ele):
         self.graph.skybox = ele
 
-    def clear(self):
-        glClear(GL_DEPTH_BUFFER_BIT)
-        if not self.graph.skybox:
-            glClear(GL_COLOR_BUFFER_BIT)
-
     def add_light(self, light):
         self.graph.lights.append(light)
 
@@ -146,5 +141,5 @@ class Scene(object):
             hits.append(None)
             depths.append(None)
 
-        self.clear()
+        view.clear_screen()
         return PickResult(hits, depths)
