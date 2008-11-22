@@ -15,7 +15,6 @@ class _Screen(object):
         self.fullscreen = False
         self.hwrender = True
         self.decorated = True
-        self.shadows = False
         self.lighting = True
         self.fog = True
         self.fog_color = (.5,.5,.5,.5)
@@ -128,9 +127,6 @@ def set_decorated(boolean):
 
 def toggle_decorated():
     set_decorated(not screen.decorated)
-
-def set_shadows(boolean):
-    screen.shadows = boolean
 
 def set_fog_color(rgba):
     glFogfv(GL_FOG_COLOR, rgba)
