@@ -140,3 +140,9 @@ class BasicMesh(object):
         glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
+
+    def __del__(self):
+        try:
+            glDeleteLists(self.gl_list, 1)
+        except:
+            pass #already cleared!

@@ -7,15 +7,10 @@ from include import *
 
 import view
 
-_all_images = {}
-_all_textures = {}
-_all_3d_images = {}
-
 class Texture(object):
-    def __init__(self, filename, flip=0, unique=False, dont_load=False):
+    def __init__(self, filename, flip=0, dont_load=False):
         self.filename = filename
         self.flip = 0
-        self.unique = False
 
         self.size = (0,0)
 
@@ -23,8 +18,6 @@ class Texture(object):
 
         if not dont_load:
             self._load_file()
-        else:
-            self.unique = True
 
     def _get_next_biggest(self, x, y):
         nw = 16
@@ -36,20 +29,9 @@ class Texture(object):
         return nw, nh
 
     def _load_file(self):
-        if not self.unique:
-            if self.filename in _all_textures:
-                glDeleteTextures(self.gl_tex)
-                x = _all_textures[self.filename]
-                self.gl_tex = x.gl_tex
-            else:
-                image = pygame.image.load(self.filename)
+        image = pygame.image.load(self.filename)
 
-                self._compile(image)
-                _all_textures[self.filename] = self
-        else:
-            image = pygame.image.load(self.filename)
-
-            self._compile(image)
+        self._compile(image)
 
     def _compile(self, image):
         size = self._get_next_biggest(*image.get_size())
@@ -80,15 +62,16 @@ class Texture(object):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
 
     def __del__(self):
-        if self.unique:
+        try:
             glDeleteTextures([self.gl_tex])
+        except:
+            pass #already cleared...
 
 class Image(object):
     def __init__(self, filename, pos=(0,0),
                  rotation=(0,0,0), scale=1,
-                 dont_load=False, unique=False):
+                 dont_load=False):
         self.filename = filename
-        self.unique = unique
 
         self.pos = pos
 
@@ -115,7 +98,7 @@ class Image(object):
         self.rotation = r
 
     def copy(self, shallow=True):
-        new = Image(self.filename, unique=self.unique, dont_load=True)
+        new = Image(self.filename, dont_load=True)
         new._pimage2 = self._pimage2.copy()
         new._pimage = new._pimage2.subsurface(0,0,*self.get_size())
 
@@ -124,15 +107,9 @@ class Image(object):
 
         new.rect = self.rect
         new.offset = self.offset
-
-        if new.unique:
-            new.compile_from_surface(new._pimage2)
-        else:
-            new.gl_tex = self.gl_tex
-            new.gl_list = self.gl_list
+        new.compile_from_surface(new._pimage2)
         if not shallow:
             new.rotation = list(self.rotation)
-            new.unique = self.unique
             new.pos = self.pos
             new.rotation = self.rotation
             new.scale = self.scale
@@ -154,56 +131,24 @@ class Image(object):
         return view.screen.rect.colliderect(r)
 
     def _load_file(self):
-        if not self.unique:
-            if self.filename in _all_images:
-                x = _all_images[self.filename]
-                self.gl_tex = x.gl_tex
-                self._pimage = x._pimage
-                self._pimage2 = x._pimage2
-                self._image_size = x._image_size
-                self._altered_image_size = x._altered_image_size
-                self.offset = x.offset
-                self.gl_list = x.gl_list
-                self.rect = self._pimage.get_rect()
-            else:
-                self._pimage = pygame.image.load(self.filename)
+        self._pimage = pygame.image.load(self.filename)
 
-                sx, sy = self._pimage.get_size()
-                xx, xy = self._get_next_biggest(sx, sy)
+        sx, sy = self._pimage.get_size()
+        xx, xy = self._get_next_biggest(sx, sy)
 
-                self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
-                self._pimage2.fill((0,0,0,0))
+        self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
+        self._pimage2.fill((0,0,0,0))
 
-                self._pimage2.blit(self._pimage, (0,0))
+        self._pimage2.blit(self._pimage, (0,0))
 
-                self._pimage = self._pimage2.subsurface(0,0,sx,sy)
+        self._pimage = self._pimage2.subsurface(0,0,sx,sy)
 
-                self._image_size = (sx, sy)
-                self._altered_image_size = (xx, xy)
+        self._image_size = (sx, sy)
+        self._altered_image_size = (xx, xy)
 
-                self._texturize(self._pimage2)
-                self.rect = self._pimage.get_rect()
-                self._compile()
-                _all_images[self.filename] = self
-        else:
-            self._pimage = pygame.image.load(self.filename)
-
-            sx, sy = self._pimage.get_size()
-            xx, xy = self._get_next_biggest(sx, sy)
-
-            self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
-            self._pimage2.fill((0,0,0,0))
-
-            self._pimage2.blit(self._pimage, (0,0))
-
-            self._pimage = self._pimage2.subsurface(0,0,sx,sy)
-
-            self._image_size = (sx, sy)
-            self._altered_image_size = (xx, xy)
-
-            self._texturize(self._pimage2)
-            self.rect = self._pimage.get_rect()
-            self._compile()
+        self._texturize(self._pimage2)
+        self.rect = self._pimage.get_rect()
+        self._compile()
 
     def compile_from_surface(self, surf):
         self._pimage = surf
@@ -219,8 +164,6 @@ class Image(object):
 
         self._image_size = (sx, sy)
         self._altered_image_size = (xx, xy)
-
-        self.unique = True
 
         self.rect = self._pimage.get_rect()
 
@@ -334,17 +277,22 @@ class Image(object):
                 self.to_be_blitted.remove(i)
 
     def __del__(self):
-        if self.unique:
+        try:
             glDeleteTextures([self.gl_tex])
+        except:
+            pass #already cleared
+        try:
             glDeleteLists(self.gl_list, 1)
+        except:
+            pass #already cleared
 
 
 class Image3D(Image):
     def __init__(self, filename, pos=(0,0,0),
                  rotation=(0,0,0), scale=1,
-                 dont_load=False, unique=False):
+                 dont_load=False):
         Image.__init__(self, filename, pos, rotation,
-                       scale, dont_load, unique)
+                       scale, dont_load)
 
     def render(self, camera=None):
         h, w = self.get_size()
@@ -375,18 +323,14 @@ class Image3D(Image):
     test_on_screen = blit
 
     def copy(self, shallow=True):
-        n = Image3D(self.filename, unique=self.unique, dont_load=True)
+        n = Image3D(self.filename, dont_load=True)
         n._image_size = self._image_size
         n._altered_image_size = self._altered_image_size
         n._pimage = self._pimage
         n._pimage2 = self._pimage2
         n.offset = self.offset
 
-        if n.unique:
-            n.compile_from_surface(n._pimage2)
-        else:
-            n.gl_tex = self.gl_tex
-            n.gl_list = self.gl_list
+        n.compile_from_surface(n._pimage2)
         
         if not shallow:
             n.pos = self.pos
@@ -396,53 +340,23 @@ class Image3D(Image):
         return n
 
     def _load_file(self):
-        if not self.unique:
-            if self.filename in _all_3d_images:
-                x = _all_3d_images[self.filename]
-                self.gl_tex = x.gl_tex
-                self._pimage = x._pimage
-                self._pimage2 = x._pimage2
-                self._image_size = x._image_size
-                self._altered_image_size = x._altered_image_size
-                self.offset = x.offset
-                self.gl_list = x.gl_list
-            else:
-                self._pimage = pygame.image.load(self.filename)
+        self._pimage = pygame.image.load(self.filename)
 
-                sx, sy = self._pimage.get_size()
-                xx, xy = self._get_next_biggest(sx, sy)
+        sx, sy = self._pimage.get_size()
+        xx, xy = self._get_next_biggest(sx, sy)
 
-                self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
-                self._pimage2.fill((0,0,0,0))
+        self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
+        self._pimage2.fill((0,0,0,0))
 
-                self._pimage2.blit(self._pimage, (0,0))
+        self._pimage2.blit(self._pimage, (0,0))
 
-                self._pimage = self._pimage2.subsurface(0,0,sx,sy)
+        self._pimage = self._pimage2.subsurface(0,0,sx,sy)
 
-                self._image_size = (sx, sy)
-                self._altered_image_size = (xx, xy)
+        self._image_size = (sx, sy)
+        self._altered_image_size = (xx, xy)
 
-                self._texturize(self._pimage2)
-                self._compile()
-                _all_3d_images[self.filename] = self
-        else:
-            self._pimage = pygame.image.load(self.filename)
-
-            sx, sy = self._pimage.get_size()
-            xx, xy = self._get_next_biggest(sx, sy)
-
-            self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
-            self._pimage2.fill((0,0,0,0))
-
-            self._pimage2.blit(self._pimage, (0,0))
-
-            self._pimage = self._pimage2.subsurface(0,0,sx,sy)
-
-            self._image_size = (sx, sy)
-            self._altered_image_size = (xx, xy)
-
-            self._texturize(self._pimage2)
-            self._compile()
+        self._texturize(self._pimage2)
+        self._compile()
         self.rect = self._pimage.get_rect()
 
     def compile_from_surface(self, surf):
@@ -459,8 +373,6 @@ class Image3D(Image):
 
         self._image_size = (sx, sy)
         self._altered_image_size = (xx, xy)
-
-        self.unique = True
 
         self._texturize(self._pimage2)
         self._compile()

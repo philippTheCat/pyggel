@@ -26,7 +26,7 @@ class Font(object):
 
     def make_text_image(self, text="", color=(255,255,255), antialias=True):
         ren = self.pygame_font.render(text, antialias, color)
-        i = image.Image(None, dont_load=True, unique=True)
+        i = image.Image(None, dont_load=True)
         i.compile_from_surface(ren)
         return i
 
