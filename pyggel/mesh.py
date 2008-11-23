@@ -40,6 +40,7 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
     sfaces = []
 
     material = None
+    smtl = None
     for line in open(filename, "r"):
         if line.startswith('#'): continue
         values = line.split()
@@ -76,15 +77,19 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
                 else:
                     norms.append(0)
             sfaces.append((face, norms, texcoords, material))
+        
 
     gl_list = glGenLists(1)
     glNewList(gl_list, GL_COMPILE)
     for face in sfaces:
         vertices, normals, texture_coords, material = face
-        mtl = smtl[material]
-        try:
-            mtl.bind()
-        except:
+        if smtl:
+            mtl = smtl[material]
+            try:
+                mtl.bind()
+            except:
+                blank_texture.bind()
+        else:
             blank_texture.bind()
         glBegin(GL_POLYGON)
         for i in xrange(len(vertices)):
@@ -101,13 +106,14 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
         for x in i[0]:
             verts.append(svertices[x-1])
 
-    return BasicMesh(gl_list, pos, rotation, verts, 1, colorize)
+    return BasicMesh(gl_list, pos, rotation, verts, 1, colorize, smtl)
 
 
 class BasicMesh(object):
     def __init__(self, gl_list, pos=(0,0,0),
                  rotation=(0,0,0), verts=[],
-                 scale=1, colorize=(1,1,1,1)):
+                 scale=1, colorize=(1,1,1,1),
+                 materials=None):
         self.gl_list = gl_list
         self.pos = pos
         self.rotation = rotation
@@ -115,6 +121,7 @@ class BasicMesh(object):
         self.scale = scale
         self.colorize = colorize
         self.visible = True
+        self.materials = materials #this is necessary so the textures aren't deleted when they no longer have references to them!
 
     def copy(self):
         return BasicMesh(self.gl_list, list(self.pos),
