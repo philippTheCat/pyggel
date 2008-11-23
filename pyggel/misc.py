@@ -35,3 +35,6 @@ class StaticObjectGroup(object):
 
     def render(self, camera=None):
         glCallList(self.gl_list)
+
+def save_screenshot(filename):
+    pygame.image.save(pygame.display.get_surface(), filename)

@@ -67,9 +67,6 @@ def main():
                                               texture=image.Texture("data/tile_example.png"),
                                               facing="top"))
 
-##    for i in quads:
-##        mscene.add_3d(i)
-
     mscene.add_3d(pyggel.misc.StaticObjectGroup(quads))
 
     clock = pygame.time.Clock()
@@ -89,8 +86,6 @@ def main():
                         camera = camera2
                     else:
                         camera = camera1
-                if event.key == K_SPACE:
-                    img.cant_hide = not img.cant_hide
 
                 if event.key == K_s:
                     if mscene.graph.skybox == skybox:
@@ -99,6 +94,9 @@ def main():
                         mscene.graph.skybox = None
                     else:
                         mscene.graph.skybox = skybox
+
+                if event.key == K_SPACE:
+                    misc.save_screenshot("test.png")
 
         key = pygame.key.get_pressed()
         if key[K_m]:
