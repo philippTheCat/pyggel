@@ -114,6 +114,7 @@ class BasicMesh(object):
         self.verts = verts
         self.scale = scale
         self.colorize = colorize
+        self.visible = True
 
     def copy(self):
         return BasicMesh(self.gl_list, list(self.pos),

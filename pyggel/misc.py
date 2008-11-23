@@ -22,6 +22,8 @@ class StaticObjectGroup(object):
         self.objects = objects
         self.gl_list = glGenLists(1)
 
+        self.visible = True
+
         self.compile()
 
     def add_object(self, obj):

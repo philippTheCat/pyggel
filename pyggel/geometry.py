@@ -57,6 +57,8 @@ class Cube(object):
 
         self.gl_list = glGenLists(1)
 
+        self.visible = True
+
         self._compile()
 
     def _compile(self):
@@ -210,6 +212,7 @@ class Sphere(object):
         self.scale = 1
 
         self.gl_list = glGenLists(1)
+        self.visible = True
 
         self._compile()
 

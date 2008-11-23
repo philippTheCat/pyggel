@@ -31,7 +31,14 @@ class PickResult(object):
         depths = [a, b, c]
 
         self.hit = hits[depths.index(min(depths))]
-        
+
+class RenderObject(object):
+    def __init__(self):
+        self.camera = None
+
+    def render(self, obj):
+        if obj.visible:
+            obj.render(self.camera)
 
 class Scene(object):
     def __init__(self):
@@ -40,7 +47,10 @@ class Scene(object):
         self.render2d = True
         self.render3d = True
 
+        self.rObj = RenderObject()
+
     def render(self, camera):
+        self.rObj.camera = camera
         view.set3d()
         for i in self.graph.lights:
             if i.bind_to_camera:
@@ -54,20 +64,20 @@ class Scene(object):
                 if not i.bind_to_camera:
                     i.shine()
             glEnable(GL_ALPHA_TEST)
-            for i in self.graph.render_3d: i.render(camera)
+            map(self.rObj.render, self.graph.render_3d)
             glDisable(GL_ALPHA_TEST)
             glDepthMask(GL_FALSE)
-            for i in self.graph.render_3d_blend: i.render(camera)
+            map(self.rObj.render, self.graph.render_3d_blend)
             glDepthMask(GL_TRUE)
             glDisable(GL_DEPTH_TEST)
-            for i in self.graph.render_3d_always: i.render(camera)
+            map(self.rObj.render, self.graph.render_3d_always)
             glEnable(GL_DEPTH_TEST)
             camera.pop()
 
         if self.render2d:
             view.set2d()
             glDisable(GL_LIGHTING)
-            for i in self.graph.render_2d: i.render()
+            map(self.rObj.render, self.graph.render_2d)
             if view.screen.lighting:
                 glEnable(GL_LIGHTING)
 

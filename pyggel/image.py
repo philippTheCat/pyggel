@@ -97,6 +97,7 @@ class Image(object):
         self.rotation = list(rotation)
         self.scale = scale
         self.colorize = (1,1,1,1)
+        self.visible = True
 
         self.textured = True
 

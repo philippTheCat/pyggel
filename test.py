@@ -109,6 +109,8 @@ def main():
         img.rotate((0,0,1))
         img2.rotate((0,0,-1))
 
+        img5.visible = not img5.visible
+
 ##        star.pos = camera.get_real_pos()
 
         pyggel.view.clear_screen()
