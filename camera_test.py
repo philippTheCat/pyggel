@@ -13,7 +13,7 @@ def main():
     camera1 = pyggel.camera.LookFromCamera((0,0,-10))
     camera2 = pyggel.camera.LookAtCamera((0,0,5), distance=10)
     camera = camera1
-    font = pyggel.font.Font()
+    font = pyggel.font.Font(None, 32)
     img = font.make_text_image3D("Hello World: 3D", (255, 255, 0))
     img.scale = 5
     img2 = font.make_text_image3D("Hello World: 3D X2!!!", (0, 255, 255))
@@ -27,8 +27,8 @@ def main():
     img5.pos = (0, .1, 0)
 
     text = font.make_text_image("ARG!!!!", (255, 0, 0))
-    img6 = text.copy()
-    img6.pos = (0, 50)
+    text2 = text.copy()
+    text2.pos = (0,75)
 
     box = pyggel.geometry.Cube(5, texture=[image.Texture("data/ar.png")]*6)
     box.pos = (0,0,5)
@@ -45,7 +45,7 @@ def main():
     mscene.add_3d_blend(img5)
     mscene.add_3d_always(img4)
     mscene.add_2d(text)
-    mscene.add_2d(img6)
+    mscene.add_2d(text2)
 
     skybox = pyggel.geometry.Skybox(image.Texture("data/skybox.png"))
     skyball = pyggel.geometry.Skyball(image.Texture("data/skyball.png"))
@@ -69,7 +69,7 @@ def main():
 
     while 1:
         clock.tick(999)
-        print clock.get_fps()
+##        print clock.get_fps()
 
         for event in pyggel.get_events():
             if event.type == QUIT:

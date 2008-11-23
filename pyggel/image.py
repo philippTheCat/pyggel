@@ -380,7 +380,6 @@ class Image3D(Image):
 
     def _load_file(self):
         if self.filename in _all_3d_images:
-##            glDeleteTextures(self.gl_tex)
             x = _all_3d_images[self.filename]
             self.gl_tex = x.gl_tex
             self._pimage = x._pimage
