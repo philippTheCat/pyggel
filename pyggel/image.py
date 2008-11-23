@@ -88,30 +88,28 @@ class Image(object):
 
         self.pos = pos
 
-        self.gl_tex = glGenTextures(1)
+##        self.gl_tex = glGenTextures(1)
 
         if not dont_load:
             self._load_file()
 
         self.to_be_blitted = []
-        self.rotation = list(rotation)
+        self.rotation = rotation
         self.scale = scale
         self.colorize = (1,1,1,1)
         self.visible = True
 
-        self.textured = True
-
     def rotate(self, amount):
-        r = self.rotation
-        r[0] += amount[0]
-        r[1] += amount[1]
-        r[2] += amount[2]
+        a, b, c = self.rotation
+        a += amount[0]
+        b += amount[1]
+        c += amount[2]
         for i in r:
             if i < 0:
                 i += 360
             if i >= 360:
                 i -= 360
-        self.rotation = r
+        self.rotation = (a, b, c)
 
     def copy(self, shallow=True):
         new = Image(self.filename, True)
@@ -144,25 +142,6 @@ class Image(object):
             nh *= 2
         return nw, nh
 
-    def resize(self, size):
-        self._pimage = pygame.transform.scale(self._pimage, size)
-        sx, sy = self._pimage.get_size()
-        xx, xy = self._get_next_biggest(sx, sy)
-
-        self._pimage2 = pygame.Surface((xx, xy)).convert_alpha()
-        self._pimage2.fill((0,0,0,0))
-
-        self._pimage2.blit(self._pimage, (0,0))
-
-        self._pimage = self._pimage2.subsurface(0,0,sx,sy)
-
-        self._image_size = (sx, sy)
-        self._altered_image_size = (xx, xy)
-
-        self.rect = self._pimage.get_rect()
-
-        self._texturize(self._pimage2)
-
     def test_on_screen(self):
         r = pygame.rect.Rect(self.pos, self._image_size)
         return view.screen.rect.colliderect(r)
@@ -170,9 +149,8 @@ class Image(object):
     def _load_file(self):
         if not self.unique:
             if self.filename in _all_images:
-                glDeleteTextures(self.gl_tex)
                 x = _all_images[self.filename]
-                self.gl_tex = x
+                self.gl_tex = x.gl_tex
                 self._pimage = x._pimage
                 self._pimage2 = x._pimage2
                 self._image_size = x._image_size
@@ -243,6 +221,7 @@ class Image(object):
         self._compile()
 
     def _texturize(self, image):
+        self.gl_tex = glGenTextures(1)
         tdata = pygame.image.tostring(image, "RGBA", 0)
         
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
@@ -347,12 +326,6 @@ class Image(object):
             if i[0] == obj:
                 self.to_be_blitted.remove(i)
 
-    def __del__(self):
-        try:
-            glDeleteTextures(self.gl_tex)
-        except:
-            pass
-
 
 class Image3D(Image):
     def __init__(self, filename, pos=(0,0,0),
@@ -408,7 +381,7 @@ class Image3D(Image):
 
     def _load_file(self):
         if self.filename in _all_3d_images:
-            glDeleteTextures(self.gl_tex)
+##            glDeleteTextures(self.gl_tex)
             x = _all_3d_images[self.filename]
             self.gl_tex = x.gl_tex
             self._pimage = x._pimage
@@ -494,9 +467,3 @@ class Image3D(Image):
         glEnd()
 
         glEndList()
-
-    def __del__(self):
-        try:
-            glDeleteTextures(self.gl_tex)
-        except:
-            pass
