@@ -233,7 +233,10 @@ class Image(object):
 
         glPushMatrix()
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
-        glScalef(self.scale, self.scale, self.scale)
+        try:
+            glScalef(self.scale[0], self.scale[1], 1)
+        except:
+            glScalef(self.scale, self.scale, 1)
 
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
@@ -301,7 +304,10 @@ class Image3D(Image):
 
         glPushMatrix()
         glTranslatef(pos[0], pos[1], -pos[2])
-        glScalef(self.scale, self.scale, self.scale)
+        try:
+            glScalef(self.scale[0], self.scale[1], 1)
+        except:
+            glScalef(self.scale, self.scale, 1)
         if camera:
             camera.set_facing_matrix()
         glRotatef(self.rotation[0], 1, 0, 0)

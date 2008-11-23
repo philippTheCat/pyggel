@@ -136,7 +136,10 @@ class BasicMesh(object):
         glRotatef(rot[0], 1, 0, 0)
         glRotatef(rot[1], 0, 1, 0)
         glRotatef(rot[2], 0, 0, 1)
-        glScalef(self.scale, self.scale, self.scale)
+        try:
+            glScalef(*self.scale)
+        except:
+            glScalef(self.scale, self.scale, self.scale)
         glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
