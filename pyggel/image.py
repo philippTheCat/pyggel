@@ -79,6 +79,10 @@ class Texture(object):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
 
+    def __del__(self):
+        if self.unique:
+            glDeleteTextures(self.gl_tex)
+
 class Image(object):
     def __init__(self, filename, pos=(0,0),
                  rotation=(0,0,0), scale=1,
@@ -325,6 +329,11 @@ class Image(object):
         for i in self.to_be_blitted:
             if i[0] == obj:
                 self.to_be_blitted.remove(i)
+
+    def __del__(self):
+        if self.unique:
+            glDeleteTextures(self.gl_tex)
+            glDeleteLists(self.gl_list)
 
 
 class Image3D(Image):

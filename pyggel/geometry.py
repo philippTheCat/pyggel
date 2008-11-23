@@ -112,7 +112,7 @@ class Cube(object):
 
     def copy(self):
         n = Cube(self.size, self.pos, self.rotation, self.color, self.texture)
-        glDeleteTextures(n.gl_list)
+        glDeleteLists(n.gl_list)
         n.gl_list = self.gl_list
         n.scale = self.scale
         return n
@@ -165,7 +165,7 @@ class Quad(Cube):
 
     def copy(self):
         n = Quad(self.size, self.pos, self.rotation, self.colorize, self.texture, self.facing)
-        glDeleteTextures(n.gl_list)
+        glDeleteLists(n.gl_list)
         n.gl_list = self.gl_list
         n.scale = self.scale
         return n
@@ -194,7 +194,7 @@ class Skybox(Cube):
 
     def copy(self):
         n = Skybox(self.texture, self.colorize)
-        glDeleteTextures(n.gl_list)
+        glDeleteLists(n.gl_list)
         n.gl_list = self.gl_list
         n.scale = self.scale
         return n
@@ -236,7 +236,7 @@ class Sphere(object):
 
     def copy(self):
         n = Sphere(self.size, self.pos, self.colorize, self.texture, self.detail)
-        glDeleteTextures(n.gl_list)
+        glDeleteLists(n.gl_list)
         n.gl_list = self.gl_list
         n.scale = self.scale
         return n
@@ -257,7 +257,7 @@ class Skyball(Sphere):
 
     def copy(self):
         n = Skyball(self.texture, self.colorize, self.detail)
-        glDeleteTextures(n.gl_list)
+        glDeleteLists(n.gl_list)
         n.gl_list = self.gl_list
         n.scale = self.scale
         return n
