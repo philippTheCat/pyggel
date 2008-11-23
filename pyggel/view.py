@@ -87,7 +87,7 @@ def init(screen_size=None):
     glFogf(GL_FOG_DENSITY, .35)
     glHint(GL_FOG_HINT, GL_NICEST)
     glFogf(GL_FOG_START, 10.0)
-    glFogf(GL_FOG_END, 50.0)
+    glFogf(GL_FOG_END, 100.0)
     set_fog(True)
     glAlphaFunc(GL_GEQUAL, .5)
     set_background_color()
