@@ -11,7 +11,6 @@ from OpenGL.GLU import *
 
 
 from image import Texture
-blank_texture = Texture(None, dont_load=True)
-image = pygame.Surface((8,8))
+image = pygame.Surface((2,2))
 image.fill((255,255,255,255))
-blank_texture._compile(image)
+blank_texture = Texture(image)

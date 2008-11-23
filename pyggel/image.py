@@ -8,7 +8,7 @@ from include import *
 import view
 
 class Texture(object):
-    def __init__(self, filename, flip=0, dont_load=False):
+    def __init__(self, filename, flip=0):
         self.filename = filename
         self.flip = 0
 
@@ -16,8 +16,10 @@ class Texture(object):
 
         self.gl_tex = glGenTextures(1)
 
-        if not dont_load:
+        if type(filename) is type(""):
             self._load_file()
+        else:
+            self._compile(filename)
 
     def _get_next_biggest(self, x, y):
         nw = 16
@@ -69,14 +71,15 @@ class Texture(object):
 
 class Image(object):
     def __init__(self, filename, pos=(0,0),
-                 rotation=(0,0,0), scale=1,
-                 dont_load=False):
+                 rotation=(0,0,0), scale=1):
         self.filename = filename
 
         self.pos = pos
 
-        if not dont_load:
+        if type(filename) is type(""):
             self._load_file()
+        else:
+            self.compile_from_surface(filename)
 
         self.to_be_blitted = []
         self.rotation = rotation
@@ -98,16 +101,8 @@ class Image(object):
         self.rotation = r
 
     def copy(self, shallow=True):
-        new = Image(self.filename, dont_load=True)
-        new._pimage2 = self._pimage2.copy()
-        new._pimage = new._pimage2.subsurface(0,0,*self.get_size())
+        new = Image(self._pimage)
 
-        new._image_size = self._image_size
-        new._altered_image_size = self._altered_image_size
-
-        new.rect = self.rect
-        new.offset = self.offset
-        new.compile_from_surface(new._pimage2)
         if not shallow:
             new.rotation = list(self.rotation)
             new.pos = self.pos
@@ -115,6 +110,9 @@ class Image(object):
             new.scale = self.scale
             new.colorize = self.colorize
             new.to_be_blitted = list(self.to_be_blitted)
+            new.clear_mem()
+            new.gl_list = self.gl_list
+            new.gl_tex = self.gl_tex
         return new
 
     def _get_next_biggest(self, x, y):
@@ -276,7 +274,7 @@ class Image(object):
             if i[0] == obj:
                 self.to_be_blitted.remove(i)
 
-    def __del__(self):
+    def clear_mem(self):
         try:
             glDeleteTextures([self.gl_tex])
         except:
@@ -286,13 +284,15 @@ class Image(object):
         except:
             pass #already cleared
 
+    def __del__(self):
+        self.clear_mem()
+
 
 class Image3D(Image):
     def __init__(self, filename, pos=(0,0,0),
-                 rotation=(0,0,0), scale=1,
-                 dont_load=False):
+                 rotation=(0,0,0), scale=1):
         Image.__init__(self, filename, pos, rotation,
-                       scale, dont_load)
+                       scale)
 
     def render(self, camera=None):
         h, w = self.get_size()
@@ -323,20 +323,16 @@ class Image3D(Image):
     test_on_screen = blit
 
     def copy(self, shallow=True):
-        n = Image3D(self.filename, dont_load=True)
-        n._image_size = self._image_size
-        n._altered_image_size = self._altered_image_size
-        n._pimage = self._pimage
-        n._pimage2 = self._pimage2
-        n.offset = self.offset
-
-        n.compile_from_surface(n._pimage2)
+        n = Image3D(self._pimage)
         
         if not shallow:
             n.pos = self.pos
             n.rotation = self.rotation
             n.scale = self.scale
             n.colorize = self.colorize
+            n.clear_mem()
+            n.gl_list = self.gl_list
+            n.gl_tex = self.gl_tex
         return n
 
     def _load_file(self):

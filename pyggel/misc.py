@@ -1,8 +1,7 @@
 from include import *
 import image, view
 
-def create_empty_texture(size=(128,128), color=(1,1,1,1)):
-    blank_texture = image.Texture(None, dont_load=True)
+def create_empty_texture(size=(2,2), color=(1,1,1,1)):
     i = pygame.Surface(size)
     if len(color) == 4:
         r, g, b, a = color
@@ -14,8 +13,7 @@ def create_empty_texture(size=(128,128), color=(1,1,1,1)):
     b *= 255
     a *= 255
     i.fill((r,g,b,a))
-    blank_texture._compile(i)
-    return blank_texture
+    return image.Texture(i)
 
 class StaticObjectGroup(object):
     def __init__(self, objects=[]):

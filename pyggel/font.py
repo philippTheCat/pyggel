@@ -25,13 +25,7 @@ class Font(object):
             _all_fonts[self.fontname] = self.pygame_font
 
     def make_text_image(self, text="", color=(255,255,255), antialias=True):
-        ren = self.pygame_font.render(text, antialias, color)
-        i = image.Image(None, dont_load=True)
-        i.compile_from_surface(ren)
-        return i
+        return image.Image(self.pygame_font.render(text, antialias, color))
 
     def make_text_image3D(self, text="", color=(255,255,255), antialias=True):
-        ren = self.pygame_font.render(text, antialias, color)
-        i = image.Image3D(None, dont_load=True)
-        i.compile_from_surface(ren)
-        return i
+        return image.Image3D(self.pygame_font.render(text, antialias, color))

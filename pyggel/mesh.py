@@ -25,7 +25,7 @@ def MTL(filename, path=''):
             contents[mtl] = tex
         elif values[0]=="Kd":
             #create a color texture
-            tex = misc.create_empty_texture((8, 8), map(float, values[1:]))
+            tex = misc.create_empty_texture(color=map(float, values[1:]))
             contents[mtl] = tex
         else:
             pass
