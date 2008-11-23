@@ -31,6 +31,7 @@ def main():
     font = pyggel.font.Font()
     img4 = font.make_text_image("Hello World: 2D", (255, 255, 0))
     img5 = font.make_text_image3D("Hello World: 3D", (0, 255, 255))
+    img5.scale = 2
 
     img.blit(img2, (0, 0))
 
