@@ -1,3 +1,8 @@
+"""
+pyggle.picker
+This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+"""
+
 from include import *
 
 def Pick512Objects(x, y, objs, camera):
