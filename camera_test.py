@@ -23,6 +23,9 @@ def main():
     img4 = font.make_text_image3D("Testy...123...", (0, 255, 0))
     img4.pos = (0, -1, 0)
     img5 = img4.copy()
+
+    del img5
+    img5 = img4.copy()
     img5.colorize = (1, 0, 0, .5)
     img5.pos = (0, .1, 0)
 
