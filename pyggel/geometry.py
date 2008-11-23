@@ -94,9 +94,10 @@ class Cube(object):
         glPushMatrix()
         x, y, z = self.pos
         glTranslatef(x, y, -z)
-        glRotatef(self.rotation[0], 1, 0, 0)
-        glRotatef(self.rotation[1], 0, 1, 0)
-        glRotatef(self.rotation[2], 0, 0, 1)
+        a, b, c = self.rotation
+        glRotatef(a, 1, 0, 0)
+        glRotatef(b, 0, 1, 0)
+        glRotatef(c, 0, 0, 1)
         glScalef(.5*self.size,.5*self.size,.5*self.size)
         try:
             glScalef(*self.scale)
@@ -208,10 +209,11 @@ class Skybox(Cube):
             pass
 
 class Sphere(object):
-    def __init__(self, size, pos=(0,0,0), colorize=(1,1,1,1),
-                 texture=None, detail=30):
+    def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
+                 colorize=(1,1,1,1), texture=None, detail=30):
         self.size = size
         self.pos = pos
+        self.rotation = rotation
         self.colorize = colorize
         if not texture:
             texture = blank_texture
@@ -236,6 +238,10 @@ class Sphere(object):
         glPushMatrix()
         x, y, z = self.pos
         glTranslatef(x, y, -z)
+        a, b, c = self.rotation
+        glRotatef(a, 1, 0, 0)
+        glRotatef(b, 0, 1, 0)
+        glRotatef(c, 0, 0, 1)
         glScalef(self.size, self.size, self.size)
         try:
             glScalef(*self.scale)

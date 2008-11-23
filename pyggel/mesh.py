@@ -132,10 +132,10 @@ class BasicMesh(object):
         glPushMatrix()
         x,y,z = self.pos
         glTranslatef(x,y,-z)
-        rot = self.rotation
-        glRotatef(rot[0], 1, 0, 0)
-        glRotatef(rot[1], 0, 1, 0)
-        glRotatef(rot[2], 0, 0, 1)
+        a, b, c = self.rotation
+        glRotatef(a, 1, 0, 0)
+        glRotatef(b, 0, 1, 0)
+        glRotatef(c, 0, 0, 1)
         try:
             glScalef(*self.scale)
         except:

@@ -221,14 +221,14 @@ class Image(object):
 
         glPushMatrix()
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
-        try:
-            glScalef(self.scale[0], self.scale[1], 1)
-        except:
-            glScalef(self.scale, self.scale, 1)
 
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
+        try:
+            glScalef(self.scale[0], self.scale[1], 1)
+        except:
+            glScalef(self.scale, self.scale, 1)
         glColor(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
@@ -293,15 +293,15 @@ class Image3D(Image):
 
         glPushMatrix()
         glTranslatef(pos[0], pos[1], -pos[2])
-        try:
-            glScalef(self.scale[0], self.scale[1], 1)
-        except:
-            glScalef(self.scale, self.scale, 1)
         if camera:
             camera.set_facing_matrix()
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
+        try:
+            glScalef(self.scale[0], self.scale[1], 1)
+        except:
+            glScalef(self.scale, self.scale, 1)
         glColor(*self.colorize)
         glDisable(GL_LIGHTING)
         glCallList(self.gl_list)
