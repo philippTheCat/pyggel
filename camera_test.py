@@ -33,6 +33,9 @@ def main():
     text2 = text.copy()
     text2.pos = (0,75)
 
+    font2 = pyggel.font.MEFont(None, 32)
+    text3 = font2.make_image("Testing - 1, 2, 3", (0, 1, 0, 1))
+
     box = pyggel.geometry.Cube(5, texture=[image.Texture("data/ar.png")]*6)
     box.pos = (0,0,5)
     box.rotation = list(box.rotation)
@@ -49,6 +52,7 @@ def main():
     mscene.add_3d_always(img4)
     mscene.add_2d(text)
     mscene.add_2d(text2)
+    mscene.add_2d(text3)
 
     skybox = pyggel.geometry.Skybox(image.Texture("data/skybox.png"))
     skyball = pyggel.geometry.Skyball(image.Texture("data/skyball.png"))

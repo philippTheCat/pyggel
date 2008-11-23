@@ -71,7 +71,8 @@ class Texture(object):
 
 class Image(object):
     def __init__(self, filename, pos=(0,0),
-                 rotation=(0,0,0), scale=1):
+                 rotation=(0,0,0), scale=1,
+                 colorize=(1,1,1,1)):
         self.filename = filename
 
         self.pos = pos
@@ -84,21 +85,8 @@ class Image(object):
         self.to_be_blitted = []
         self.rotation = rotation
         self.scale = scale
-        self.colorize = (1,1,1,1)
+        self.colorize = colorize
         self.visible = True
-
-    def rotate(self, amount):
-        a, b, c = self.rotation
-        a += amount[0]
-        b += amount[1]
-        c += amount[2]
-        r=[a,b,c]
-        for i in r:
-            if i < 0:
-                i += 360
-            if i >= 360:
-                i -= 360
-        self.rotation = r
 
     def copy(self, shallow=True):
         new = Image(self._pimage)
@@ -241,7 +229,7 @@ class Image(object):
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
-        glColor4f(*self.colorize)
+        glColor(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
         if self.to_be_blitted:
@@ -293,9 +281,10 @@ class Image(object):
 
 class Image3D(Image):
     def __init__(self, filename, pos=(0,0,0),
-                 rotation=(0,0,0), scale=1):
+                 rotation=(0,0,0), scale=1,
+                 colorize=(1,1,1,1)):
         Image.__init__(self, filename, pos, rotation,
-                       scale)
+                       scale, colorize)
 
     def render(self, camera=None):
         h, w = self.get_size()
@@ -313,7 +302,7 @@ class Image3D(Image):
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
-        glColor4f(*self.colorize)
+        glColor(*self.colorize)
         glDisable(GL_LIGHTING)
         glCallList(self.gl_list)
         if view.screen.lighting:

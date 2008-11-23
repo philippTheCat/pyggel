@@ -102,7 +102,7 @@ class Cube(object):
             glScalef(*self.scale)
         except:
             glScalef(self.scale, self.scale, self.scale)
-        glColor4f(*self.colorize)
+        glColor(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
 
@@ -241,7 +241,7 @@ class Sphere(object):
             glScalef(*self.scale)
         except:
             glScalef(self.scale, self.scale, self.scale)
-        glColor4f(*self.colorize)
+        glColor(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
 
