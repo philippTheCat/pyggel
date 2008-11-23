@@ -87,7 +87,7 @@ def init(screen_size=None):
     glFogf(GL_FOG_DENSITY, .35)
     glHint(GL_FOG_HINT, GL_NICEST)
     glFogf(GL_FOG_START, 10.0)
-    glFogf(GL_FOG_END, 100.0)
+    glFogf(GL_FOG_END, 125.0)
     set_fog(True)
     glAlphaFunc(GL_GEQUAL, .5)
     set_background_color()
@@ -141,6 +141,10 @@ def set_fog(boolean):
 
 def toggle_fog():
     set_fog(not screen.fog)
+
+def set_fog_depth(min=10, max=125):
+    glFogf(GL_FOG_START, min)
+    glFogf(GL_FOG_END, max)
 
 def set_debug(boolean):
     screen.debug = boolean
