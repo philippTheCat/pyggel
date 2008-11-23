@@ -113,7 +113,7 @@ class Image(object):
                 i -= 360
         self.rotation = r
 
-    def copy(self):
+    def copy(self, shallow=True):
         new = Image(self.filename, True)
         new._pimage2 = self._pimage2.copy()
         new._pimage = new._pimage2.subsurface(0,0,*self.get_size())
@@ -121,18 +121,18 @@ class Image(object):
         new._image_size = self._image_size
         new._altered_image_size = self._altered_image_size
 
-        new.to_be_blitted = list(self.to_be_blitted)
-
         new.rect = self.rect
 
-        new._texturize(new._pimage2)
-        new.rotation = list(self.rotation)
-        new.unique = self.unique
-        new.pos = self.pos
-        new.rotation = self.rotation
-        new.scale = self.scale
-        new.colorize = self.colorize
-
+        new.gl_tex = self.gl_tex
+        new.gl_list = self.gl_list
+        if not shallow:
+            new.rotation = list(self.rotation)
+            new.unique = self.unique
+            new.pos = self.pos
+            new.rotation = self.rotation
+            new.scale = self.scale
+            new.colorize = self.colorize
+            new.to_be_blitted = list(self.to_be_blitted)
         return new
 
     def _get_next_biggest(self, x, y):
@@ -389,8 +389,9 @@ class Image3D(Image):
     blit_again = blit
     test_on_screen = blit
 
-    def copy(self):
-        n = Image3D(self.filename, self.pos, self.rotation, self.scale, True)
+    def copy(self, shallow=True):
+##        n = Image3D(self.filename, self.pos, self.rotation, self.scale, True)
+        n = Image3D(self.filename, dont_load=True)
         n._image_size = self._image_size
         n._altered_image_size = self._altered_image_size
         n.gl_list = self.gl_list
@@ -398,6 +399,11 @@ class Image3D(Image):
         n._pimage = self._pimage
         n._pimage2 = self._pimage2
         n.offset = self.offset
+        if not shallow:
+            n.pos = self.pos
+            n.rotation = self.rotation
+            n.scale = self.scale
+            n.colorize = self.colorize
         return n
 
     def _load_file(self):
