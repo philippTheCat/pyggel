@@ -31,7 +31,8 @@ def MTL(filename, path=''):
             pass
     return contents
  
-def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
+def OBJ(filename, swapyz=True, pos=(0,0,0),
+        rotation=(0,0,0), colorize=(1,1,1,1)):
     """Loads a Wavefront OBJ file. """
     svertices = []
     snormals = []
@@ -100,24 +101,24 @@ def OBJ(filename, swapyz=True, pos=(0,0,0), rotation=(0,0,0)):
         for x in i[0]:
             verts.append(svertices[x-1])
 
-    return BasicMesh(gl_list, pos, rotation, verts)
+    return BasicMesh(gl_list, pos, rotation, verts, 1, colorize)
 
 
 class BasicMesh(object):
     def __init__(self, gl_list, pos=(0,0,0),
                  rotation=(0,0,0), verts=[],
-                 size=1, colorize=(1,1,1,1)):
+                 scale=1, colorize=(1,1,1,1)):
         self.gl_list = gl_list
         self.pos = pos
         self.rotation = rotation
         self.verts = verts
-        self.size = size
+        self.scale = scale
         self.colorize = colorize
 
     def copy(self):
         return BasicMesh(self.gl_list, list(self.pos),
                          list(self.rotation), list(self.verts),
-                         self.size, list(self.colorize))
+                         self.scale, list(self.colorize))
 
     def render(self, camera=None):
         glPushMatrix()
@@ -127,7 +128,7 @@ class BasicMesh(object):
         glRotatef(rot[0], 1, 0, 0)
         glRotatef(rot[1], 0, 1, 0)
         glRotatef(rot[2], 0, 0, 1)
-        glScalef(self.size, self.size, self.size)
+        glScalef(self.scale, self.scale, self.scale)
         glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()

@@ -53,6 +53,8 @@ class Cube(object):
                              (3,1),#right
                              (2,2))#bottom
 
+        self.scale = 1
+
         self.gl_list = glGenLists(1)
 
         self._compile()
@@ -101,6 +103,7 @@ class Cube(object):
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
         glScalef(.5*self.size,.5*self.size,.5*self.size)
+        glScalef(self.scale, self.scale, self.scale)
         glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
@@ -109,6 +112,7 @@ class Cube(object):
         n = Cube(self.size, self.pos, self.rotation, self.color, self.texture)
         glDeleteTextures(n.gl_list)
         n.gl_list = self.gl_list
+        n.scale = self.scale
         return n
 
 class Quad(Cube):
@@ -161,6 +165,7 @@ class Quad(Cube):
         n = Quad(self.size, self.pos, self.rotation, self.colorize, self.texture, self.facing)
         glDeleteTextures(n.gl_list)
         n.gl_list = self.gl_list
+        n.scale = self.scale
         return n
 
 class Skybox(Cube):
@@ -189,6 +194,7 @@ class Skybox(Cube):
         n = Skybox(self.texture, self.colorize)
         glDeleteTextures(n.gl_list)
         n.gl_list = self.gl_list
+        n.scale = self.scale
         return n
 
 class Sphere(object):
@@ -201,6 +207,7 @@ class Sphere(object):
             texture = blank_texture
         self.texture = texture
         self.detail = detail
+        self.scale = 1
 
         self.gl_list = glGenLists(1)
 
@@ -219,6 +226,7 @@ class Sphere(object):
         x, y, z = self.pos
         glTranslatef(x, y, -z)
         glScalef(self.size, self.size, self.size)
+        glScalef(self.scale, self.scale, self.scale)
         glColor4f(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()
@@ -227,6 +235,7 @@ class Sphere(object):
         n = Sphere(self.size, self.pos, self.colorize, self.texture, self.detail)
         glDeleteTextures(n.gl_list)
         n.gl_list = self.gl_list
+        n.scale = self.scale
         return n
 
 class Skyball(Sphere):
@@ -247,4 +256,5 @@ class Skyball(Sphere):
         n = Skyball(self.texture, self.colorize, self.detail)
         glDeleteTextures(n.gl_list)
         n.gl_list = self.gl_list
+        n.scale = self.scale
         return n
