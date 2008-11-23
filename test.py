@@ -106,12 +106,15 @@ def main():
             camera.posz += .1
 
         rot += 1
-        img.rotate((0,0,1))
-        img2.rotate((0,0,-1))
+        a,b,c = img.rotation
+        c += 1
+        img.rotation = a,b,c
+
+        a,b,c = img2.rotation
+        c -= 1
+        img2.rotation = a,b,c
 
         img5.visible = not img5.visible
-
-##        star.pos = camera.get_real_pos()
 
         pyggel.view.clear_screen()
 
