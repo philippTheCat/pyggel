@@ -27,6 +27,8 @@ def main():
     img5.pos = (0, .1, 0)
 
     text = font.make_text_image("ARG!!!!", (255, 0, 0))
+    img6 = text.copy()
+    img6.pos = (0, 50)
 
     box = pyggel.geometry.Cube(5, texture=[image.Texture("data/ar.png")]*6)
     box.pos = (0,0,5)
@@ -43,6 +45,7 @@ def main():
     mscene.add_3d_blend(img5)
     mscene.add_3d_always(img4)
     mscene.add_2d(text)
+    mscene.add_2d(img6)
 
     skybox = pyggel.geometry.Skybox(image.Texture("data/skybox.png"))
     skyball = pyggel.geometry.Skyball(image.Texture("data/skyball.png"))

@@ -88,8 +88,6 @@ class Image(object):
 
         self.pos = pos
 
-##        self.gl_tex = glGenTextures(1)
-
         if not dont_load:
             self._load_file()
 
@@ -104,15 +102,16 @@ class Image(object):
         a += amount[0]
         b += amount[1]
         c += amount[2]
+        r=[a,b,c]
         for i in r:
             if i < 0:
                 i += 360
             if i >= 360:
                 i -= 360
-        self.rotation = (a, b, c)
+        self.rotation = r
 
     def copy(self, shallow=True):
-        new = Image(self.filename, True)
+        new = Image(self.filename, dont_load=True)
         new._pimage2 = self._pimage2.copy()
         new._pimage = new._pimage2.subsurface(0,0,*self.get_size())
 
@@ -120,6 +119,7 @@ class Image(object):
         new._altered_image_size = self._altered_image_size
 
         new.rect = self.rect
+        new.offset = self.offset
 
         new.gl_tex = self.gl_tex
         new.gl_list = self.gl_list
@@ -363,7 +363,6 @@ class Image3D(Image):
     test_on_screen = blit
 
     def copy(self, shallow=True):
-##        n = Image3D(self.filename, self.pos, self.rotation, self.scale, True)
         n = Image3D(self.filename, dont_load=True)
         n._image_size = self._image_size
         n._altered_image_size = self._altered_image_size
