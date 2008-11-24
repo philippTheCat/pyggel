@@ -10,7 +10,7 @@ import game
 def main():
     
     os.environ["SDL_VIDEO_CENTERED"] = "1"
-    pyggel.view.init()
+    pyggel.view.init([800, 600])
     g = game.Game()
     g.run()
     pyggel.quit()

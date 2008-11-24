@@ -114,11 +114,12 @@ class Game(object):
         
         self.player = Player(self, self.scene)
         self.overlay = pyggel.image.Image("data/screen.png", pos=[0, 0])
+        self.overlay.scale = 1.5
         self.overlay.colorize = [0, 1, 1, 0.1]
         self.scene.add_2d(self.overlay)
         self.hudmask = pyggel.image.Image("data/hud.png", pos=[0, 0])
-        self.scene.add_2d(self.hudmask)
-        self.targeter = pyggel.image.Image("data/target.png", pos=[320-32, 240-32])
+        #self.scene.add_2d(self.hudmask)
+        self.targeter = pyggel.image.Image("data/target.png", pos=[400-32, 300-32])
         self.scene.add_2d(self.targeter)
         self.font = pyggel.font.MEFont("data/DS-DIGI.ttf", 32)
         self.text1 = self.font.make_text_image("||||||||||            Score: 00925675            Lives x3", (0, 255, 0))
@@ -197,6 +198,23 @@ class Game(object):
             for b in self.baddies:
                 if b.collide(s.pos):
                     s.kill()
+        for b in self.baddies:
+            r = [b.pos[0] - 20, b.pos[1] - 20, 40, 40]
+            line = [b.pos[0], b.pos[1]]
+            home_in = True
+            for i in range(30):
+                line[0] += math.sin(math.radians(b.obj.rotation[2]))*1
+                line[1] += math.cos(math.radians(b.obj.rotation[2]))*1
+                r2 = [self.player.pos[0] - 5, self.player.pos[1] - 5, 10, 10]
+                if collidepoint(self.player.pos, r2):
+                    home_in = True
+                    break
+            if collidepoint(self.player.pos, r) or home_in:
+                x = self.player.pos[0] - b.pos[0]
+                y = self.player.pos[1] - b.pos[1]
+                angle = math.atan2(-y, x)
+                angle = 270.0 - (angle * 180.0)/math.pi
+                b.obj.rotation = (b.obj.rotation[0], b.obj.rotation[1], angle)
 
     def do_draw(self):
         
