@@ -126,7 +126,7 @@ class Game(object):
         self.scene.add_2d(self.targeter)
         self.font = pyggel.font.MEFont("data/DS-DIGI.ttf", 32)
         self.text1 = self.font.make_text_image("||||||||||            Score: 00925675            Lives x3", (0, 255, 0))
-        self.text1.pos = (10, 10)
+        self.text1.pos = (50, 10)
         self.scene.add_2d(self.text1)
         
         #self.sky = pyggel.geometry.Skyball(texture=pyggel.image.Texture("data/ceiling.png")) #
@@ -205,12 +205,17 @@ class Game(object):
         for b in self.baddies:
             r = [b.pos[0] - 20, b.pos[1] - 20, 40, 40]
             line = [b.pos[0], b.pos[1]]
-            home_in = True
-            for i in xrange(30):
+            home_in = False
+            collidables = []
+            wr = [b.pos[0] - 15, b.pos[1] - 15, 30, 30]
+            for w in self.walls:
+                if collidepoint(w.pos, wr):
+                    collidables.append(w)
+            for i in xrange(10):
                 line[0] += math.sin(math.radians(b.obj.rotation[2]))*1
                 line[1] += math.cos(math.radians(b.obj.rotation[2]))*1
                 r2 = [self.player.pos[0] - 5, self.player.pos[1] - 5, 10, 10]
-                if collidepoint(self.player.pos, r2):
+                if collidepoint(line, r2):
                     home_in = True
                     break
             if collidepoint(self.player.pos, r) or home_in:
@@ -219,6 +224,9 @@ class Game(object):
                 angle = math.atan2(-y, x)
                 angle = 270.0 - (angle * 180.0)/math.pi
                 b.obj.rotation = (b.obj.rotation[0], b.obj.rotation[1], angle)
+            for w in collidables:
+                r = [w.pos[0]-3.0, w.pos[1]-3.0, 6.0, 6.0]
+                b.wall_collide(r)
 
     def do_draw(self):
         

@@ -84,8 +84,8 @@ class Player(Object):
     def update_gun_pos(self):
         offsetx = math.sin(math.radians(self.angle+90))*0.25
         offsetz = math.cos(math.radians(self.angle+90))*0.25
-        offsetx2 = math.sin(math.radians(self.angle))*1.1
-        offsetz2 = math.cos(math.radians(self.angle))*1.1
+        offsetx2 = math.sin(math.radians(self.angle))*1.3
+        offsetz2 = math.cos(math.radians(self.angle))*1.3
         self.gun.pos = [self.pos[0]+offsetx+offsetx2, -0.2, self.pos[1]+offsetz+offsetz2]
         self.gun.rotation[2] = self.angle
         
@@ -185,6 +185,7 @@ class RoboBaddie(Object):
         self.scene.add_3d(self.obj)
         self.pos = list(pos)
         self.obj.pos = [self.pos[0], -0.2, self.pos[1]]
+        self.old_pos = list(self.pos)
         self.hp = 5
         self.hit_timer = 0
         self.obj.colorize = [0.3, 0.4, 0.5, 1]
@@ -197,6 +198,7 @@ class RoboBaddie(Object):
             self.obj.colorize = [0.3, 0.4, 0.5, 1]
         self.obj.pos = [self.pos[0], -0.2, self.pos[1]]
         self.obj.rotation = (270, 0, self.obj.rotation[2]+3)
+        self.old_pos = list(self.pos)
         self.pos[0] += math.sin(math.radians(-self.obj.rotation[2]))*0.1
         self.pos[1] += math.cos(math.radians(-self.obj.rotation[2]))*0.1
     
@@ -221,6 +223,15 @@ class RoboBaddie(Object):
                 self.kill()
                 self.game.player.score += 15
             return 1
+
+    def wall_collide(self, rect):
+        #Collide n' slide.
+        if collidepoint(self.pos, rect):
+            #print [self.pos[0] - self.old_pos[0], self.pos[1] - self.old_pos[1]]
+            if self.old_pos[0] >= rect[0]+rect[2] or self.old_pos[0] <= rect[0]:
+                self.pos[0] = self.old_pos[0]
+            if self.old_pos[1] >= rect[1]+rect[3] or self.old_pos[1] <= rect[1]:
+                self.pos[1] = self.old_pos[1]
 
 class Explosion(Object):
     
