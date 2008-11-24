@@ -21,6 +21,8 @@ class _Screen(object):
 
         self.debug = True
 
+        self.have_init = False
+
         self.clips = [(0,0,self.screen_size[0],self.screen_size[1])]
         glScissor(*self.clips[0])
 
@@ -93,6 +95,8 @@ def init(screen_size=None):
     set_background_color()
 
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
+
+    screen.have_init = True
 
 def set_background_color(col=(0,0,0)):
     glClearColor(*col+(0,))
@@ -190,3 +194,7 @@ def clear_screen(scene=None):
     else:
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT)
     glEnable(GL_SCISSOR_TEST)
+
+def require_init():
+    if not screen.have_init:
+        raise TypeError, "pyggel.init must be called before this action can occur"

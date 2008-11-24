@@ -34,6 +34,7 @@ def MTL(filename, path=''):
 def OBJ(filename, swapyz=True, pos=(0,0,0),
         rotation=(0,0,0), colorize=(1,1,1,1)):
     """Loads a Wavefront OBJ file. """
+    view.require_init()
     svertices = []
     snormals = []
     stexcoords = []
@@ -125,6 +126,7 @@ class BasicMesh(object):
                  rotation=(0,0,0), verts=[],
                  scale=1, colorize=(1,1,1,1),
                  materials=None):
+        view.require_init()
         self.gl_list = gl_list
         self.pos = pos
         self.rotation = rotation

@@ -4,10 +4,11 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 """
 
 from include import *
-import image
+import image, view
 
 class Font(object):
     def __init__(self, filename=None, fsize=32):
+        view.require_init()
         self.filename = filename
         self.fsize = fsize
         self.fontname = str(self.filename) + ":" + str(self.fsize)
@@ -85,6 +86,7 @@ class MEFontImage(object):
 class MEFont(object):
     """Only works for 2d images!!!!!!!"""
     def __init__(self, filename=None, fsize=32):
+        view.require_init()
         self.filename = filename
         self.fsize = fsize
 

@@ -9,6 +9,7 @@ import image, view
 class Cube(object):
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
                  colorize=(1,1,1,1), texture=None):
+        view.require_init()
         self.size = size
         self.pos = pos
         self.rotation = rotation
@@ -211,6 +212,7 @@ class Skybox(Cube):
 class Sphere(object):
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
                  colorize=(1,1,1,1), texture=None, detail=30):
+        view.require_init()
         self.size = size
         self.pos = pos
         self.rotation = rotation

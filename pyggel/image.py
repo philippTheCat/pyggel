@@ -73,6 +73,7 @@ class Image(object):
     def __init__(self, filename, pos=(0,0),
                  rotation=(0,0,0), scale=1,
                  colorize=(1,1,1,1)):
+        view.require_init()
         self.filename = filename
 
         self.pos = pos
