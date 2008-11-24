@@ -13,8 +13,7 @@ for i in xrange(8):
 class Light(object):
     def __init__(self, pos=(0,0,0), ambient=(0,0,0,0),
                  diffuse=(1,1,1,1), specular=(1,1,1,1),
-                 spot_direction=(0,0,0), directional=True,
-                 bind_to_camera=False):
+                 spot_direction=(0,0,0), directional=True):
         self.pos = pos
         self.directional = directional
         self.ambient = ambient
@@ -25,7 +24,6 @@ class Light(object):
             self.gl_light = all_lights.pop()
         except:
             self.gl_light = None
-        self.bind_to_camera = bind_to_camera
 
     def shine(self):
         if not self.gl_light == None:
@@ -40,9 +38,3 @@ class Light(object):
     def hide(self):
         if self.gl_light:
             glDisable(self.gl_light)
-
-    def position_to_camera(self, cam):
-        x, y, z = cam.get_pos()
-        if hasattr(cam, "distance"):
-            z -= cam.distance
-        self.pos = x, y, z

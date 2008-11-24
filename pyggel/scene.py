@@ -52,17 +52,12 @@ class Scene(object):
     def render(self, camera):
         self.rObj.camera = camera
         view.set3d()
-        for i in self.graph.lights:
-            if i.bind_to_camera:
-                i.position_to_camera(camera)
-                i.shine()
         if self.graph.skybox:
             self.graph.skybox.render(camera)
         if self.render3d:
             camera.push()
             for i in self.graph.lights:
-                if not i.bind_to_camera:
-                    i.shine()
+                i.shine()
             glEnable(GL_ALPHA_TEST)
             map(self.rObj.render, self.graph.render_3d)
             glDisable(GL_ALPHA_TEST)

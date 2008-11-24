@@ -7,12 +7,9 @@ def main():
     pyggel.view.init()
     pyggel.view.set_debug(False)
 
-##    my_light = pyggel.light.Light((0,100,0), (0.5,0.5,0.5,1),
-##                                  (1,1,1,1), (50,50,50,10),
-##                                  (0,0,0), True)
-    my_light = pyggel.light.Light((0,0,-2), (0.5,0.5,0.5,1),
+    my_light = pyggel.light.Light((0,100,0), (0.5,0.5,0.5,1),
                                   (1,1,1,1), (50,50,50,10),
-                                  (0,0,0), True, True)
+                                  (0,0,0), True)
 
     camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
 ##    camera = pyggel.camera.LookFromCamera((0,0,10))
