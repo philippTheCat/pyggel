@@ -221,15 +221,15 @@ class Image(object):
         pos = self.pos
 
         glPushMatrix()
+        try:
+            glScalef(self.scale[0], self.scale[1], 1)
+        except:
+            glScalef(self.scale, self.scale, 1)
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
 
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
-        try:
-            glScalef(self.scale[0], self.scale[1], 1)
-        except:
-            glScalef(self.scale, self.scale, 1)
         glColor(*self.colorize)
         glCallList(self.gl_list)
         glPopMatrix()

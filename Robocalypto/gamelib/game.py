@@ -118,7 +118,10 @@ class Game(object):
         self.overlay.colorize = [0, 1, 1, 0.1]
         self.scene.add_2d(self.overlay)
         self.hudmask = pyggel.image.Image("data/hud.png", pos=[0, 0])
-        #self.scene.add_2d(self.hudmask)
+        ix, iy = self.hudmask.get_size()
+        sx, sy = pyggel.view.screen.screen_size
+        self.hudmask.scale = (1.0*sx/ix, 1.0*sy/iy)
+        self.scene.add_2d(self.hudmask)
         self.targeter = pyggel.image.Image("data/target.png", pos=[400-32, 300-32])
         self.scene.add_2d(self.targeter)
         self.font = pyggel.font.MEFont("data/DS-DIGI.ttf", 32)
