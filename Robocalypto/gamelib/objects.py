@@ -141,7 +141,8 @@ class Shot(Object):
         Object.__init__(self, self.groups)
         self.scene = scene
         self.obj = pyggel.mesh.OBJ("data/bullet.obj", pos=pos, rotation=[0, angle + 90, 0])
-        self.obj.scale = [10, 1, 1]
+        self.obj.scale = [5, 0.75, 0.75]
+        self.obj.colorize = [1, 1, 0.4, 1]
         self.scene.add_3d(self.obj)
         self.pos = [pos[0], pos[2]]
         self.angle = angle
