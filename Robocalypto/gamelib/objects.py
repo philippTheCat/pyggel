@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 
 import math, random
+
 import pyggel
 
 def colliderect(a, b):
