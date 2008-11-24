@@ -144,13 +144,17 @@ class Player(Object):
                 self.pos[1] = self.old_pos[1]
 
 class Shot(Object):
+    main_obj = None
     
     def __init__(self, game, scene, pos, angle):
         Object.__init__(self, game, self.groups)
         self.scene = scene
-        self.obj = pyggel.mesh.OBJ("data/bullet.obj", pos=pos, rotation=[0, angle + 90, 0])
+        if not self.main_obj:
+            self.main_obj = pyggel.mesh.OBJ("data/bullet.obj", pos=pos, rotation=[0, angle + 90, 0])
+        self.obj = self.main_obj.copy()
+        self.obj.pos = pos
+        self.obj.rotation = [0, angle+90, 0]
         self.obj.scale = [5, 0.75, 0.75]
-        self.obj.colorize = [1, 1, 0.4, 1]
         self.scene.add_3d(self.obj)
         self.pos = [pos[0], pos[2]]
         self.angle = angle

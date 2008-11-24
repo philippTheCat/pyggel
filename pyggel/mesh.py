@@ -106,8 +106,19 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
         for x in i[0]:
             verts.append(svertices[x-1])
 
-    return BasicMesh(gl_list, pos, rotation, verts, 1, colorize, smtl)
+    return BasicMesh(GL_LIST(gl_list), pos, rotation, verts, 1, colorize, smtl)
 
+
+class GL_LIST(object):
+    """So we don't lose the list between copies/kills"""
+    def __init__(self, l):
+        self.gl_list = l
+
+    def __del__(self):
+        try:
+            glDeleteLists(self.gl_list, 1)
+        except:
+            pass #already cleared!
 
 class BasicMesh(object):
     def __init__(self, gl_list, pos=(0,0,0),
@@ -126,7 +137,8 @@ class BasicMesh(object):
     def copy(self):
         return BasicMesh(self.gl_list, list(self.pos),
                          list(self.rotation), list(self.verts),
-                         self.scale, list(self.colorize))
+                         self.scale, list(self.colorize),
+                         self.materials)
 
     def render(self, camera=None):
         glPushMatrix()
@@ -141,11 +153,5 @@ class BasicMesh(object):
         except:
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
-        glCallList(self.gl_list)
+        glCallList(self.gl_list.gl_list)
         glPopMatrix()
-
-    def __del__(self):
-        try:
-            glDeleteLists(self.gl_list, 1)
-        except:
-            pass #already cleared!
