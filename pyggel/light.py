@@ -37,6 +37,10 @@ class Light(object):
             glLightfv(gl_light, GL_SPOT_DIRECTION, self.spot_direction+(0,))
             glEnable(gl_light)
 
+    def hide(self):
+        if self.gl_light:
+            glDisable(self.gl_light)
+
     def position_to_camera(self, cam):
         x, y, z = cam.get_pos()
         if hasattr(cam, "distance"):

@@ -76,6 +76,8 @@ def main():
                             img.clear_blits()
                         else:
                             img.blit(img2, (0, 0))
+            if event.type == KEYDOWN and event.key == K_SPACE:
+                pyggel.misc.save_screenshot("Test.png")
 
         key = pygame.key.get_pressed()
         if key[K_LEFT]:
