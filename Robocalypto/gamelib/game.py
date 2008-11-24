@@ -37,7 +37,7 @@ GRID = [
 [1,1,1,1,1,1,1,1,1,1,1]]
 
 #Level parsing function parsing levels
-def level_parse(scene):
+def level_parse(game, scene):
     
     #Static objects. Woo woo, built for speeeeeeed
     static = []
@@ -59,11 +59,11 @@ def level_parse(scene):
                 box = pyggel.geometry.Cube(4.55, texture=[image.Texture("data/%s" % random.choice(["wall.png", "door.png", "wall.png", "wall.png"]))]*6)
                 box.pos=(x*5,0,y*5)
                 static.append(box)
-                walls.append(Wall([box.pos[0], box.pos[2]]))
+                walls.append(Wall(game, [box.pos[0], box.pos[2]]))
             
             #Robo Baddies. OoOoOoOoOo...
             if column == 2:
-                RoboBaddie(scene, [x*5, y*5])
+                RoboBaddie(game, scene, [x*5, y*5])
         
         #Positioning
             x += 1
@@ -112,13 +112,13 @@ class Game(object):
         Wall.groups = [self.objects, self.walls]
         GunFlash.groups = [self.objects]
         
-        self.player = Player(self.scene)
+        self.player = Player(self, self.scene)
         self.overlay = pyggel.image.Image("data/screen.png", pos=[0, 0])
         self.overlay.colorize = [0, 1, 1, 0.1]
         self.scene.add_2d(self.overlay)
         self.targeter = pyggel.image.Image("data/target.png", pos=[320-32, 240-32])
         self.scene.add_2d(self.targeter)
-        self.font = pyggel.font.Font("data/DS-DIGI.ttf", 32)
+        self.font = pyggel.font.MEFont("data/DS-DIGI.ttf", 32)
         self.text1 = self.font.make_text_image("||||||||||            Score: 00925675            Lives x3", (0, 255, 0))
         self.text1.pos = (10, 10)
         self.scene.add_2d(self.text1)
@@ -127,7 +127,7 @@ class Game(object):
         #self.scene.add_skybox(self.sky)
         
         #parse ze level
-        static, self.walls._objects = level_parse(self.scene)
+        static, self.walls._objects = level_parse(self, self.scene)
         self.scene.add_3d(pyggel.misc.StaticObjectGroup(static))
         
         #Used for bobbing up and down. No I will not be less vague.
@@ -161,6 +161,9 @@ class Game(object):
                     pygame.event.set_grab(self.grabbed)
 
     def do_update(self):
+
+        s = "AMMO: %s"%self.player.ammo + " "*10 + "Score: %s"%self.player.score + " "*10 + "Lives: %s"%self.player.lives
+        self.text1.text = s
         
         #Loop the frame at 360.
         self.frame += 1
@@ -168,7 +171,7 @@ class Game(object):
             self.frame = 0
         
         #Cap the FPS so the FPS runs smoothly. DOUBLE MEANING! Bwahaha!
-        self.clock.tick(60)
+        self.clock.tick(999)
         print self.clock.get_fps()
         
         self.update_camera_pos()
@@ -208,6 +211,8 @@ class Game(object):
             self.do_input()
             self.do_update()
             self.do_draw()
+
+        pygame.event.set_grab(False)
 
     def run(self):
         self.main_loop()

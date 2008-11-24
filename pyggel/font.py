@@ -100,5 +100,5 @@ class MEFont(object):
 
         self.glyphs = L
 
-    def make_image(self, text="", color=(1,1,1,1)):
+    def make_text_image(self, text="", color=(1,1,1,1)):
         return MEFontImage(self, text, color)

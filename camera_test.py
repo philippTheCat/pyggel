@@ -34,7 +34,7 @@ def main():
     text2.pos = (0,75)
 
     font2 = pyggel.font.MEFont(None, 32)
-    text3 = font2.make_image("Testing - 1, 2, 3", (0, 1, 0, 1))
+    text3 = font2.make_text_image("Testing - 1, 2, 3", (0, 1, 0, 1))
 
     box = pyggel.geometry.Cube(5, texture=[image.Texture("data/ar.png")]*6)
     box.pos = (0,0,5)

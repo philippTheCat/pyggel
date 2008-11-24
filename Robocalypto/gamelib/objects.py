@@ -35,11 +35,13 @@ class Group(object):
 
 class Object(object):
     
-    def __init__(self, groups):
+    def __init__(self, game, groups):
         self.grid_color = [0, 0, 0]
         for g in groups:
             g.add(self)
         self._groups = groups
+
+        self.game = game
         
     def kill(self):
         for g in self._groups:
@@ -56,8 +58,8 @@ class Object(object):
 
 class Player(Object):
     
-    def __init__(self, scene):
-        Object.__init__(self, self.groups)
+    def __init__(self, game, scene):
+        Object.__init__(self, game, self.groups)
         self.scene = scene
         self.pos = [10, 15]
         self.old_pos = list(self.pos)
@@ -74,6 +76,10 @@ class Player(Object):
         self.update_gun_pos()
         self.gun.old_y = self.gun.pos[1]
         self.frame = 0
+
+        self.lives = 3
+        self.ammo = 100
+        self.score = 0
         
     def update_gun_pos(self):
         offsetx = math.sin(math.radians(self.angle+90))*0.25
@@ -111,14 +117,16 @@ class Player(Object):
             if self.rel_timer <= 0:
               
                 #Initial shot position
-                shotpos = [self.gun.pos[0], -0.3, self.gun.pos[2]]
-                shotpos[0] += math.sin(math.radians(self.angle+90))*.06
-                shotpos[2] += math.cos(math.radians(self.angle+90))*.06
-                shotpos[0] += math.sin(math.radians(self.angle))*0.75
-                shotpos[2] += math.cos(math.radians(self.angle))*0.75
-                Shot(self.scene, shotpos, -self.angle)
-                self.rel_timer = 8
-                GunFlash(self.scene, shotpos)
+                if self.ammo:
+                    shotpos = [self.gun.pos[0], -0.3, self.gun.pos[2]]
+                    shotpos[0] += math.sin(math.radians(self.angle+90))*.06
+                    shotpos[2] += math.cos(math.radians(self.angle+90))*.06
+                    shotpos[0] += math.sin(math.radians(self.angle))*0.75
+                    shotpos[2] += math.cos(math.radians(self.angle))*0.75
+                    Shot(self.game, self.scene, shotpos, -self.angle)
+                    self.rel_timer = 8
+                    GunFlash(self.game, self.scene, shotpos)
+                    self.ammo -= 1
         
         if self.rel_timer > 5:
             self.gun.pos[1] = self.gun.old_y + 0.025
@@ -137,8 +145,8 @@ class Player(Object):
 
 class Shot(Object):
     
-    def __init__(self, scene, pos, angle):
-        Object.__init__(self, self.groups)
+    def __init__(self, game, scene, pos, angle):
+        Object.__init__(self, game, self.groups)
         self.scene = scene
         self.obj = pyggel.mesh.OBJ("data/bullet.obj", pos=pos, rotation=[0, angle + 90, 0])
         self.obj.scale = [5, 0.75, 0.75]
@@ -165,8 +173,8 @@ class Shot(Object):
 
 class RoboBaddie(Object):
     
-    def __init__(self, scene, pos):
-        Object.__init__(self, self.groups)
+    def __init__(self, game, scene, pos):
+        Object.__init__(self, game, self.groups)
         self.scene = scene
         self.obj = pyggel.mesh.OBJ("data/robo.obj", pos=pos, rotation=[270, 0, 0], colorize=[0.3, 0.4, 0.5, 1])
         self.obj.scale = 2.0
@@ -197,21 +205,23 @@ class RoboBaddie(Object):
                 pos[0] += random.choice([-0.5, -0.4, -0.3, -0.2, -0.1])*random.choice([1, -1])
                 pos[1] += random.choice([-0.3, -0.2, -0.1])*random.choice([1, -1])
                 pos[2] += random.choice([-0.5, -0.4, -0.3, -0.2, -0.1])*random.choice([1, -1])
-                Explosion(self.scene, pos)
+                Explosion(self.game, self.scene, pos)
     
     def collide(self, point):
         r = [self.pos[0] - 1.5, self.pos[1] - 1.5, 3.0, 3.0]
         if collidepoint(point, r) and self.hit_timer <= 0:
             self.hit_timer = 4
             self.hp -= 1
+            self.game.player.score += 1
             if self.hp <= 0:
                 self.kill()
+                self.game.player.score += 15
             return 1
 
 class Explosion(Object):
     
-    def __init__(self, scene, pos):
-        Object.__init__(self, self.groups)
+    def __init__(self, game, scene, pos):
+        Object.__init__(self, game, self.groups)
         self.scene = scene
         self.obj = pyggel.image.Image3D("data/explosion.png", pos=pos)
         self.scene.add_3d_blend(self.obj)
@@ -236,8 +246,8 @@ class Explosion(Object):
 
 class GunFlash(Object):
     
-    def __init__(self, scene, pos):
-        Object.__init__(self, self.groups)
+    def __init__(self, game, scene, pos):
+        Object.__init__(self, game, self.groups)
         self.scene = scene
         self.obj = pyggel.image.Image3D("data/flash.png", pos=pos)
         self.scene.add_3d_blend(self.obj)
@@ -260,6 +270,6 @@ class GunFlash(Object):
 
 class Wall(Object):
     
-    def __init__(self, pos):
-        Object.__init__(self, self.groups)
+    def __init__(self, game, pos):
+        Object.__init__(self, game, self.groups)
         self.pos = pos

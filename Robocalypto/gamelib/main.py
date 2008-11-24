@@ -13,7 +13,7 @@ def main():
     pyggel.view.init()
     g = game.Game()
     g.run()
-    pygame.quit()
+    pyggel.quit()
 
 if __name__ == "__main__":
     main()
