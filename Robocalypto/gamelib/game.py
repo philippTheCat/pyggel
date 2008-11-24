@@ -190,7 +190,7 @@ class Game(object):
                 area = [s.pos[0]-10, s.pos[1]-10, 20, 20]
                 if collidepoint(w.pos, area):
                     collidables.append(w)
-            for i in range(5):
+            for i in xrange(5):
                 s.move()
                 for w in collidables:
                     r = [w.pos[0]-3.0, w.pos[1]-3.0, 6.0, 6.0]
@@ -202,7 +202,7 @@ class Game(object):
             r = [b.pos[0] - 20, b.pos[1] - 20, 40, 40]
             line = [b.pos[0], b.pos[1]]
             home_in = True
-            for i in range(30):
+            for i in xrange(30):
                 line[0] += math.sin(math.radians(b.obj.rotation[2]))*1
                 line[1] += math.cos(math.radians(b.obj.rotation[2]))*1
                 r2 = [self.player.pos[0] - 5, self.player.pos[1] - 5, 10, 10]
