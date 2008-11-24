@@ -81,7 +81,7 @@ class Game(object):
         #Disable fog. We ain't in a blasted harbor, RB[0]!
         #pyggel.view.set_fog(False)
         pyggel.view.set_fog_color((0, .6, .5, .5))
-        pyggel.view.set_fog_depth(5, 150)
+        pyggel.view.set_fog_depth(1, 60)
         
         #Create a First Person camera
         self.camera = pyggel.camera.LookFromCamera((0,0,-10))
@@ -167,9 +167,6 @@ class Game(object):
                     pygame.event.set_grab(self.grabbed)
 
     def do_update(self):
-
-        s = "AMMO: %s"%self.player.ammo + " "*10 + "Score: %s"%self.player.score + " "*10 + "Lives: %s"%self.player.lives
-        self.text1.text = s
         
         #Loop the frame at 360.
         self.frame += 1
@@ -178,7 +175,11 @@ class Game(object):
         
         #Cap the FPS so the FPS runs smoothly. DOUBLE MEANING! Bwahaha!
         self.clock.tick(999)
-        print self.clock.get_fps()
+##        print self.clock.get_fps()
+
+        s = "AMMO: %s"%self.player.ammo + " "*10 + "Score: %s"%self.player.score + " "*10 +\
+            "Lives: %s"%self.player.lives + " "*10 + "FPS: %s"%int(self.clock.get_fps())
+        self.text1.text = s
         
         self.update_camera_pos()
         self.player.update_gun_pos()
