@@ -4,7 +4,7 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 """
 
 from include import *
-import image, view
+import image, view, data
 
 class Cube(object):
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
@@ -49,15 +49,15 @@ class Cube(object):
 
         self.scale = 1
 
-        self.gl_list = glGenLists(1)
+        self.display_list = data.DisplayList()
 
         self.visible = True
 
         self._compile()
 
     def _compile(self):
-        glNewList(self.gl_list, GL_COMPILE)
-        if isinstance(self.texture, image.Texture):
+        self.display_list.begin()
+        if isinstance(self.texture, data.Texture):
             self.texture.bind()
             reg_type = 0
         else:
@@ -89,7 +89,7 @@ class Cube(object):
                 glVertex3f(a,b,c)
                 ix += 1
             glEnd()
-        glEndList()
+        self.display_list.end()
 
     def render(self, camera=None):
         glPushMatrix()
@@ -105,19 +105,14 @@ class Cube(object):
         except:
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
-        glCallList(self.gl_list)
+        self.display_list.render()
         glPopMatrix()
 
     def copy(self):
         n = Cube(self.size, self.pos, self.rotation, self.color, self.texture)
+        n.display_list = self.display_list
         n.scale = self.scale
         return n
-
-    def __del__(self):
-        try:
-            glDeleteLists(self.gl_list, 1)
-        except:
-            pass
 
 class Quad(Cube):
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
@@ -138,7 +133,7 @@ class Quad(Cube):
         Cube.__init__(self, size, pos, rotation, colorize, texture)
 
     def _compile(self):
-        glNewList(self.gl_list, GL_COMPILE)
+        self.display_list.begin()
         self.texture.bind()
 
         ox = .25
@@ -163,18 +158,13 @@ class Quad(Cube):
             glVertex3f(a,b,c)
             ix += 1
         glEnd()
-        glEndList()
+        self.display_list.end()
 
     def copy(self):
         n = Quad(self.size, self.pos, self.rotation, self.colorize, self.texture, self.facing)
         n.scale = self.scale
+        n.display_list = self.display_list
         return n
-
-    def __del__(self):
-        try:
-            glDeleteLists(self.gl_list, 1)
-        except:
-            pass
 
 class Skybox(Cube):
     def __init__(self, texture, colorize=(1,1,1,1)):
@@ -201,13 +191,8 @@ class Skybox(Cube):
     def copy(self):
         n = Skybox(self.texture, self.colorize)
         n.scale = self.scale
+        n.display_list = self.display_list
         return n
-
-    def __del__(self):
-        try:
-            glDeleteLists(self.gl_list, 1)
-        except:
-            pass
 
 class Sphere(object):
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
@@ -223,18 +208,18 @@ class Sphere(object):
         self.detail = detail
         self.scale = 1
 
-        self.gl_list = glGenLists(1)
+        self.display_list = data.DisplayList()
         self.visible = True
 
         self._compile()
 
     def _compile(self):
-        glNewList(self.gl_list, GL_COMPILE)
+        self.display_list.begin()
         self.texture.bind()
         Sphere = gluNewQuadric()
         gluQuadricTexture(Sphere, GLU_TRUE)
         gluSphere(Sphere, 1, self.detail, self.detail)
-        glEndList()
+        self.display_list.end()
 
     def render(self, camera=None):
         glPushMatrix()
@@ -250,19 +235,14 @@ class Sphere(object):
         except:
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
-        glCallList(self.gl_list)
+        self.display_list.render()
         glPopMatrix()
 
     def copy(self):
         n = Sphere(self.size, self.pos, self.colorize, self.texture, self.detail)
         n.scale = self.scale
+        n.display_list = self.display_list
         return n
-
-    def __del__(self):
-        try:
-            glDeleteLists(self.gl_list, 1)
-        except:
-            pass
 
 class Skyball(Sphere):
     def __init__(self, texture=None, colorize=(1,1,1,1), detail=30):
@@ -281,10 +261,5 @@ class Skyball(Sphere):
     def copy(self):
         n = Skyball(self.texture, self.colorize, self.detail)
         n.scale = self.scale
+        n.display_list = self.display_list
         return n
-
-    def __del__(self):
-        try:
-            glDeleteLists(self.gl_list, 1)
-        except:
-            pass

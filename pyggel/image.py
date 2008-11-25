@@ -5,83 +5,22 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 
 from include import *
 
-import view
-
-class Texture(object):
-    def __init__(self, filename, flip=0):
-        self.filename = filename
-        self.flip = 0
-
-        self.size = (0,0)
-
-        self.gl_tex = glGenTextures(1)
-
-        if type(filename) is type(""):
-            self._load_file()
-        else:
-            self._compile(filename)
-
-    def _get_next_biggest(self, x, y):
-        nw = 16
-        nh = 16
-        while nw < x:
-            nw *= 2
-        while nh < y:
-            nh *= 2
-        return nw, nh
-
-    def _load_file(self):
-        image = pygame.image.load(self.filename)
-
-        self._compile(image)
-
-    def _compile(self, image):
-        size = self._get_next_biggest(*image.get_size())
-
-        image = pygame.transform.scale(image, size)
-
-        tdata = pygame.image.tostring(image, "RGBA", self.flip)
-        
-        glBindTexture(GL_TEXTURE_2D, self.gl_tex)
-
-        xx, xy = size
-        self.size = size
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, tdata)
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
-
-    def bind(self):
-        glBindTexture(GL_TEXTURE_2D, self.gl_tex)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
-
-    def __del__(self):
-        try:
-            glDeleteTextures([self.gl_tex])
-        except:
-            pass #already cleared...
+import view, data
 
 class Image(object):
     def __init__(self, filename, pos=(0,0),
                  rotation=(0,0,0), scale=1,
-                 colorize=(1,1,1,1)):
+                 colorize=(1,1,1,1), dont_load=False):
         view.require_init()
         self.filename = filename
 
         self.pos = pos
 
-        if type(filename) is type(""):
-            self._load_file()
-        else:
-            self.compile_from_surface(filename)
+        if not dont_load:
+            if type(filename) is type(""):
+                self._load_file()
+            else:
+                self.compile_from_surface(filename)
 
         self.to_be_blitted = []
         self.rotation = rotation
@@ -89,19 +28,18 @@ class Image(object):
         self.colorize = colorize
         self.visible = True
 
-    def copy(self, shallow=True):
-        new = Image(self._pimage)
-
-        if not shallow:
-            new.rotation = list(self.rotation)
-            new.pos = self.pos
-            new.rotation = self.rotation
-            new.scale = self.scale
-            new.colorize = self.colorize
-            new.to_be_blitted = list(self.to_be_blitted)
-            new.clear_mem()
-            new.gl_list = self.gl_list
-            new.gl_tex = self.gl_tex
+    def copy(self):
+        new = Image(self.filename, self.pos, self.rotation, self.scale,
+                    self.colorize, True)
+        new._pimage = self._pimage
+        new._pimage2 = self._pimage2
+        new._image_size = self._image_size
+        new._altered_image_size = self._altered_image_size
+        new.rect = new._pimage.get_rect()
+        new.to_be_blitted = list(self.to_be_blitted)
+        new.display_list = self.display_list
+        new.texture = self.texture
+        new.offset = self.offset
         return new
 
     def _get_next_biggest(self, x, y):
@@ -158,27 +96,15 @@ class Image(object):
         self._compile()
 
     def _texturize(self, image):
-        self.gl_tex = glGenTextures(1)
-        tdata = pygame.image.tostring(image, "RGBA", 0)
-        
-        glBindTexture(GL_TEXTURE_2D, self.gl_tex)
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-
-        xx, xy = self._altered_image_size
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, tdata)
+        self.texture = data.Texture(image)
 
     def _compile(self):
         self.offset = self.get_width()/2, self.get_height()/2
         self.rect.center = self.offset[0] + self.pos[0], self.offset[1] + self.pos[1]
-        self.gl_list = glGenLists(1)
-        glNewList(self.gl_list, GL_COMPILE)
 
-        glEnable(GL_TEXTURE_2D)
-
-        glBindTexture(GL_TEXTURE_2D, self.gl_tex)
+        self.display_list = data.DisplayList()
+        self.display_list.begin()
+        self.texture.bind()
         off = self.offset
         l = -off[0]
         r = off[0]
@@ -202,7 +128,7 @@ class Image(object):
         glVertex3f(l, b, 0)
         glEnd()
 
-        glEndList()
+        self.display_list.end()
 
     def blit(self, other, pos):
         self.remove_blit(other)
@@ -221,17 +147,19 @@ class Image(object):
         pos = self.pos
 
         glPushMatrix()
-        try:
-            glScalef(self.scale[0], self.scale[1], 1)
-        except:
-            glScalef(self.scale, self.scale, 1)
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
 
         glRotatef(self.rotation[0], 1, 0, 0)
         glRotatef(self.rotation[1], 0, 1, 0)
         glRotatef(self.rotation[2], 0, 0, 1)
+
+        try:
+            glScalef(self.scale[0], self.scale[1], 1)
+        except:
+            glScalef(self.scale, self.scale, 1)
+
         glColor(*self.colorize)
-        glCallList(self.gl_list)
+        self.display_list.render()
         glPopMatrix()
         if self.to_be_blitted:
             view.screen.push_clip((pos[0], view.screen.screen_size[1]-pos[1]-h,w,h))
@@ -266,26 +194,13 @@ class Image(object):
             if i[0] == obj:
                 self.to_be_blitted.remove(i)
 
-    def clear_mem(self):
-        try:
-            glDeleteTextures([self.gl_tex])
-        except:
-            pass #already cleared
-        try:
-            glDeleteLists(self.gl_list, 1)
-        except:
-            pass #already cleared
-
-    def __del__(self):
-        self.clear_mem()
-
 
 class Image3D(Image):
     def __init__(self, filename, pos=(0,0,0),
                  rotation=(0,0,0), scale=1,
-                 colorize=(1,1,1,1)):
+                 colorize=(1,1,1,1), dont_load=False):
         Image.__init__(self, filename, pos, rotation,
-                       scale, colorize)
+                       scale, colorize, dont_load)
 
     def render(self, camera=None):
         h, w = self.get_size()
@@ -305,7 +220,7 @@ class Image3D(Image):
             glScalef(self.scale, self.scale, 1)
         glColor(*self.colorize)
         glDisable(GL_LIGHTING)
-        glCallList(self.gl_list)
+        self.display_list.render()
         if view.screen.lighting:
             glEnable(GL_LIGHTING)
         glPopMatrix()
@@ -318,18 +233,18 @@ class Image3D(Image):
     blit_again = blit
     test_on_screen = blit
 
-    def copy(self, shallow=True):
-        n = Image3D(self._pimage)
-        
-        if not shallow:
-            n.pos = self.pos
-            n.rotation = self.rotation
-            n.scale = self.scale
-            n.colorize = self.colorize
-            n.clear_mem()
-            n.gl_list = self.gl_list
-            n.gl_tex = self.gl_tex
-        return n
+    def copy(self):
+        new = Image3D(self.filename, self.pos, self.rotation, self.scale,
+                      self.colorize, True)
+        new._pimage = self._pimage
+        new._pimage2 = self._pimage2
+        new._image_size = self._image_size
+        new._altered_image_size = self._altered_image_size
+        new.rect = new._pimage.get_rect()
+        new.display_list = self.display_list
+        new.texture = self.texture
+        new.offset = self.offset
+        return new
 
     def _load_file(self):
         self._pimage = pygame.image.load(self.filename)
@@ -371,10 +286,10 @@ class Image3D(Image):
 
     def _compile(self):
         self.offset = self.get_width()/2, self.get_height()/2
-        self.gl_list = glGenLists(1)
-        glNewList(self.gl_list, GL_COMPILE)
 
-        glBindTexture(GL_TEXTURE_2D, self.gl_tex)
+        self.display_list = data.DisplayList()
+        self.display_list.begin()
+        self.texture.bind()
 
         w = self.get_width()*1.0/self._altered_image_size[0]
         h = self.get_height()*1.0/self._altered_image_size[1]
@@ -404,4 +319,4 @@ class Image3D(Image):
         glVertex3f(-uw, uh, 0)
         glEnd()
 
-        glEndList()
+        self.display_list.end()

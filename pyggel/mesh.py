@@ -5,7 +5,7 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 
 from include import *
 import os
-import image, view, misc
+import image, view, misc, data
 
 def MTL(filename, path=''):
     contents = {}
@@ -80,8 +80,8 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
             sfaces.append((face, norms, texcoords, material))
         
 
-    gl_list = glGenLists(1)
-    glNewList(gl_list, GL_COMPILE)
+    gl_list = data.DisplayList()
+    gl_list.begin()
     for face in sfaces:
         vertices, normals, texture_coords, material = face
         if smtl:
@@ -100,34 +100,22 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
                 glTexCoord2fv(stexcoords[texture_coords[i] - 1])
             glVertex3fv(svertices[vertices[i] - 1])
         glEnd()
-    glEndList()
+    gl_list.end()
 
     verts = []
     for i in sfaces:
         for x in i[0]:
             verts.append(svertices[x-1])
 
-    return BasicMesh(GL_LIST(gl_list), pos, rotation, verts, 1, colorize, smtl)
-
-
-class GL_LIST(object):
-    """So we don't lose the list between copies/kills"""
-    def __init__(self, l):
-        self.gl_list = l
-
-    def __del__(self):
-        try:
-            glDeleteLists(self.gl_list, 1)
-        except:
-            pass #already cleared!
+    return BasicMesh(gl_list, pos, rotation, verts, 1, colorize, smtl)
 
 class BasicMesh(object):
-    def __init__(self, gl_list, pos=(0,0,0),
+    def __init__(self, display_list, pos=(0,0,0),
                  rotation=(0,0,0), verts=[],
                  scale=1, colorize=(1,1,1,1),
                  materials=None):
         view.require_init()
-        self.gl_list = gl_list
+        self.display_list = display_list
         self.pos = pos
         self.rotation = rotation
         self.verts = verts
@@ -137,7 +125,7 @@ class BasicMesh(object):
         self.materials = materials #this is necessary so the textures aren't deleted when they no longer have references to them!
 
     def copy(self):
-        return BasicMesh(self.gl_list, list(self.pos),
+        return BasicMesh(self.display_list, list(self.pos),
                          list(self.rotation), list(self.verts),
                          self.scale, list(self.colorize),
                          self.materials)
@@ -155,5 +143,5 @@ class BasicMesh(object):
         except:
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
-        glCallList(self.gl_list.gl_list)
+        self.display_list.render()
         glPopMatrix()
