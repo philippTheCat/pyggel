@@ -59,11 +59,18 @@ class _Screen(object):
 
 screen = _Screen()
 
-def init(screen_size=None):
+def init(screen_size=None, use_psyco=True):
     if screen_size:
         screen.set_size(screen_size)
     else:
         screen_size = screen.screen_size
+
+    if use_psyco:
+        try:
+            import psyco
+            psyco.background()
+        except:
+            pass
 
     pygame.init()
     build_screen()
