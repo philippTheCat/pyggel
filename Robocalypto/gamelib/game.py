@@ -178,8 +178,8 @@ class Game(object):
         self.clock.tick(999)
 ##        print self.clock.get_fps()
 
-        s = "AMMO: %s"%self.player.ammo + " "*10 + "Score: %s"%self.player.score + " "*10 +\
-            "Lives: %s"%self.player.lives + " "*10 + "FPS: %s"%int(self.clock.get_fps())
+        s = "AMMO: %s\nScore: %s\nLives: %s\nFPS: %s"%(self.player.ammo, self.player.score,
+                                                       self.player.lives, int(self.clock.get_fps()))
         self.text1.text = s
         
         self.update_camera_pos()

@@ -14,13 +14,13 @@ def main():
     camera2 = pyggel.camera.LookAtCamera((0,0,5), distance=10)
     camera = camera1
     font = pyggel.font.Font(None, 32)
-    img = font.make_text_image3D("Hello World: 3D", (255, 255, 0))
+    img = font.make_text_image3D("Hello\nWorld: 3D", (1, 1, 0, 1))
     img.scale = 5
-    img2 = font.make_text_image3D("Hello World: 3D X2!!!", (0, 255, 255))
+    img2 = font.make_text_image3D("Hello World: 3D X2!!!", (0, 1, 1, 1))
     img2.pos = (0, .7, 0)
     img3 = img2.copy()
     img3.pos = (0, 0, 0)
-    img4 = font.make_text_image3D("Testy...123...", (0, 255, 0))
+    img4 = font.make_text_image3D("Testy...123...", (0, 1, 0, 1))
     img4.pos = (0, -1, 0)
     img5 = img4.copy()
 
@@ -29,12 +29,12 @@ def main():
     img5.colorize = (1, 0, 0, .5)
     img5.pos = (0, .1, 0)
 
-    text = font.make_text_image("ARG!!!!", (255, 0, 0))
+    text = font.make_text_image("ARG!!!!", (1, 0, 0, 1))
     text2 = text.copy()
     text2.pos = (0,75)
 
     font2 = pyggel.font.MEFont(None, 32)
-    text3 = font2.make_text_image("Testing - 1, 2, 3", (0, 1, 0, 1))
+    text3 = font2.make_text_image("Testing -\n1, 2, 3", (0, 0, 1, 1))
 
     box = pyggel.geometry.Cube(5, texture=[image.Texture("data/ar.png")]*6)
     box.pos = (0,0,5)
