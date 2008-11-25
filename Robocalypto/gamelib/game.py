@@ -63,7 +63,7 @@ def level_parse(game, scene):
             
             #Robo Baddies. OoOoOoOoOo...
             if column == 2:
-                RoboBaddie(game, scene, [x*5, y*5])
+                RoboBaddie(game, [x*5, y*5])
         
         #Positioning
             x += 1
@@ -106,13 +106,14 @@ class Game(object):
         self.baddies = Group()
         self.walls = Group()
         Player.groups = [self.objects]
+        Gun.groups = [self.objects]
         Shot.groups = [self.objects, self.shots]
         RoboBaddie.groups = [self.objects, self.baddies]
         Explosion.groups = [self.objects]
         Wall.groups = [self.objects, self.walls]
         GunFlash.groups = [self.objects]
         
-        self.player = Player(self, self.scene)
+        self.player = Player(self)
         self.overlay = pyggel.image.Image("data/screen.png", pos=[0, 0])
         self.overlay.scale = 1.5
         self.overlay.colorize = [0, 1, 1, 0.1]
@@ -141,8 +142,8 @@ class Game(object):
     
     def update_camera_pos(self):
         amt = pygame.mouse.get_rel()
-        self.player.angle += amt[0]/8.0
-        self.camera.roty = self.player.angle
+        self.player.rotation += amt[0]/8.0
+        self.camera.roty = self.player.rotation
         self.camera.posz = self.player.pos[1]
         self.camera.posx = self.player.pos[0]
     
@@ -182,7 +183,6 @@ class Game(object):
         self.text1.text = s
         
         self.update_camera_pos()
-        self.player.update_gun_pos()
         for o in self.objects:
             o.update()
         for w in self.walls:
@@ -195,7 +195,7 @@ class Game(object):
                 if collidepoint(w.pos, area):
                     collidables.append(w)
             for i in xrange(5):
-                s.move()
+                s.move_increment()
                 for w in collidables:
                     r = [w.pos[0]-3.0, w.pos[1]-3.0, 6.0, 6.0]
                     s.collide(r)

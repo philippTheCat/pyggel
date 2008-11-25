@@ -35,13 +35,11 @@ class Group(object):
 
 class Object(object):
     
-    def __init__(self, game, groups):
+    def __init__(self, groups):
         self.grid_color = [0, 0, 0]
         for g in groups:
             g.add(self)
         self._groups = groups
-
-        self.game = game
         
     def kill(self):
         for g in self._groups:
@@ -56,40 +54,64 @@ class Object(object):
     def alive(self):
         return self in self._groups[0] #HACK -- need to check to see if its in all groups efficiently
 
-class Player(Object):
+class GameObject(Object):
     
-    def __init__(self, game, scene):
-        Object.__init__(self, game, self.groups)
-        self.scene = scene
-        self.pos = [10, 15]
+    def __init__(self, game, obj=None, pos=[0, 0], rotation=0, height=0, color=[1, 1, 1, 1]):
+        Object.__init__(self, self.groups)
+        self.game = game
+        self.scene = self.game.scene
+        self.pos = [pos[0], pos[1]]
+        self.rotation = rotation
+        self.obj = obj
+        self.height = height
+        self.update_obj()
+    
+    def update_obj(self):
+        if self.obj:
+            self.obj.pos = (self.pos[0], self.height, self.pos[1])
+            self.obj.rotation = (self.obj.rotation[0], self.rotation, self.obj.rotation[2])
+    
+    def move(self, amount, rotation):
+        po=0.0174532925
+        self.pos[0] -= math.sin(rotation[1]*po)*amount
+        self.height += math.sin(rotation[0]*po)*amount
+        self.pos[1] += math.cos(rotation[1]*po)*amount
+        self.update_obj()
+    
+    def position(self, x, y, h=None):
+        self.pos[0] = x
+        self.pos[1] = y
+        if h:
+            self.height = h
+    
+    def rotate(self, dx, dy, dz):
+        self.obj.rotation = (self.obj.rotation[0]+dx, self.obj.rotation[1]+dy, self.obj.rotation[2]+dz)
+        self.rotation = self.obj.rotation[1]
+    
+    def rotate_to(self, x, y, z):
+        self.obj.rotation = (x, y, z)
+        self.rotation = self.obj.rotation[1]
+    
+    def update(self):
+        self.update_obj()
+
+class Player(GameObject):
+    
+    def __init__(self, game):
+        GameObject.__init__(self, game, obj=None, pos=[10, 15], rotation=0, height=0)
         self.old_pos = list(self.pos)
-        self.angle = 0
         self.speed = 0.3
         self.rel_timer = 0
         
-        self.gun = pyggel.mesh.OBJ("data/gun.obj", colorize=[0.2, 0.2, 0.2, 1])
-        self.gun.scale = 0.65
-        self.gun.rotation = list(self.gun.rotation)
-        self.gun.pos = list(self.gun.pos)
-        self.gun.rotation[0] = 90
-        self.scene.add_3d(self.gun)
-        self.update_gun_pos()
-        self.gun.old_y = self.gun.pos[1]
+        self.gun = Gun(self.game, self)
         self.frame = 0
 
         self.lives = 3
         self.ammo = 100
         self.score = 0
         
-    def update_gun_pos(self):
-        offsetx = math.sin(math.radians(self.angle+90))*0.25
-        offsetz = math.cos(math.radians(self.angle+90))*0.25
-        offsetx2 = math.sin(math.radians(self.angle))*1.3
-        offsetz2 = math.cos(math.radians(self.angle))*1.3
-        self.gun.pos = [self.pos[0]+offsetx+offsetx2, -0.2, self.pos[1]+offsetz+offsetz2]
-        self.gun.rotation[2] = self.angle
-        
     def update(self):
+        self.gun.update_pos()
         self.frame += 1
         if self.frame > 360:
             self.frame = 0
@@ -98,19 +120,18 @@ class Player(Object):
         
         key = pygame.key.get_pressed()
         if key[K_w]:
-            self.pos[0] += math.sin(math.radians(self.angle))*self.speed
-            self.pos[1] += math.cos(math.radians(self.angle))*self.speed
+            self.move(self.speed, (0, -self.rotation))
         if key[K_s]:
-            self.pos[0] += math.sin(math.radians(self.angle))*-self.speed
-            self.pos[1] += math.cos(math.radians(self.angle))*-self.speed
+            self.move(-self.speed, (0, -self.rotation))
         if key[K_a]:
-            self.pos[0] += math.sin(math.radians(self.angle+90))*-self.speed
-            self.pos[1] += math.cos(math.radians(self.angle+90))*-self.speed
+            self.move(-self.speed, (0, -self.rotation-90))
         if key[K_d]:
-            self.pos[0] += math.sin(math.radians(self.angle+90))*self.speed
-            self.pos[1] += math.cos(math.radians(self.angle+90))*self.speed
+            self.move(self.speed, (0, -self.rotation-90))
         if key[K_w] or key[K_s] or key[K_a] or key[K_d]:
-            self.gun.pos[1] += math.sin(math.radians(self.frame)*8)/75
+            self.gun.height = math.sin(math.radians(self.frame)*8)/75 + self.gun.old_y
+            self.gun.update_obj()
+        else:
+            self.gun.height = self.gun.old_y
         
         mb = pygame.mouse.get_pressed()
         if mb[0]:
@@ -118,20 +139,20 @@ class Player(Object):
               
                 #Initial shot position
                 if self.ammo:
-                    shotpos = [self.gun.pos[0], -0.3, self.gun.pos[2]]
-                    shotpos[0] += math.sin(math.radians(self.angle+90))*.06
-                    shotpos[2] += math.cos(math.radians(self.angle+90))*.06
-                    shotpos[0] += math.sin(math.radians(self.angle))*0.75
-                    shotpos[2] += math.cos(math.radians(self.angle))*0.75
-                    Shot(self.game, self.scene, shotpos, -self.angle)
+                    shotpos = [self.gun.pos[0], self.gun.height-0.1, self.gun.pos[1]]
+                    shotpos[0] += math.sin(math.radians(self.rotation+90))*.06
+                    shotpos[2] += math.cos(math.radians(self.rotation+90))*.06
+                    shotpos[0] += math.sin(math.radians(self.rotation))*0.75
+                    shotpos[2] += math.cos(math.radians(self.rotation))*0.75
+                    Shot(self.game, [shotpos[0], shotpos[2]], -self.rotation, shotpos[1])
                     self.rel_timer = 8
-                    GunFlash(self.game, self.scene, shotpos)
+                    GunFlash(self.game, shotpos)
                     self.ammo -= 1
         
         if self.rel_timer > 5:
-            self.gun.pos[1] = self.gun.old_y + 0.025
+            self.gun.height = self.gun.old_y + 0.025
         elif self.rel_timer == 5:
-            self.gun.pos[1] = self.gun.old_y
+            self.gun.height = self.gun.old_y
             self.frame = 0
     
     def collide(self, rect):
@@ -143,52 +164,67 @@ class Player(Object):
             if self.old_pos[1] >= rect[1]+rect[3] or self.old_pos[1] <= rect[1]:
                 self.pos[1] = self.old_pos[1]
 
-class Shot(Object):
+class Gun(GameObject):
+    
+    def __init__(self, game, player):
+        height = -0.15
+        GameObject.__init__(self, game, obj=pyggel.mesh.OBJ("data/gun.obj", colorize=[0.2, 0.2, 0.2, 1]), 
+                            pos=[10, 15], rotation=0, height=height)
+        self.player = player
+        self.obj.scale = 0.65
+        self.rotate_to(90, 0, 0)
+        self.scene.add_3d(self.obj)
+        self.update_pos()
+        self.old_y = height
+    
+    def update_pos(self):
+        self.rotate_to(90, 0, self.player.rotation)
+        self.update_obj()
+        self.pos = list(self.player.pos)
+        self.move(0.25, (0, -self.player.rotation-90))
+        self.move(1.3, (0, -self.player.rotation))
+        self.update_obj()
+
+class Shot(GameObject):
     main_obj = None
     
-    def __init__(self, game, scene, pos, angle):
-        Object.__init__(self, game, self.groups)
-        self.scene = scene
+    def __init__(self, game, pos, angle, height):
         if not self.main_obj:
-            self.main_obj = pyggel.mesh.OBJ("data/bullet.obj", pos=pos, rotation=[0, angle + 90, 0])
-        self.obj = self.main_obj.copy()
-        self.obj.pos = pos
-        self.obj.rotation = [0, angle+90, 0]
+            self.main_obj = pyggel.mesh.OBJ("data/bullet.obj")
+        obj = self.main_obj.copy()
+        GameObject.__init__(self, game, obj=obj, pos=pos, rotation=angle+90, height=height)
         self.obj.scale = [5, 0.75, 0.75]
         self.scene.add_3d(self.obj)
-        self.pos = [pos[0], pos[2]]
-        self.angle = angle
         self.speed = 3.0
-        self.h = pos[1]
         
     def kill(self):
         if self.alive():
-            Object.kill(self)
+            GameObject.kill(self)
             self.scene.remove_3d(self.obj)
         
-    def move(self):
-        self.obj.pos = (self.pos[0], self.h, self.pos[1])
-        self.pos[0] += math.cos(math.radians(self.angle+90))*(self.speed/5)
-        self.pos[1] += math.sin(math.radians(self.angle+90))*(self.speed/5)
+    def move_increment(self):
+        self.move(self.speed/5, (0, self.rotation-90))
 
     def collide(self, rect):
         if collidepoint(self.pos, rect):
             self.kill()
 
-class RoboBaddie(Object):
+class RoboBaddie(GameObject):
     
-    def __init__(self, game, scene, pos):
-        Object.__init__(self, game, self.groups)
-        self.scene = scene
-        self.obj = pyggel.mesh.OBJ("data/robo.obj", pos=pos, rotation=[270, 0, 0], colorize=[0.3, 0.4, 0.5, 1])
+    main_obj = None
+    
+    def __init__(self, game, pos):
+        if not self.main_obj:
+            self.main_obj = pyggel.mesh.OBJ("data/robo.obj", pos=pos, rotation=[270, 0, 0], colorize=[0.3, 0.4, 0.5, 1])
+        obj = self.main_obj.copy()
+        GameObject.__init__(self, game, obj=obj, pos=pos, rotation=0, height=-0.2)
         self.obj.scale = 2.0
         self.scene.add_3d(self.obj)
-        self.pos = list(pos)
-        self.obj.pos = [self.pos[0], -0.2, self.pos[1]]
         self.old_pos = list(self.pos)
         self.hp = 5
         self.hit_timer = 0
         self.obj.colorize = [0.3, 0.4, 0.5, 1]
+        self.home_in = False
         
     def update(self):
         self.hit_timer -= 1
@@ -196,22 +232,20 @@ class RoboBaddie(Object):
             self.obj.colorize = [1, 0, 0, 1]
         else:
             self.obj.colorize = [0.3, 0.4, 0.5, 1]
-        self.obj.pos = [self.pos[0], -0.2, self.pos[1]]
-        self.obj.rotation = (270, 0, self.obj.rotation[2]+3)
+        self.rotate_to(270, 0, self.obj.rotation[2]+3)
         self.old_pos = list(self.pos)
-        self.pos[0] += math.sin(math.radians(-self.obj.rotation[2]))*0.1
-        self.pos[1] += math.cos(math.radians(-self.obj.rotation[2]))*0.1
+        self.move(0.1, (0, self.obj.rotation[2]))
     
     def kill(self):
         if self.alive():
-            Object.kill(self)
+            GameObject.kill(self)
             self.scene.remove_3d(self.obj)
             for i in range(3):
                 pos = list(self.obj.pos)
                 pos[0] += random.choice([-0.5, -0.4, -0.3, -0.2, -0.1])*random.choice([1, -1])
                 pos[1] += random.choice([-0.3, -0.2, -0.1])*random.choice([1, -1])
                 pos[2] += random.choice([-0.5, -0.4, -0.3, -0.2, -0.1])*random.choice([1, -1])
-                Explosion(self.game, self.scene, pos)
+                Explosion(self.game, [pos[0], pos[2]], pos[1])
     
     def collide(self, point):
         r = [self.pos[0] - 1.5, self.pos[1] - 1.5, 3.0, 3.0]
@@ -233,15 +267,11 @@ class RoboBaddie(Object):
             if self.old_pos[1] >= rect[1]+rect[3] or self.old_pos[1] <= rect[1]:
                 self.pos[1] = self.old_pos[1]
 
-class Explosion(Object):
+class Explosion(GameObject):
     
-    def __init__(self, game, scene, pos):
-        Object.__init__(self, game, self.groups)
-        self.scene = scene
-        self.obj = pyggel.image.Image3D("data/explosion.png", pos=pos)
+    def __init__(self, game, pos, height):
+        GameObject.__init__(self, game, pyggel.image.Image3D("data/explosion.png"), pos=pos, height=height)
         self.scene.add_3d_blend(self.obj)
-        self.pos = list(pos)
-        self.d = 1
         self.alpha = 1.0
         self.obj.scale = 0.25
        
@@ -251,22 +281,19 @@ class Explosion(Object):
             self.scene.remove_3d_blend(self.obj)
         
     def update(self):
-        self.obj.pos = list(self.pos)
         self.obj.scale += 0.1
-        self.obj.rotation = [self.obj.rotation[0], self.obj.rotation[1], self.obj.rotation[2]+2]
+        self.rotate(0, 0, 2)
         self.alpha -= 0.04
         if self.alpha < 0:
             self.kill()
         self.obj.colorize = (1.0, 1.0, 1.0, self.alpha)
 
-class GunFlash(Object):
+class GunFlash(GameObject):
     
-    def __init__(self, game, scene, pos):
-        Object.__init__(self, game, self.groups)
-        self.scene = scene
+    def __init__(self, game, pos):
+        GameObject.__init__(self, game, pos=[pos[0], pos[2]], height=pos[1])
         self.obj = pyggel.image.Image3D("data/flash.png", pos=pos)
         self.scene.add_3d_blend(self.obj)
-        self.pos = list(pos)
         self.alpha = 1.0
         self.obj.scale = 0.1
        
@@ -276,7 +303,6 @@ class GunFlash(Object):
             self.scene.remove_3d_blend(self.obj)
         
     def update(self):
-        self.obj.pos = list(self.pos)
         self.obj.scale += 0.05
         self.alpha -= 0.1
         if self.alpha < 0:
@@ -286,5 +312,5 @@ class GunFlash(Object):
 class Wall(Object):
     
     def __init__(self, game, pos):
-        Object.__init__(self, game, self.groups)
+        Object.__init__(self, self.groups)
         self.pos = pos
