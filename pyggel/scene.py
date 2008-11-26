@@ -48,20 +48,24 @@ class Scene(object):
             for i in self.graph.lights:
                 i.shine()
             glEnable(GL_ALPHA_TEST)
-            for i in self.graph.render_3d: i.render(camera)
+            for i in self.graph.render_3d:
+                if i.visible: i.render(camera)
             glDisable(GL_ALPHA_TEST)
             glDepthMask(GL_FALSE)
-            for i in self.graph.render_3d_blend: i.render(camera)
+            for i in self.graph.render_3d_blend:
+                if i.visible: i.render(camera)
             glDepthMask(GL_TRUE)
             glDisable(GL_DEPTH_TEST)
-            for i in self.graph.render_3d_always: i.render(camera)
+            for i in self.graph.render_3d_always:
+                if i.visible: i.render(camera)
             glEnable(GL_DEPTH_TEST)
             camera.pop()
 
         if self.render2d:
             view.set2d()
             glDisable(GL_LIGHTING)
-            for i in self.graph.render_2d: i.render()
+            for i in self.graph.render_2d:
+                if i.visible: i.render()
             if view.screen.lighting:
                 glEnable(GL_LIGHTING)
 

@@ -7,6 +7,7 @@ from include import *
 
 import mesh, view, image, camera, math3d, light
 import scene, font, geometry, misc, picker, data
+import particle
 
 def quit():
     view.clear_screen()
