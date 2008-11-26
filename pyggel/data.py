@@ -5,6 +5,7 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 
 from include import *
 import view
+import numpy
 
 class Texture(object):
     def __init__(self, filename, flip=0):
@@ -90,3 +91,42 @@ class DisplayList(object):
             glDeleteLists(self.gl_list, 1)
         except:
             pass #already cleared!
+
+class VertexArray(object):
+    def __init__(self):
+        self.texture = blank_texture
+
+        self.verts = []
+        self.colors = []
+        self.texcs = []
+        self.Nquads = 0
+
+        self._compiled = []
+
+    def render(self):
+        self.texture.bind()
+
+        glEnableClientState(GL_VERTEX_ARRAY)
+        glEnableClientState(GL_COLOR_ARRAY)
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+
+        if self._compiled:
+            v, c, t = self._compiled
+            glVertexPointer(3, GL_FLOAT, 0, v)
+            glColorPointer(4, GL_FLOAT, 0, c)
+            glTexCoordPointer(2, GL_FLOAT, 0, t)
+        else:
+            glVertexPointer(3, GL_FLOAT, 0, self.verts)
+            glColorPointer(4, GL_FLOAT, 0, self.colors)
+            glTexCoordPointer(2, GL_FLOAT, 0, self.texcs)
+
+        glDrawArrays(GL_QUADS, 0, len(self.verts))
+
+        glDisableClientState(GL_VERTEX_ARRAY)
+        glDisableClientState(GL_COLOR_ARRAY)
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY)
+
+    def compile(self):
+        self._compiled = [numpy.array(self.verts),
+                          numpy.array(self.colors),
+                          numpy.array(self.texcs)]
