@@ -42,7 +42,7 @@ def main():
     sphere = pyggel.geometry.Sphere(5, texture=image.Texture("data/ar.png"))
     sphere.pos = (10, 0, 5)
 
-    emitter = particle.Emitter3D(particle.Fire, (0, 0, -2))
+    emitter = particle.Emitter3D(particle.Fire3D, (0, 0, -2))
     emitter.behavior.image = image.Image3D("data/fire1.png")
     emitter.behavior.image.scale = .5
 

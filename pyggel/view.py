@@ -90,6 +90,8 @@ def init(screen_size=None, use_psyco=True):
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_BLEND)
 
+    glPointSize(10)
+
     clear_screen()
     set_fog_color((.5,.5,.5,.5))
     glFogi(GL_FOG_MODE, GL_LINEAR)

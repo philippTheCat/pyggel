@@ -93,40 +93,36 @@ class DisplayList(object):
             pass #already cleared!
 
 class VertexArray(object):
-    def __init__(self):
-        self.texture = blank_texture
+    def __init__(self, render_type=None, max_size=[]):
+        if render_type is None:
+            render_type = GL_QUADS
+        self.render_type = render_type
+        self.texture = None
 
-        self.verts = []
-        self.colors = []
-        self.texcs = []
-        self.Nquads = 0
+        self.max_size = max_size
 
-        self._compiled = []
+        self.verts = numpy.empty((max_size, 3), dtype=object)
+        self.colors = numpy.empty((max_size, 4), dtype=object)
+        self.texcs = numpy.empty((max_size, 2), dtype=object)
+        self.Nobjs = 0
 
     def render(self):
-        self.texture.bind()
+        if self.texture:
+            self.texture.bind()
 
         glEnableClientState(GL_VERTEX_ARRAY)
         glEnableClientState(GL_COLOR_ARRAY)
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+        if self.texture:
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY)
 
-        if self._compiled:
-            v, c, t = self._compiled
-            glVertexPointer(3, GL_FLOAT, 0, v)
-            glColorPointer(4, GL_FLOAT, 0, c)
-            glTexCoordPointer(2, GL_FLOAT, 0, t)
-        else:
-            glVertexPointer(3, GL_FLOAT, 0, self.verts)
-            glColorPointer(4, GL_FLOAT, 0, self.colors)
+        glVertexPointer(3, GL_FLOAT, 0, self.verts)
+        glColorPointer(4, GL_FLOAT, 0, self.colors)
+        if self.texture:
             glTexCoordPointer(2, GL_FLOAT, 0, self.texcs)
 
-        glDrawArrays(GL_QUADS, 0, len(self.verts))
+        glDrawArrays(self.render_type, 0, self.Nobjs)
 
         glDisableClientState(GL_VERTEX_ARRAY)
         glDisableClientState(GL_COLOR_ARRAY)
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY)
-
-    def compile(self):
-        self._compiled = [numpy.array(self.verts),
-                          numpy.array(self.colors),
-                          numpy.array(self.texcs)]
+        if self.texture:
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY)
