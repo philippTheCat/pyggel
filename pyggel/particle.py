@@ -142,10 +142,10 @@ class ParticlePoint(object):
         self.parent.remove_particle(self)
 
     def update(self):
-        print self
         self.behavior.particle_update(self)
         x, y, z = self.pos
         r, g, b, a = self.colorize
+
         self.parent.vertex_array.verts[self.index][0] = x
         self.parent.vertex_array.verts[self.index][1] = y
         self.parent.vertex_array.verts[self.index][2] = z
@@ -230,16 +230,19 @@ class FirePoint(BehaviorPoint):
         dy = randfloat(.15, .3)
         dz = randfloat(-.1, .1)
 
-        rot = random.randint(-25, 25)
-
         part.extra_data["dir"] = (dx, dy, dz)
+        part.colorize = (1, .5, 0, 1)
+
+        x, y, z = self.emitter.pos
+
+        part.pos = x + dx, y, z + dz
 
     def particle_update(self, part):
         BehaviorPoint.particle_update(self, part)
 
         r, g, b, a = part.colorize
-        g += 11
-        a -= .025
+        g += .02
+        a -= 1.0/20
         part.colorize = r, g, b, a
 
         x, y, z = part.pos
@@ -249,6 +252,6 @@ class FirePoint(BehaviorPoint):
         y += b
         z += c
 
-        b -= .025
+        b -= .01
         part.extra_data["dir"] = a, b, c
         part.pos = x, y, z

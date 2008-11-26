@@ -46,6 +46,8 @@ def main():
     emitter.behavior.image = image.Image3D("data/fire1.png")
     emitter.behavior.image.scale = .5
 
+    emitter2 = particle.EmitterPoint(particle.FirePoint, (2, 0, -2))
+
     mscene = pyggel.scene.Scene()
     mscene.add_3d(img)
     mscene.add_3d(img2)
@@ -58,6 +60,7 @@ def main():
     mscene.add_2d(text2)
     mscene.add_2d(text3)
     mscene.add_3d_blend(emitter)
+    mscene.add_3d(emitter2)
 
     skybox = pyggel.geometry.Skybox(image.Texture("data/skybox.png"))
     skyball = pyggel.geometry.Skyball(image.Texture("data/skyball.png"))
