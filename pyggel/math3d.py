@@ -17,6 +17,7 @@ def get_distance(a, b):
     return Vector(a).distance(Vector(b))
 
 class Vector(object):
+    ctype = "Vector"
     def __init__(self, pos):
         self.x, self.y, self.z = pos
 
@@ -162,49 +163,93 @@ class Vector(object):
                       self.z * other.x - self.x * other.z,
                       self.x * other.y - self.y * other.x))
 
-class Projection(object):
-    def __init__(self, min, max):
-        self.min = min
-        self.max = max
-
-    def intersects(self, other):
-        return self.max > other.min and other.max > self.min
-
-class Polygon(object):
-    def __init__(self, points):
-        if isinstance(points[0], Vector):
-            self.points = points
+    def collide(self, other):
+        if other.ctype == "Vector":
+            return self == other
         else:
-            self.points = []
-            for i in points:
-                self.points.append(Vector(i))
+            return other.collide(self)
 
-        self.edges = []
-        L = len(self.points)
-        for i in xrange(L):
-            p = self.points[i]
-            next = self.points[(i+1)%L]
-            self.edges.append(next - p)
+class Sphere(Vector):
+    ctype = "Sphere"
+    def __init__(self, pos, radius):
+        Vector.__init__(self, pos)
+        self.radius = radius
 
-    def project_to_axis(self, axis):
-        projected_points = []
-        for point in self.points:
-            projected_points.append(point.dot(axis))
-        return Projection(min(projected_points), max(projected_points))
+    def collide(self, other):
+        if other.ctype == "Vector":
+            return other.fast_distance(self) <= self.radius ** 2 #this so we avoid the sqrt call ;)
+        elif other.ctype == "Sphere":
+            return other.fast_distance(self) <= (self.radius + other.radius) ** 2
+        else:
+            return other.collide(self)
 
-    def collidepoly(self, other):
+class AABox(Vector):
+    ctype = "AABox"
+    def __init__(self, pos, size):
+        Vector.__init__(self, pos)
+
         try:
-            edges = self.edges + other.edges
-
-            for e in edges:
-                axis = e.normalize().perpendicular()
-
-                self_ = self.project_to_axis(axis)
-                other = other.project_to_axis(axis)
-
-                if not self_.intersects(other):
-                    return False
-            return True
+            self.width, self.height, self.depth = size
         except:
-            return True
-            
+            self.width = self.height = self.depth = size
+
+    def collide(self, other):
+        w = self.width * .5
+        h = self.height * .5
+        d = self.depth * .5
+
+        left = self.x - w
+        right = self.x + w
+        bottom = self.y - h
+        top = self.y + h
+        front = self.z - d
+        back = self.z + d
+
+        if other.ctype == "Vector":
+            return left <= other.x <= right and\
+                   bottom <= other.y <= top and\
+                   front <= other.z <= back
+        elif other.ctype == "Sphere":
+            r = other.radius
+            return left -r <= other.x <= right + r and\
+                   bottom -r <= other.y <= top + r and\
+                   front - r <= other.z <= back + r
+        elif other.ctype == "AABox":
+            points = ((left, bottom, front),
+                      (right, bottom, front),
+                      (right, top, front),
+                      (left, top, front),
+                      (left, bottom, back),
+                      (right, bottom, back),
+                      (right, top, back),
+                      (left, top, back))
+            for i in points:
+                if other.collide(Vector(i)):
+                    return True
+
+            #test them against us now...
+            w = other.width * .5
+            h = other.height * .5
+            d = other.depth * .5
+
+            left = other.x - w
+            right = other.x + w
+            bottom = other.y - h
+            top = other.y + h
+            front = other.z - d
+            back = other.z + d
+            points = ((left, bottom, front),
+                      (right, bottom, front),
+                      (right, top, front),
+                      (left, top, front),
+                      (left, bottom, back),
+                      (right, bottom, back),
+                      (right, top, back),
+                      (left, top, back))
+
+            for i in points:
+                if self.collide(Vector(i)):
+                    return True
+            return False
+        else:
+            return other.collide(self)
