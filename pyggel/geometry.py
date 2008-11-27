@@ -166,6 +166,84 @@ class Quad(Cube):
         n.display_list = self.display_list
         return n
 
+class Plane(Quad):
+    def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
+                 colorize=(1,1,1,1), texture=None, facing=0,
+                 tile=1):
+
+        f = {"left":0,
+             "right":1,
+             "top":2,
+             "bottom":3,
+             "front":4,
+             "back":5}
+        if type(facing) is type(""):
+            facing = f[facing]
+        self.facing = facing
+
+        self.xnorms = [1,0,3,2,5,4]
+        self.tile = tile
+
+        Quad.__init__(self, size, pos, rotation, colorize, texture, facing)
+
+    def _compile(self):
+        self.display_list.begin()
+        self.texture.bind()
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT)
+
+        ox = .25
+        oy = .33
+        i = self.sides[self.facing]
+        ix = 0
+        x, y = self.split_coords[i[5]]
+        x *= ox
+        y *= oy
+
+        glBegin(GL_QUADS)
+        coords = ((0,0), (0,self.tile),
+                  (self.tile,self.tile),
+                  (self.tile,0))
+
+        glNormal3f(*self.normals[self.xnorms[i[6]]])
+
+        for x in i[:4]:
+            glTexCoord2fv(coords[ix])
+            a, b, c = self.corners[x]
+            a *= 1.1
+            b *= 1.1
+            c *= 1.1
+            glVertex3f(a,b,c)
+            ix += 1
+        glEnd()
+        self.display_list.end()
+
+    def render(self, camera=None):
+        glPushMatrix()
+        x, y, z = self.pos
+        glTranslatef(x, y, -z)
+        a, b, c = self.rotation
+        glRotatef(a, 1, 0, 0)
+        glRotatef(b, 0, 1, 0)
+        glRotatef(c, 0, 0, 1)
+        s = self.size / self.tile if (self.size and self.tile) else self.size
+        glScalef(.5*self.size,.5*s,.5*self.size)
+        try:
+            glScalef(*self.scale)
+        except:
+            glScalef(self.scale, self.scale, self.scale)
+        glColor(*self.colorize)
+        self.display_list.render()
+        glPopMatrix()
+
+    def copy(self):
+        n = Plane(self.size, self.pos, self.rotation, self.colorize, self.texture, self.facing, self.tile)
+        n.scale = self.scale
+        n.display_list = self.display_list
+        return n
+
 class Skybox(Cube):
     def __init__(self, texture, colorize=(1,1,1,1)):
         Cube.__init__(self, 1, colorize=colorize, texture=texture)

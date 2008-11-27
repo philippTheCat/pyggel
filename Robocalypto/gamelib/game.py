@@ -18,20 +18,20 @@ from objects import *
 #You're on the GRID! :-O
 GRID = [
 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,2,2,2,2,2,1],
-[1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,2,2,2,2,2,1],
-[1,1,0,0,0,0,0,0,2,0,1,0,0,2,0,1,2,2,2,2,2,1],
-[1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,2,2,2,2,2,1],
-[1,1,0,0,0,1,0,1,0,0,1,0,0,0,0,1,2,2,2,2,2,1],
-[1,0,0,2,0,1,0,1,0,0,1,0,0,0,0,1,2,2,2,2,2,1],
-[1,0,0,0,0,0,0,1,1,0,1,0,1,1,0,1,2,2,2,2,2,1],
-[1,0,0,0,0,1,0,1,0,0,1,0,1,0,0,1,2,2,2,2,2,1],
-[1,1,0,0,1,1,0,1,0,0,1,0,1,0,0,1,2,2,2,2,2,1],
-[0,1,0,0,0,1,0,0,0,0,1,1,1,0,1,1,2,2,2,2,2,1],
-[0,1,0,0,0,1,0,0,2,0,0,0,0,0,0,1,2,2,2,2,2,1],
-[0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,2,2,2,2,2,1],
-[0,1,0,0,0,0,1,0,1,1,1,0,0,2,0,1,2,2,2,2,2,1],
-[1,1,0,0,1,1,0,0,0,0,1,0,0,0,0,1,2,1,2,1,2,1],
+[1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,2,0,2,0,1],
+[1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,2,0,2,0,1],
+[1,1,0,0,0,0,0,0,2,0,1,0,0,2,0,1,0,2,0,2,0,1],
+[1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,2,0,2,0,1],
+[1,1,0,0,0,1,0,1,0,0,1,0,0,0,0,1,0,2,0,2,0,1],
+[1,0,0,2,0,1,0,1,0,0,1,0,0,0,0,1,0,2,0,2,0,1],
+[1,0,0,0,0,0,0,1,1,0,1,0,1,1,0,1,0,2,0,2,0,1],
+[1,0,0,0,0,1,0,1,0,0,1,0,1,0,0,1,0,2,0,2,0,1],
+[1,1,0,0,1,1,0,1,0,0,1,0,1,0,0,1,0,2,0,2,0,1],
+[0,1,0,0,0,1,0,0,0,0,1,1,1,0,1,1,0,2,0,2,0,1],
+[0,1,0,0,0,1,0,0,2,0,0,0,0,0,0,1,0,2,0,2,0,1],
+[0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,2,0,2,0,1],
+[0,1,0,0,0,0,1,0,1,1,1,0,0,2,0,1,0,2,0,2,0,1],
+[1,1,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1],
 [1,1,0,2,0,1,0,0,0,0,1,0,1,1,1,1,1,1,0,1,1,1],
 [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
@@ -43,20 +43,29 @@ def level_parse(game, scene):
     static = []
     walls = []
     x = y = 0 #OMGZ!
+    height = len(GRID)
+    width = len(GRID[0])
+    mx = width/2*5
+    my = height/2*5
+    mwh = max((width, height))
+    quad = pyggel.geometry.Plane(mwh*5,pos=[mx,0,my],facing="bottom",texture=pyggel.data.Texture("data/floor.png"),tile=mwh)
+    static.append(quad)
+    quad = pyggel.geometry.Plane(mwh*5,pos=[mx,0,my],facing="top",texture=pyggel.data.Texture("data/ceiling.png"),tile=mwh)
+    static.append(quad)
     for row in GRID:
         for column in row:
             
-            #Floor tiles
-            quad = pyggel.geometry.Quad(4.55, pos=[x*5, 0, y*5], facing="bottom", texture=pyggel.image.Texture("data/floor.png"))
-            static.append(quad)
-            
-            #Ceiling tiles
-            quad = pyggel.geometry.Quad(4.55, pos=[x*5, 0, y*5], facing="top", texture=pyggel.image.Texture("data/ceiling.png"))
-            static.append(quad)
+##            #Floor tiles
+##            quad = pyggel.geometry.Quad(4.55, pos=[x*5, 0, y*5], facing="bottom", texture=pyggel.data.Texture("data/floor.png"), tile=2)
+##            static.append(quad)
+##            
+##            #Ceiling tiles
+##            quad = pyggel.geometry.Quad(4.55, pos=[x*5, 0, y*5], facing="top", texture=pyggel.data.Texture("data/ceiling.png"), tile=2)
+##            static.append(quad)
             
             #Walls
             if column == 1:
-                box = pyggel.geometry.Cube(4.55, texture=[image.Texture("data/%s" % random.choice(["wall.png", "door.png", "wall.png", "wall.png"]))]*6)
+                box = pyggel.geometry.Cube(4.55, texture=[data.Texture("data/%s" % random.choice(["wall.png", "door.png", "wall.png", "wall.png"]))]*6)
                 box.pos=(x*5,0,y*5)
                 static.append(box)
                 walls.append(Wall(game, [box.pos[0], box.pos[2]]))
@@ -119,14 +128,11 @@ class Game(object):
         self.overlay.colorize = [0, 1, 1, 0.1]
         self.scene.add_2d(self.overlay)
         self.hudmask = pyggel.image.Image("data/hud.png", pos=[0, 0])
-        ix, iy = self.hudmask.get_size()
-        sx, sy = pyggel.view.screen.screen_size
-        self.hudmask.scale = (1.0*sx/ix, 1.0*sy/iy)
         self.scene.add_2d(self.hudmask)
         self.targeter = pyggel.image.Image("data/target.png", pos=[400-32, 300-32])
         self.scene.add_2d(self.targeter)
         self.font = pyggel.font.MEFont("data/DS-DIGI.ttf", 32)
-        self.text1 = self.font.make_text_image("||||||||||            Score: 00925675            Lives x3", (0, 255, 0))
+        self.text1 = self.font.make_text_image("", (0, 255, 0))
         self.text1.pos = (50, 10)
         self.scene.add_2d(self.text1)
         

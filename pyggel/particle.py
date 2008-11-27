@@ -95,7 +95,7 @@ class Fire3D(Behavior3D):
 
         x, y, z = self.emitter.pos
 
-        part.image.pos = x+dx, y, z+dz
+        part.image.pos = x+dx*randfloat(1, 2), y, z+dz*randfloat(1, 2)
 
     def particle_update(self, part):
         Behavior3D.particle_update(self, part)

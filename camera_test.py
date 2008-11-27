@@ -68,14 +68,18 @@ def main():
 
     mscene.add_light(light)
 
-    quads = []
-    for x in xrange(10):
-        for z in xrange(10):
-            quads.append(pyggel.geometry.Quad(5, (x*5.5,0,z*5.5),
-                                              texture=data.Texture("data/tile_example.png"),
-                                              facing="top"))
-
-    mscene.add_3d(pyggel.misc.StaticObjectGroup(quads))
+##    quads = []
+##    for x in xrange(10):
+##        for z in xrange(10):
+##            quads.append(pyggel.geometry.Quad(5, (x*5.5,0,z*5.5),
+##                                              texture=data.Texture("data/tile_example.png"),
+##                                              facing="top"))
+##
+##    mscene.add_3d(pyggel.misc.StaticObjectGroup(quads))
+    quad = pyggel.geometry.Plane(50, (0,0,0),
+                                 texture=data.Texture("data/tile_example.png"),
+                                 facing="top", tile=10)
+    mscene.add_3d(quad)
 
     clock = pygame.time.Clock()
 
