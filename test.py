@@ -36,7 +36,7 @@ def main():
     obj2 = obj.copy()
     obj2.pos = (0,0,5)
 
-    box = pyggel.geometry.Cube(5, texture=[image.Texture("data/stickdude.png")]*6)
+    box = pyggel.geometry.Cube(5, texture=[data.Texture("data/stickdude.png")]*6)
     box.pos = (-5, 0, 0)
 
     my_scene = pyggel.scene.Scene()

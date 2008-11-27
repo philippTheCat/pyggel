@@ -4,7 +4,7 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 """
 
 from include import *
-import image, view, data
+import view, data
 
 class Cube(object):
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),

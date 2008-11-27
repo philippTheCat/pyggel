@@ -36,10 +36,10 @@ def main():
     font2 = pyggel.font.MEFont(None, 32)
     text3 = font2.make_text_image("Testing -\n1, 2, 3", (0, 0, 1, 1))
 
-    box = pyggel.geometry.Cube(5, texture=[image.Texture("data/ar.png")]*6)
+    box = pyggel.geometry.Cube(5, texture=[data.Texture("data/ar.png")]*6)
     box.pos = (0,0,5)
     box.rotation = list(box.rotation)
-    sphere = pyggel.geometry.Sphere(5, texture=image.Texture("data/ar.png"))
+    sphere = pyggel.geometry.Sphere(5, texture=data.Texture("data/ar.png"))
     sphere.pos = (10, 0, 5)
 
     emitter = particle.Emitter3D(particle.Fire3D, (0, 0, -2))
@@ -62,8 +62,8 @@ def main():
     mscene.add_3d_blend(emitter)
     mscene.add_3d(emitter2)
 
-    skybox = pyggel.geometry.Skybox(image.Texture("data/skybox.png"))
-    skyball = pyggel.geometry.Skyball(image.Texture("data/skyball.png"))
+    skybox = pyggel.geometry.Skybox(data.Texture("data/skybox.png"))
+    skyball = pyggel.geometry.Skyball(data.Texture("data/skyball.png"))
     mscene.add_skybox(skybox)
 
     mscene.add_light(light)
@@ -72,7 +72,7 @@ def main():
     for x in xrange(10):
         for z in xrange(10):
             quads.append(pyggel.geometry.Quad(5, (x*5.5,0,z*5.5),
-                                              texture=image.Texture("data/tile_example.png"),
+                                              texture=data.Texture("data/tile_example.png"),
                                               facing="top"))
 
     mscene.add_3d(pyggel.misc.StaticObjectGroup(quads))
