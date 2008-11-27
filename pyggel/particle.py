@@ -153,7 +153,7 @@ class ParticlePoint(object):
         self.parent.vertex_array.colors[self.index][0] = r
         self.parent.vertex_array.colors[self.index][1] = g
         self.parent.vertex_array.colors[self.index][2] = b
-        self.parent.vertex_array.colors[self.index][2] = a
+        self.parent.vertex_array.colors[self.index][3] = a
 
 class EmitterPoint(object):
     def __init__(self, behavior, pos=(0,0,0)):
@@ -190,6 +190,7 @@ class EmitterPoint(object):
 
     def render(self, camera):
         self.update()
+        glPointSize(self.behavior.point_size)
         for i in self.particles:
             if i:
                 i.update()
@@ -219,6 +220,7 @@ class FirePoint(BehaviorPoint):
         BehaviorPoint.__init__(self, emitter)
 
         self.particle_lifespan = 20
+        self.point_size = 15
         self.max_particles = 105 #self.particle_lifespan * emit rate (5) + 1 cycle of give space - as the emitter runs before the particles die...
 
     def emitter_update(self):
@@ -231,17 +233,21 @@ class FirePoint(BehaviorPoint):
         dz = randfloat(-.1, .1)
 
         part.extra_data["dir"] = (dx, dy, dz)
-        part.colorize = (1, .5, 0, 1)
+        part.colorize = (1, 0, 0, 1)
 
         x, y, z = self.emitter.pos
 
-        part.pos = x + dx, y, z + dz
+        part.pos = x + dx * randfloat(1, 1.2), y, z + dz * randfloat(1, 1.2)
+
+        part.colorize = random.choice(((1, 0, 0, 1),
+                                       (1, .25, 0, 1),
+                                       (1, 1, 0, 1)))
 
     def particle_update(self, part):
         BehaviorPoint.particle_update(self, part)
 
         r, g, b, a = part.colorize
-        g += .02
+        g += .01
         a -= 1.0/20
         part.colorize = r, g, b, a
 

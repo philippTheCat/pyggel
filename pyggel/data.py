@@ -3,9 +3,8 @@ pyggle.data
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 """
 
-import include
 from include import *
-import view
+import view, misc
 import numpy
 
 class Texture(object):
@@ -98,7 +97,7 @@ class VertexArray(object):
         if render_type is None:
             render_type = GL_QUADS
         self.render_type = render_type
-        self.texture = None
+        self.texture = misc.create_empty_texture()
 
         self.max_size = max_size
 
@@ -107,24 +106,18 @@ class VertexArray(object):
         self.texcs = numpy.empty((max_size, 2), dtype=object)
 
     def render(self):
-        if self.texture:
-            self.texture.bind()
-        else:
-            include.blank_texture.bind()
+        self.texture.bind()
 
         glEnableClientState(GL_VERTEX_ARRAY)
         glEnableClientState(GL_COLOR_ARRAY)
-        if self.texture:
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY)
 
         glVertexPointer(3, GL_FLOAT, 0, self.verts)
         glColorPointer(4, GL_FLOAT, 0, self.colors)
-        if self.texture:
-            glTexCoordPointer(2, GL_FLOAT, 0, self.texcs)
+        glTexCoordPointer(2, GL_FLOAT, 0, self.texcs)
 
         glDrawArrays(self.render_type, 0, self.max_size)
 
         glDisableClientState(GL_VERTEX_ARRAY)
         glDisableClientState(GL_COLOR_ARRAY)
-        if self.texture:
-            glDisableClientState(GL_TEXTURE_COORD_ARRAY)
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY)
