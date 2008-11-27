@@ -140,6 +140,9 @@ def main():
 
         box.rotation[1] += 1
 
+        light.pos = camera.get_real_pos()
+        sphere.pos = camera.get_real_pos()
+
         pyggel.view.clear_screen(mscene)
         mscene.render(camera)
         pyggel.view.refresh_screen()

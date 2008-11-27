@@ -6,11 +6,15 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 import math
 
 def move_with_rotation(pos, rot, amount):
+    try:
+        a1, a2, a3 = amount
+    except:
+        a1 = a2 = a3 = amount
     p=[pos[0],pos[1],pos[2]]
     po=0.0174532925
-    p[0] -= math.sin(rot[1]*po)*amount
-    p[1] += math.sin(rot[0]*po)*amount
-    p[2] += math.cos(rot[1]*po)*amount
+    p[0] -= math.sin(rot[1]*po)*a1
+    p[1] += math.sin(rot[0]*po)*a2
+    p[2] += math.cos(rot[1]*po)*a3
     return p
 
 def get_distance(a, b):
@@ -41,7 +45,7 @@ class Vector(object):
     def rotate(self, vec, amount):
         a, b, c = amount
 
-        vec = self - vec
+        vec2 = self - vec
 
         Sin, Cos, Rad = math.sin, math.cos, math.radians
 
@@ -52,8 +56,8 @@ class Vector(object):
 
             op = self.copy()
 
-            vec.y = cos * op.y - sin * op.z
-            vec.z = sin * op.y + cos * op.z
+            vec2.y = cos * op.y - sin * op.z
+            vec2.z = sin * op.y + cos * op.z
 
         if b:
             rad = Rad(-b)
@@ -62,8 +66,8 @@ class Vector(object):
 
             op = self.copy()
 
-            vec.x = cos * op.x - sin * op.z
-            vec.z = sin * op.x + cos * op.z
+            vec2.x = cos * op.x - sin * op.z
+            vec2.z = sin * op.x + cos * op.z
 
         if c:
             rad = Rad(-c)
@@ -72,10 +76,10 @@ class Vector(object):
 
             op = self.copy()
 
-            vec.x = cos * op.x - sin * op.y
-            vec.y = sin * op.x + cos * op.y
+            vec2.x = cos * op.x - sin * op.y
+            vec2.y = sin * op.x + cos * op.y
 
-        return vec + self
+        return vec2 + vec
 
     def invert(self):
         return Vector((-self.x, -self.y, -self.z))
