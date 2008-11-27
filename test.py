@@ -81,9 +81,9 @@ def main():
             camera.roty -= .5
         if key[K_RIGHT]:
             camera.roty += .5
-        if key[K_UP]:
-            camera.rotx -= .5
         if key[K_DOWN]:
+            camera.rotx -= .5
+        if key[K_UP]:
             camera.rotx += .5
         if key[K_1]:
             camera.rotz -= .5

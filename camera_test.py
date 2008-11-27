@@ -116,9 +116,9 @@ def main():
                 camera.posx -= .1
             if key[K_RIGHT]:
                 camera.posx += .1
-            if key[K_UP]:
-                camera.posy -= .1
             if key[K_DOWN]:
+                camera.posy -= .1
+            if key[K_UP]:
                 camera.posy += .1
             if key[K_MINUS]:
                 camera.posz -= .1
@@ -140,8 +140,8 @@ def main():
 
         box.rotation[1] += 1
 
-        light.pos = camera.get_real_pos()
-        sphere.pos = camera.get_real_pos()
+        light.pos = camera.get_pos()
+        sphere.pos = camera.get_pos()
 
         pyggel.view.clear_screen(mscene)
         mscene.render(camera)

@@ -3,7 +3,6 @@ pyggle.camera
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 """
 from include import *
-from math3d import Vector, move_with_rotation
 
 class Base(object):
     def __init__(self, pos=[0,0,0], rotation=[0,0,0]):
@@ -28,9 +27,6 @@ class Base(object):
     def set_skybox_data(self):
         pass
 
-    def get_real_pos(self):
-        return self.get_pos()
-
 class LookFromCamera(Base):
     def __init__(self, pos=(0,0,0), rotation=(0,0,0)):
         Base.__init__(self, pos, rotation)
@@ -40,7 +36,7 @@ class LookFromCamera(Base):
         glRotatef(self.rotx, 1, 0, 0)
         glRotatef(self.roty, 0, 1, 0)
         glRotatef(self.rotz, 0, 0, 1)
-        glTranslatef(-self.posx, self.posy, self.posz)
+        glTranslatef(-self.posx, -self.posy, self.posz)
 
     def pop(self):
         glPopMatrix()
@@ -61,9 +57,6 @@ class LookFromCamera(Base):
         glRotatef(self.roty, 0, 1, 0)
         glRotatef(self.rotz, 0, 0, 1)
 
-    def get_real_pos(self):
-        return self.posx, -self.posy, self.posz
-
 class LookAtCamera(Base):
     def __init__(self, pos=[0,0,0], rotation=[0,0,0],
                  distance=0):
@@ -76,7 +69,7 @@ class LookAtCamera(Base):
         glRotatef(-self.rotx, 1, 0, 0)
         glRotatef(-self.roty, 0, 1, 0)
         glRotatef(self.rotz, 0, 0, 1)
-        glTranslatef(-self.posx, self.posy, self.posz)
+        glTranslatef(-self.posx, -self.posy, self.posz)
 
     def set_facing_matrix(self):
         glRotatef(-self.rotz, 0, 0, 1)
@@ -87,6 +80,3 @@ class LookAtCamera(Base):
         glRotatef(-self.rotx, 1, 0, 0)
         glRotatef(-self.roty, 0, 1, 0)
         glRotatef(self.rotz, 0, 0, 1)
-
-    def get_real_pos(self):
-        return self.posx, -self.posy, self.posz
