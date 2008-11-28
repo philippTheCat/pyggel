@@ -42,6 +42,9 @@ class Emitter3D(object):
 
         self.visible = True
 
+    def get_dimensions(self):
+        return self.behavior.get_dimensions()
+
     def update(self):
         self.behavior.emitter_update()
 
@@ -58,6 +61,10 @@ class Behavior3D(object):
         self.particle_lifespan = 1
         self.image = misc.create_empty_image3d((8,8))
         self.image.pos = self.emitter.pos
+
+    def get_dimensions(self):
+        #calculate max width, height and depth of particles...
+        return 1, 1, 1
 
     def emitter_update(self):
         pass
@@ -78,6 +85,9 @@ class Fire3D(Behavior3D):
         self.image.scale = .25
         self.image.pos = self.emitter.pos
         self.particle_lifespan = 20
+
+    def get_dimensions(self):
+        return 2, 6, 2 #max/abs(min) directions(x,y,z) * particle_lifespan
 
     def emitter_update(self):
         for i in xrange(5):
@@ -168,6 +178,9 @@ class EmitterPoint(object):
         self.visible = True
         self.particle_type = ParticlePoint
 
+    def get_dimensions(self):
+        return self.behavior.get_dimensions()
+
     def add_particle(self, part):
         if self.empty_spaces:
             x = self.empty_spaces.pop(0)
@@ -204,6 +217,9 @@ class BehaviorPoint(object):
         self.particle_lifespan = 1
         self.max_particles = 2
 
+    def get_dimensions(self):
+        return 1,1,1
+
     def emitter_update(self):
         pass
 
@@ -222,6 +238,9 @@ class FirePoint(BehaviorPoint):
         self.particle_lifespan = 20
         self.point_size = 15
         self.max_particles = 105 #self.particle_lifespan * emit rate (5) + 1 cycle of give space - as the emitter runs before the particles die...
+
+    def get_dimensions(self):
+        return 2, 6, 2 #max/abs(min) directions (x,y,z) of particles * particle_lifespan
 
     def emitter_update(self):
         for i in xrange(5):

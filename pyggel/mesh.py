@@ -124,6 +124,17 @@ class BasicMesh(object):
         self.visible = True
         self.materials = materials #this is necessary so the textures aren't deleted when they no longer have references to them!
 
+    def get_dimensions(self):
+        x = []
+        y = []
+        z = []
+        for i in self.verts:
+            x.append(i[0])
+            y.append(i[1])
+            z.append(i[2])
+
+        return max((x, abs(min(x)))), max((y, abs(min(y)))), max((z, abs(min(z))))
+
     def copy(self):
         return BasicMesh(self.display_list, list(self.pos),
                          list(self.rotation), list(self.verts),

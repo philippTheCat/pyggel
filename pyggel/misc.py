@@ -1,5 +1,5 @@
 from include import *
-import image, view, data
+import image, view, data, math3d
 
 def create_empty_texture(size=(2,2), color=(1,1,1,1)):
     i = pygame.Surface(size)
@@ -52,3 +52,20 @@ class StaticObjectGroup(object):
 
 def save_screenshot(filename):
     pygame.image.save(pygame.display.get_surface(), filename)
+
+class VolumeStore(object):
+    ctype = "VolumeStore"
+    def __init__(self, parent):
+        self.parent = parent
+
+        self.vector = math3d.Vector((0,0,0))
+        self.sphere = math3d.Sphere((0,0,0), max(parent.get_dimensions()))
+        self.box = math3d.AABox((0,0,0), parent.get_dimensions())
+
+        self.collision_geom = self.sphere
+
+    def collide(self, other):
+        if other.ctype == "VolumeStore":
+            return self.collision_geom.collide(other.collision_geom)
+        else:
+            return other.collide(self.collision_geom)

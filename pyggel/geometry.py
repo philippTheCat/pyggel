@@ -55,6 +55,9 @@ class Cube(object):
 
         self._compile()
 
+    def get_dimensions(self):
+        return self.size, self.size, self.size
+
     def _compile(self):
         self.display_list.begin()
         if isinstance(self.texture, data.Texture):
@@ -290,6 +293,9 @@ class Sphere(object):
         self.visible = True
 
         self._compile()
+
+    def get_dimensions(self):
+        return self.size, self.size, self.size
 
     def _compile(self):
         self.display_list.begin()
