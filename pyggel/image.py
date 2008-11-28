@@ -202,6 +202,12 @@ class Image3D(Image):
         Image.__init__(self, filename, pos, rotation,
                        scale, colorize, dont_load)
 
+    def get_dimensions(self):
+        return 1, 1, 1
+
+    def get_pos(self):
+        return self.pos
+
     def render(self, camera=None):
         h, w = self.get_size()
 

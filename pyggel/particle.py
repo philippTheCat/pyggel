@@ -45,6 +45,9 @@ class Emitter3D(object):
     def get_dimensions(self):
         return self.behavior.get_dimensions()
 
+    def get_pos(self):
+        return self.pos
+
     def update(self):
         self.behavior.emitter_update()
 
@@ -180,6 +183,9 @@ class EmitterPoint(object):
 
     def get_dimensions(self):
         return self.behavior.get_dimensions()
+
+    def get_pos(self):
+        return self.pos
 
     def add_particle(self, part):
         if self.empty_spaces:

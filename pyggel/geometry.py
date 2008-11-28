@@ -58,6 +58,9 @@ class Cube(object):
     def get_dimensions(self):
         return self.size, self.size, self.size
 
+    def get_pos(self):
+        return self.pos
+
     def _compile(self):
         self.display_list.begin()
         if isinstance(self.texture, data.Texture):
@@ -297,6 +300,9 @@ class Sphere(object):
     def get_dimensions(self):
         return self.size, self.size, self.size
 
+    def get_pos(self):
+        return self.pos
+
     def _compile(self):
         self.display_list.begin()
         self.texture.bind()
@@ -332,6 +338,9 @@ class Skyball(Sphere):
     def __init__(self, texture=None, colorize=(1,1,1,1), detail=30):
         Sphere.__init__(self, 1, colorize=colorize,
                         texture=texture, detail=detail)
+
+    def get_pos(self):
+        return 0,0,0
 
     def render(self, camera):
         glDepthMask(GL_FALSE)

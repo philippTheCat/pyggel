@@ -135,6 +135,9 @@ class BasicMesh(object):
 
         return max((x, abs(min(x)))), max((y, abs(min(y)))), max((z, abs(min(z))))
 
+    def get_pos(self):
+        return self.pos
+
     def copy(self):
         return BasicMesh(self.display_list, list(self.pos),
                          list(self.rotation), list(self.verts),
