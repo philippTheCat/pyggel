@@ -7,8 +7,18 @@ from include import *
 import view, data
 
 class Cube(object):
+    """A geometric cube that can be colored and textured"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
                  colorize=(1,1,1,1), texture=None):
+        """Create a cube
+           size is the absolute size of the cube
+           pos is the position of the cube
+           rotation is the rotation of the cube
+           colorize is the color of the cube (0-1 RGBA)
+           texture can be None, a data.Texture object or a list of 6 data.Texture objects
+               if None the cube will not be textures
+               if data.Texture the texture will be mapped as a cube map to the cube
+               if a list of 6 textures each face of the quad will have one of the images"""
         view.require_init()
         self.size = size
         self.pos = pos
@@ -56,12 +66,15 @@ class Cube(object):
         self._compile()
 
     def get_dimensions(self):
+        """Return a tuple of the size of the cube - to be used by the quad tree and collision testing"""
         return self.size, self.size, self.size
 
     def get_pos(self):
+        """Return the position of the quad"""
         return self.pos
 
     def _compile(self):
+        """Compile the cube's rendering into a data.DisplayList"""
         self.display_list.begin()
         if isinstance(self.texture, data.Texture):
             self.texture.bind()
@@ -98,6 +111,8 @@ class Cube(object):
         self.display_list.end()
 
     def render(self, camera=None):
+        """Render the cube
+           camera is None or the camera object the scene is using to render this object"""
         glPushMatrix()
         x, y, z = self.pos
         glTranslatef(x, y, -z)
@@ -115,14 +130,24 @@ class Cube(object):
         glPopMatrix()
 
     def copy(self):
+        """Return a copy of the quad - uses the same display list"""
         n = Cube(self.size, self.pos, self.rotation, self.color, self.texture)
         n.display_list = self.display_list
         n.scale = self.scale
         return n
 
 class Quad(Cube):
+    """An object representing only one face of a cube"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
                  colorize=(1,1,1,1), texture=None, facing=0):
+        """Create the Quad
+           size is the absolute size of a face on a cube
+           pos is the position of the quad
+           rotation is the rotation of the quad
+           colorize is the color of the quad
+           texture can be None or a data.Texture object - entire texture is mapped to the face
+           facing is which face of the cube this is, values are:
+               left, right, top, bottom, front, back or 0, 1, 2, 3, 4, 5"""
 
         f = {"left":0,
              "right":1,
@@ -139,6 +164,7 @@ class Quad(Cube):
         Cube.__init__(self, size, pos, rotation, colorize, texture)
 
     def _compile(self):
+        """Compile the Quad into a data.DisplayList"""
         self.display_list.begin()
         self.texture.bind()
 
@@ -167,15 +193,31 @@ class Quad(Cube):
         self.display_list.end()
 
     def copy(self):
+        """Return a copy of the Quad, sharing the same display list"""
         n = Quad(self.size, self.pos, self.rotation, self.colorize, self.texture, self.facing)
         n.scale = self.scale
         n.display_list = self.display_list
         return n
 
+    def render(self, camera):
+        """Render the Quad
+           camera is None or the camera object the scene is using to render this object"""
+        Cube.render(self, camera)
+
 class Plane(Quad):
+    """Like a Quad, except the texture is tiled on the face, which increases performance"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
                  colorize=(1,1,1,1), texture=None, facing=0,
                  tile=1):
+        """Create the Plane
+           size is the absolute size of a face on a cube
+           pos is the position of the quad
+           rotation is the rotation of the quad
+           colorize is the color of the quad
+           texture can be None or a data.Texture object - entire texture is mapped to the face
+           facing is which face of the cube this is, values are:
+               left, right, top, bottom, front, back or 0, 1, 2, 3, 4, 5
+           tile is the number of times to tile the texture across the Plane"""
 
         f = {"left":0,
              "right":1,
@@ -193,6 +235,7 @@ class Plane(Quad):
         Quad.__init__(self, size, pos, rotation, colorize, texture, facing)
 
     def _compile(self):
+        """Compile Plane into a data.DisplayList"""
         self.display_list.begin()
         self.texture.bind()
 
@@ -227,6 +270,8 @@ class Plane(Quad):
         self.display_list.end()
 
     def render(self, camera=None):
+        """Render the Plane
+           camera is None or the camera object the scene is using to render this object"""
         glPushMatrix()
         x, y, z = self.pos
         glTranslatef(x, y, -z)
@@ -245,13 +290,19 @@ class Plane(Quad):
         glPopMatrix()
 
     def copy(self):
+        """Return a copy of the Plane - sharing the same display list..."""
         n = Plane(self.size, self.pos, self.rotation, self.colorize, self.texture, self.facing, self.tile)
         n.scale = self.scale
         n.display_list = self.display_list
         return n
 
 class Skybox(Cube):
+    """A skybox object, which basically creates an infinitly far-away box, where all rendering is inside.
+       Used to simulate a sky, or other things where you want to fill the view with something other than a blank color"""
     def __init__(self, texture, colorize=(1,1,1,1)):
+        """Create the Skybox
+           texture can be teh same as a Cube, None, data.Texture or  list of 6 data.Texture objects
+           colorize - the color of the Skybox"""
         Cube.__init__(self, 1, colorize=colorize, texture=texture)
         self.sides = ((3,0,4,7, 2, 2, 5),#left
                       (6,5,1,2, 3, 4, 4),#right
@@ -262,6 +313,8 @@ class Skybox(Cube):
         self._compile()
 
     def render(self, camera):
+        """Render the Skybox
+           camera is the camera object the scene is using to render the Skybox"""
         glDisable(GL_LIGHTING)
         glDepthMask(GL_FALSE)
         glPushMatrix()
@@ -273,14 +326,23 @@ class Skybox(Cube):
             glEnable(GL_LIGHTING)
 
     def copy(self):
+        """Return a copy of the Skybox - sharing the same data.DisplayList"""
         n = Skybox(self.texture, self.colorize)
         n.scale = self.scale
         n.display_list = self.display_list
         return n
 
 class Sphere(object):
+    """A geometric Sphere object that can be colored and textured"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
                  colorize=(1,1,1,1), texture=None, detail=30):
+        """Create the Sphere
+           size is the radius of the Sphere
+           pos ithe position of the sphere
+           rotation is the rotation of the sphere
+           colorize is the color of the sphere
+           texture can be None or a data.Texture object that will be mapped to the sphere
+           detail is the level of detail for the Sphere, higher = a more smooth sphere"""
         view.require_init()
         self.size = size
         self.pos = pos
@@ -298,12 +360,15 @@ class Sphere(object):
         self._compile()
 
     def get_dimensions(self):
+        """Return a three part tuple of the radius of the sphere - used in teh quadtree and collision testing"""
         return self.size, self.size, self.size
 
     def get_pos(self):
+        """Return the position of the sphere"""
         return self.pos
 
     def _compile(self):
+        """Compile the Sphere into a data.DisplayList"""
         self.display_list.begin()
         self.texture.bind()
         Sphere = gluNewQuadric()
@@ -312,6 +377,8 @@ class Sphere(object):
         self.display_list.end()
 
     def render(self, camera=None):
+        """Render the Sphere
+           camera can be None or the camera obejct teh scene is using"""
         glPushMatrix()
         x, y, z = self.pos
         glTranslatef(x, y, -z)
@@ -329,20 +396,23 @@ class Sphere(object):
         glPopMatrix()
 
     def copy(self):
+        """Return a copy of the Sphere - sharing the same display list"""
         n = Sphere(self.size, self.pos, self.colorize, self.texture, self.detail)
         n.scale = self.scale
         n.display_list = self.display_list
         return n
 
 class Skyball(Sphere):
+    """A Skyball is like a Skybox - except it is a sphere intead of a cube"""
     def __init__(self, texture=None, colorize=(1,1,1,1), detail=30):
+        """Create the Skyball
+           texture can be None or the data.Texture object to map to the Sphere"""
         Sphere.__init__(self, 1, colorize=colorize,
                         texture=texture, detail=detail)
 
-    def get_pos(self):
-        return 0,0,0
-
     def render(self, camera):
+        """Render the Skyball
+           camera is the camera the scene is using"""
         glDepthMask(GL_FALSE)
         glPushMatrix()
         camera.set_skybox_data()
@@ -352,6 +422,7 @@ class Skyball(Sphere):
         glDepthMask(GL_TRUE)
 
     def copy(self):
+        """Return a copy of teh Skyball - sharing the same dadta.DisplayList"""
         n = Skyball(self.texture, self.colorize, self.detail)
         n.scale = self.scale
         n.display_list = self.display_list

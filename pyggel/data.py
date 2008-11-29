@@ -8,7 +8,11 @@ import view, misc
 import numpy
 
 class Texture(object):
+    """An object to load and store an OpenGL texture"""
     def __init__(self, filename, flip=0):
+        """Create a texture
+           flip indicates whether the texture data needs to be flipped - deprecated...
+           filename can be be a filename for an image, or a pygame.Surface object"""
         view.require_init()
         self.filename = filename
         self.flip = 0
@@ -24,6 +28,7 @@ class Texture(object):
             self.filename = None
 
     def _get_next_biggest(self, x, y):
+        """Get the next biggest poer of two x and y sizes"""
         nw = 16
         nh = 16
         while nw < x:
@@ -33,11 +38,13 @@ class Texture(object):
         return nw, nh
 
     def _load_file(self):
+        """Loads file"""
         image = pygame.image.load(self.filename)
 
         self._compile(image)
 
     def _compile(self, image):
+        """Compiles image data into texture data"""
         size = self._get_next_biggest(*image.get_size())
 
         image = pygame.transform.scale(image, size)
@@ -58,6 +65,7 @@ class Texture(object):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
 
     def bind(self):
+        """Binds the texture for usage"""
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
@@ -66,6 +74,7 @@ class Texture(object):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
 
     def __del__(self):
+        """Clear the texture data"""
         try:
             glDeleteTextures([self.gl_tex])
         except:
@@ -73,27 +82,36 @@ class Texture(object):
 
 
 class DisplayList(object):
-    """So we don't lose the list between copies/kills"""
+    """An object to compile and store an OpenGL display list"""
     def __init__(self):
+        """Creat the list"""
         self.gl_list = glGenLists(1)
 
     def begin(self):
+        """Begin recording to the list - anything rendered after this will be compiled into the list and not actually rendered"""
         glNewList(self.gl_list, GL_COMPILE)
 
     def end(self):
+        """End recording"""
         glEndList()
 
     def render(self):
+        """Render the display list"""
         glCallList(self.gl_list)
 
     def __del__(self):
+        """Clear the display list data"""
         try:
             glDeleteLists(self.gl_list, 1)
         except:
             pass #already cleared!
 
 class VertexArray(object):
-    def __init__(self, render_type=None, max_size=None):
+    """An object to store and render an OpenGL vertex array of vertices, colors and texture coords"""
+    def __init__(self, render_type=None, max_size=100):
+        """Create the array
+           render_type is the OpenGL constant used in rendering, ie GL_POLYGON, GL_TRINAGLES, etc.
+           max_size is the size of the array"""
         if render_type is None:
             render_type = GL_QUADS
         self.render_type = render_type
@@ -106,6 +124,7 @@ class VertexArray(object):
         self.texcs = numpy.empty((max_size, 2), dtype=object)
 
     def render(self):
+        """Render the array"""
         self.texture.bind()
 
         glEnableClientState(GL_VERTEX_ARRAY)
