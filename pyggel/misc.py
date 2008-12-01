@@ -95,7 +95,8 @@ class VolumeStore(object):
 
         self.vector = math3d.Vector((0,0,0))
         self.sphere = math3d.Sphere((0,0,0), max(parent.get_dimensions()))
-        self.box = math3d.AABox((0,0,0), parent.get_dimensions())
+        x, y, z = parent.get_dimensions()
+        self.box = math3d.AABox((0,0,0), (x*2, y*2, z*2))
 
         self.collision_geom = self.sphere
 
