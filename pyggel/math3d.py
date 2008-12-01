@@ -258,12 +258,16 @@ class AABox(Vector):
     def collide(self, other):
         """Return whether this AABox is colliding with another object"""
 
-        left = self.x - self.width
-        right = self.x + self.width
-        bottom = self.y - self.height
-        top = self.y + self.height
-        front = self.z - self.depth
-        back = self.z + self.depth
+        width = self.width / 2
+        height = self.height / 2
+        depth = self.depth / 2
+
+        left = self.x - width
+        right = self.x + width
+        bottom = self.y - height
+        top = self.y + height
+        front = self.z - depth
+        back = self.z + depth
 
         if other.ctype == "Vector":
             return left <= other.x <= right and\
@@ -288,12 +292,16 @@ class AABox(Vector):
                     return True
 
             #test them against us now...
-            left = other.x - other.width
-            right = other.x + other.width
-            bottom = other.y - other.height
-            top = other.y + other.height
-            front = other.z - other.depth
-            back = other.z + other.depth
+            width = other.width / 2
+            height = other.height / 2
+            depth = other.depth / 2
+
+            left = other.x - width
+            right = other.x + width
+            bottom = other.y - height
+            top = other.y + height
+            front = other.z - depth
+            back = other.z + depth
             points = ((left, bottom, front),
                       (right, bottom, front),
                       (right, top, front),
