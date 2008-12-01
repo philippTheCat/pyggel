@@ -1,7 +1,26 @@
+"""
+pyggle.misc
+This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The misc module contains various functions and classes that don't fit anywhere else.
+"""
+
 from include import *
 import image, view, data, math3d
 
+import random
+
+def randfloat(a, b):
+    """Returns a random floating point number in range(a,b)."""
+    a = int(a*100000000)
+    b = int(b*100000000)
+    x = random.randint(a, b)
+    return x * 0.00000001
+
 def create_empty_texture(size=(2,2), color=(1,1,1,1)):
+    """Create an empty data.Texture
+       size must be a two part tuple representing the pixel size of the texture
+       color must be a four-part tuple representing the (RGBA 0-1) color of the texture"""
     i = pygame.Surface(size)
     if len(color) == 4:
         r, g, b, a = color
@@ -16,6 +35,7 @@ def create_empty_texture(size=(2,2), color=(1,1,1,1)):
     return data.Texture(i)
 
 def create_empty_image(size=(2,2), color=(1,1,1,1)):
+    """Same as create_empty_texture, except returns an image.Image instead"""
     i = pygame.Surface(size)
     if len(color) == 3:
         color = color + (1,)
@@ -23,6 +43,7 @@ def create_empty_image(size=(2,2), color=(1,1,1,1)):
     return image.Image(i, colorize=color)
 
 def create_empty_image3d(size=(2,2), color=(1,1,1,1)):
+    """Same as create_empty_texture, except returns an image.Image3D instead"""
     i = pygame.Surface(size)
     if len(color) == 3:
         color = color + (1,)
@@ -30,32 +51,46 @@ def create_empty_image3d(size=(2,2), color=(1,1,1,1)):
     return image.Image3D(i, colorize=color)
 
 class StaticObjectGroup(object):
+    """A class that takes a list of renderable objects (that won't ever change position, rotation, etc.
+           This includes Image3D's - as they require a dynamic look-up of the camera to billboard correctly)
+       and compiles them into a single data.DisplayList so that rendering is much faster."""
     def __init__(self, objects=[]):
+        """Create the group.
+           objects must be a list of renderable objects"""
         self.objects = objects
-        self.gl_list = glGenLists(1)
+        self.gl_list = data.DisplayList()
 
         self.visible = True
 
         self.compile()
 
     def add_object(self, obj):
+        """Add an object to the group - if called then group.compile() must be called afterwards, to recreate the display list"""
         self.objects.append(obj)
 
     def compile(self):
-        glNewList(self.gl_list, GL_COMPILE)
+        """Compile everything into a data.DisplayList"""
+        self.gl_list.begin()
         for i in self.objects:
             i.render()
-        glEndList()
+        self.gl_list.end()
 
     def render(self, camera=None):
-        glCallList(self.gl_list)
+        """Render the group.
+           camera should be None or the camera the scene is using - only here for compatability"""
+        self.gl_list.render()
 
 def save_screenshot(filename):
+    """Save a screenshot to filename"""
     pygame.image.save(pygame.display.get_surface(), filename)
 
 class VolumeStore(object):
+    """A class that is used by objects, that stores a Vector, a Sphere and an AABox representing the object.
+       Used for collision detection, the quadtree, and eventually frustum culling."""
     ctype = "VolumeStore"
     def __init__(self, parent):
+        """Create the VolumeStore.
+           parent must be the renderable object that is creating/using the store"""
         self.parent = parent
 
         self.vector = math3d.Vector((0,0,0))
@@ -65,6 +100,7 @@ class VolumeStore(object):
         self.collision_geom = self.sphere
 
     def collide(self, other):
+        """Returns whether this VolumeStore is colliding with another VolumeStore or math3d collision object."""
         if other.ctype == "VolumeStore":
             return self.collision_geom.collide(other.collision_geom)
         else:

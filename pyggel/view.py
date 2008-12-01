@@ -1,6 +1,9 @@
 """
 pyggle.view
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The view module contains functions and objects used to manipulate initiation, settings,
+and changing of the screen window and OpenGL states.
 """
 
 from OpenGL import error
@@ -9,7 +12,9 @@ oglError = error
 from include import *
 
 class _Screen(object):
+    """A simple object to store screen settings."""
     def __init__(self):
+        """Create the screen."""
         self.screen_size = (640, 480)
         self.rect = pygame.rect.Rect(0,0,*self.screen_size)
         self.fullscreen = False
@@ -27,6 +32,7 @@ class _Screen(object):
         glScissor(*self.clips[0])
 
     def set_size(self, size):
+        """Set the screen size."""
         self.screen_size = size
         self.clips = [] #clear!
         self.clips.append((0,0,size[0],size[1]))
@@ -34,6 +40,7 @@ class _Screen(object):
         glScissor(*self.clips[0])
 
     def get_params(self):
+        """Return the pygame window initiation parameters needed."""
         params = OPENGL|DOUBLEBUF
         if self.fullscreen:
             params = params|FULLSCREEN
@@ -44,6 +51,7 @@ class _Screen(object):
         return params
 
     def push_clip(self, new):
+        """Push a new rendering clip onto the stack - used to limit rendering to a small area."""
         if self.clips: #we have an old one to compare to...
             a,b,c,d = new
             e,f,g,h = self.clips[-1] #last
@@ -52,6 +60,7 @@ class _Screen(object):
         glScissor(*new)
 
     def pop_clip(self):
+        """Pop the last clip off the stack."""
         if len(self.clips) == 1:
             return #don't pop the starting clip!
         self.clips.pop()
@@ -60,6 +69,9 @@ class _Screen(object):
 screen = _Screen()
 
 def init(screen_size=None, use_psyco=True):
+    """Initialize the display, OpenGL and whether to use psyco or not.
+       screen_size must be the pixel dimensions of the display window
+       use_psyco must be a boolean value indicating whether psyco should be used or not"""
     if screen_size:
         screen.set_size(screen_size)
     else:
@@ -93,7 +105,7 @@ def init(screen_size=None, use_psyco=True):
     glPointSize(10)
 
     clear_screen()
-    set_fog_color((.5,.5,.5,.5))
+    set_fog_color()
     glFogi(GL_FOG_MODE, GL_LINEAR)
     glFogf(GL_FOG_DENSITY, .35)
     glHint(GL_FOG_HINT, GL_NICEST)
@@ -107,17 +119,21 @@ def init(screen_size=None, use_psyco=True):
 
     screen.have_init = True
 
-def set_background_color(col=(0,0,0)):
-    glClearColor(*col+(0,))
+def set_background_color(rgb=(0,0,0)):
+    """Set the background color (RGB 0-1) of the display."""
+    glClearColor(*rgb+(0,))
 
 def set_fullscreen(boolean):
+    """Enable/Disable fullscreen mode."""
     screen.fullscreen = boolean
     build_screen()
 
 def toggle_fullscreen():
+    """Toggles fullscreen mode."""
     set_fullscreen(not screen.fullscreen)
 
 def set_lighting(boolean):
+    """Enable/Disable OpenGL lighting."""
     screen.lighting = boolean
     if boolean:
         glEnable(GL_LIGHTING)
@@ -125,27 +141,34 @@ def set_lighting(boolean):
         glDisable(GL_LIGHTING)
 
 def toggle_lighting():
+    """Toggle OpenGL lighting."""
     set_lighting(not screen.lighting)
 
 def set_hardware_render(boolean):
+    """Enable/Disable hardware rendering of screen."""
     screen.hwrender = boolean
     build_screen()
 
 def toggle_hardware_render():
+    """Toggle hardware rendering."""
     set_hardware_render(not screen.hwrender)
 
 def set_decorated(boolean):
+    """Enable/Disable window decorations (title bar, sides, etc.)"""
     screen.decorated = boolean
     build_screen()
 
 def toggle_decorated():
+    """Toggle window decorations."""
     set_decorated(not screen.decorated)
 
-def set_fog_color(rgba):
+def set_fog_color(rgba=(.5,.5,.5,.5)):
+    """Set the fog color (RGBA 0-1)"""
     glFogfv(GL_FOG_COLOR, rgba)
     screen.fog_color = rgba
 
 def set_fog(boolean):
+    """Enable/Disable fog."""
     screen.fog = boolean
     if boolean:
         glEnable(GL_FOG)
@@ -153,13 +176,16 @@ def set_fog(boolean):
         glDisable(GL_FOG)
 
 def toggle_fog():
+    """Toggle fog."""
     set_fog(not screen.fog)
 
 def set_fog_depth(min=10, max=125):
+    """Set the min/max depth of fog."""
     glFogf(GL_FOG_START, min)
     glFogf(GL_FOG_END, max)
 
 def set_debug(boolean):
+    """Enable/Disable OpenGL debugging - specifically, this turns on/off calling of glGetError after every call."""
     screen.debug = boolean
     if boolean:
         oglError.ErrorChecker.registerChecker(None)
@@ -167,12 +193,15 @@ def set_debug(boolean):
         oglError.ErrorChecker.registerChecker(lambda:None)
 
 def toggle_debug():
+    """Toggle OpenGL debugging."""
     set_debug(not screen.debug)
 
 def build_screen():
+    """Create the display window using the current set of screen parameters."""
     pygame.display.set_mode(screen.screen_size, screen.get_params())
 
 def set2d():
+    """Enable 2d rendering."""
     screen_size = screen.screen_size
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
@@ -184,6 +213,7 @@ def set2d():
     glDisable(GL_DEPTH_TEST)
 
 def set3d():
+    """Enable 3d rendering."""
     screen_size = screen.screen_size
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
@@ -194,9 +224,11 @@ def set3d():
     glEnable(GL_DEPTH_TEST)
 
 def refresh_screen():
+    """Flip the screen buffer, displaying any changes since the last clear."""
     pygame.display.flip()
 
 def clear_screen(scene=None):
+    """Clear buffers."""
     glDisable(GL_SCISSOR_TEST)
     if scene and scene.graph.skybox:
         glClear(GL_DEPTH_BUFFER_BIT)
@@ -205,5 +237,6 @@ def clear_screen(scene=None):
     glEnable(GL_SCISSOR_TEST)
 
 def require_init():
+    """Called if a function requires init to have been called - raises TypeError if not."""
     if not screen.have_init:
         raise TypeError, "pyggel.init must be called before this action can occur"

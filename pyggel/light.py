@@ -1,6 +1,8 @@
 """
 pyggle.light
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The light module contains a basic light class that interfaces with the OpenGL Light(s).
 """
 
 from include import *

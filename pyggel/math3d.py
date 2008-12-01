@@ -1,11 +1,18 @@
 """
 pyggle.math3d
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The math3d module contains general 3d math functions, as well as collision detection primitives.
 """
 
 import math
 
 def move_with_rotation(pos, rot, amount):
+    """Returns a new position that is calculated based on
+       the old pos, moved by amount according to rot facing.
+       pos is the original position we are moving from,
+       rot is the 3d rotation of the object - can be one value or a three part tuple
+       amount is how much to move by"""
     try:
         a1, a2, a3 = amount
     except:
@@ -18,31 +25,46 @@ def move_with_rotation(pos, rot, amount):
     return p
 
 def get_distance(a, b):
+    """Return the distance between two points"""
     return Vector(a).distance(Vector(b))
 
 class Vector(object):
+    """A simple, 3d Vector class"""
     ctype = "Vector"
     def __init__(self, pos):
+        """Create the Vector
+           pos must be a three part tuple of the position of the Vector"""
         self.x, self.y, self.z = pos
 
     def copy(self):
+        """Return a copy of the Vector"""
         return Vector((self.x, self.y, self.z))
 
     def distance(self, other):
+        """Return the distance between this Vector and other Vector"""
         n = self - other
         return math.sqrt(n.x**2 + n.y**2 + n.z**2)
 
     def magnitude(self):
+        """Return the magnititude of the Vector"""
         return math.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     def perpendicular(self):
+        """Return a perpendicular Vector"""
         return self.cross(Vector((-self.y, self.x, self.z)))
 
     def fast_distance(self, other):
+        """Return the distance between this Vector and other Vector.
+           This method is the same as distance, except it does not sqrt the result,
+           so the comparison must be squared to be accurate, but it is faster."""
         n = self - other
         return n.x**2 + n.y**2 + n.z**2
 
     def rotate(self, vec, amount):
+        """Return a new Vector that represents this Vector rotated around Vector vec by amount.
+           vec must be another Vector
+           amount must be a three part tuple representing the rotation amount in 3d space
+           Warning - this method seems to be a little buggy, and does not match the other rotations in PYGGEL!"""
         a, b, c = amount
 
         vec2 = self - vec
@@ -82,104 +104,135 @@ class Vector(object):
         return vec2 + vec
 
     def invert(self):
+        """Return an inverted Vector"""
         return Vector((-self.x, -self.y, -self.z))
 
     def length(self):
+        """Return the distance of this Vector from (0,0,0)"""
         return self.distance(Vector((0,0,0)))
 
     def fast_length(self):
+        """Return the fast_distance of this Vector from (0,0,0)"""
         return self.fast_distance(Vector((0,0,0)))
 
     def normalize(self):
+        """Return a normalized Vector"""
         L = self.length()
         return self / Vector((L, L, L))
 
     def dot(self, other):
+        """Return the dot product between this Vector and other Vector"""
         x = self * other
         return x.x + x.y + x.z
 
     def get_pos(self):
+        """Return the position of this Vector as a tuple"""
         return self.x, self.y, self.z
 
     def set_pos(self, pos):
+        """Set the position of this Vector from a tuple"""
         self.x, self.y, self.z = pos
 
     def angle(self, other):
+        """Return the angle between this vector and another"""
         return math.acos(self.dot(other))
 
     def __sub__(self, other):
+        """Return a Vector representing this Vector subtracting other Vector"""
         return Vector((self.x-other.x, self.y-other.y, self.z-other.z))
 
     def __add__(self, other):
+        """Return a Vector representing this Vector adding other Vector"""
         return Vector((self.x+other.x, self.y+other.y, self.z+other.z))
 
     __radd__ = __add__
 
     def __mul__(self, other):
+        """Return a Vector representing this Vector multiplying other Vector"""
         return Vector((self.x*other.x, self.y*other.y, self.z*other.z))
     __rmul__ = __mul__
 
     def __div__(self, other):
+        """Return a Vector representing this Vector divided by other Vector"""
         x = self.x/other.x if (self.x and other.x) else 0
         y = self.y/other.y if (self.y and other.y) else 0
         z = self.z/other.z if (self.z and other.z) else 0
         return Vector((x, y, z))
 
     def __eq__(self, other):
+        """Return whether this Vector is at the same position as other Vector"""
         return self.x == other.x and self.y == other.y and self.z == other.z
 
     def __ne__(self, other):
+        """Return whether this Vector is not at the same position as other Vector"""
         return not self == other
 
     def __nonzero__(self):
+        """Return whether this Vector is not at (0,0,0)"""
         return self != Vector((0,0,0))
 
     def __iadd__(self, other):
+        """Adds other Vector to this Vector"""
         self.set_pos((self + other).get_pos())
 
     def __rsub__(self, other):
+        """Returns a Vector representing other Vector subtracting this Vector"""
         return Vector(*(other - self).get_pos())
 
     def __isub__(self, other):
+        """Subtracts other Vector from this Vector"""
         self.set_pos((self - other).get_pos())
 
     def __imul__(self, other):
+        """Multiplies this Vector by other Vector"""
         self.set_pos((self * other).get_pos())
 
     def __rdiv__(self, other):
+        """Returns a Vector representing other Vector divided by this Vector"""
         return Vector((other / self).get_pos())
     def __idiv__(self, other):
+        """Divides this Vector by other Vector"""
         self.set_pos((self / other).get_pos())
 
     __neg__ = invert
 
     def __abs__(self):
+        """Returns a Vector representing this Vector's absolute position"""
         return Vector((abs(self.x), abs(self.y), abs(self.z)))
 
     def __pow__(self, other):
+        """Return a Vector representing this Vector raised to other Vector"""
         return Vector((self.x**other.x, self.y**other.y, self.z**other.z))
 
     def __rpow__(self, other):
+        """Return other Vector raised to this Vector"""
         return other ** self
 
     def cross(self, other):
+        """Return the cross product between this Vector and other Vector"""
         return Vector((self.y * other.z - self.z * other.y,
                       self.z * other.x - self.x * other.z,
                       self.x * other.y - self.y * other.x))
 
     def collide(self, other):
+        """Return whether this Vector collides with another object"""
         if other.ctype == "Vector":
             return self == other
         else:
             return other.collide(self)
 
 class Sphere(Vector):
+    """A simple Sphere object - same as Vector except has a radius"""
     ctype = "Sphere"
     def __init__(self, pos, radius):
+        """Create the Sphere
+           pos must be a three part tuple of the position of the Sphere
+           radius must be a positive number"""
         Vector.__init__(self, pos)
         self.radius = radius
 
     def collide(self, other):
+        """Return whether this Sphere is colliding with another object"""
         if other.ctype == "Vector":
             return other.fast_distance(self) <= self.radius ** 2 #this so we avoid the sqrt call ;)
         elif other.ctype == "Sphere":
@@ -188,8 +241,13 @@ class Sphere(Vector):
             return other.collide(self)
 
 class AABox(Vector):
+    """A simple, axis-aligned Cube object - same as Vector except has a size(width/height/depth)"""
     ctype = "AABox"
     def __init__(self, pos, size):
+        """Create the AABox
+           pos must be a three part tuple of the position of the AABox
+           size must be either a number representing the size of the AABox - if all sides are equal,
+               otherwise, must be a three-part tuple representing the size of each direction of the AABox"""
         Vector.__init__(self, pos)
 
         try:
@@ -198,6 +256,7 @@ class AABox(Vector):
             self.width = self.height = self.depth = size
 
     def collide(self, other):
+        """Return whether this AABox is colliding with another object"""
 
         left = self.x - self.width
         right = self.x + self.width

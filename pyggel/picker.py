@@ -1,13 +1,17 @@
 """
 pyggle.picker
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The picker module contains functions and classes to assist in selecting which 3d object(s) the mouse is over.
 """
 
 from include import *
 
 def Pick512Objects(x, y, objs, camera):
-    '''Based on PyOpenGL-2.0.2.01 glSelectWithCallback
-       https://svn.red-bean.com/pyobjc/trunk/pyobjc/PyOpenGL-2.0.2.01/src/shadow/GL.GL__init__.0100.py'''
+    """Figure out which object in a list of up to 512 objects are selected.
+       x, y are the mouse coords on screen
+       objs is a list of renderable objects
+       camera must be None or the camera the scene is using"""
 
     viewport = glGetIntegerv(GL_VIEWPORT)
     glSelectBuffer(512)
@@ -33,23 +37,29 @@ def Pick512Objects(x, y, objs, camera):
 
 
 class Storage(object):
+    """A simple class to store unique integer pick names."""
     def __init__(self):
+        """Create the Storage object."""
         self.number = 0
 
 _s = Storage()
 
 def getPickName():
+    """Return a unique integer pick name."""
     _s.number += 1
     return _s.number - 1
 
 class Group(object):
+    """A simple class to store any number of renderable objects."""
     def __init__(self):
+        """Create the group."""
         self.objects = [[]] #cur obj = -1
         self.obj_dict = {}
         self.all_objs = []
         self.all_names = []
 
     def add_obj(self, obj):
+        """Add a new object to the group."""
         name = getPickName()
         self.objects[-1].append((obj, name))
         if len(self.objects[-1]) >= 512:
@@ -59,6 +69,7 @@ class Group(object):
         self.all_names.append(name)
 
     def rem_obj(self, obj):
+        """Remove obj from group."""
         try:
             o = self.all_objs.index(obj)
             name = self.all_names[o]
@@ -74,6 +85,7 @@ class Group(object):
             pass
 
     def pick(self, mouse_pos, camera=None):
+        """Run Pick512Objects(mouse_pos[0], mouse_pos[1], self.objects, camera) and return results."""
         x, y = mouse_pos
 
         near = []

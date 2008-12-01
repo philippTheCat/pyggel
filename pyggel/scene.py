@@ -1,13 +1,17 @@
 """
 pyggle.scene
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The scene module contains classes used to represent an entire group of renderable objects.
 """
 
 from include import *
 import camera, view, picker
 
 class Tree(object):
+    """A simple class used to keep track of all objects in a scene."""
     def __init__(self):
+        """Create the Tree."""
         self.render_3d = []
         self.render_3d_blend = []
         self.render_2d = []
@@ -20,7 +24,11 @@ class Tree(object):
         self.pick_3d_always = picker.Group()
 
 class PickResult(object):
+    """A simple class for storing the results of a picking operation."""
     def __init__(self, hits, depths):
+        """Create the result.
+           hits must be a three part tuple representing the topmost object picked from each render_3d* group in the scene Tree
+           depths must be a three part tuple representing the depths of the hits"""
         self.hit3d, self.hit3d_blend, self.hit3d_always = hits
         self.dep3d, self.dep3d_blend, self.dep3d_always = depths
 
@@ -33,13 +41,17 @@ class PickResult(object):
         self.hit = hits[depths.index(min(depths))]
 
 class Scene(object):
+    """A simple scene class used to store, render, pick and manipulate objects."""
     def __init__(self):
+        """Create the scene."""
         self.graph = Tree()
 
         self.render2d = True
         self.render3d = True
 
     def render(self, camera):
+        """Render all objects.
+           camera must be the camera object used to render the scene"""
         view.set3d()
         if self.graph.skybox:
             self.graph.skybox.render(camera)
@@ -70,42 +82,56 @@ class Scene(object):
                 glEnable(GL_LIGHTING)
 
     def add_2d(self, ele):
+        """Add a 2d object to the scene."""
         self.graph.render_2d.append(ele)
 
     def remove_2d(self, ele):
+        """Remove a 2d object from the scene."""
         self.graph.render_2d.remove(ele)
 
     def add_3d(self, ele):
+        """Add a 3d, non-blended, depth-tested object to the scene."""
         self.graph.render_3d.append(ele)
         self.graph.pick_3d.add_obj(ele)
 
     def remove_3d(self, ele):
+        """Remove a 3d object from the scene."""
         self.graph.render_3d.remove(ele)
         self.graph.pick_3d.rem_obj(ele)
 
     def add_3d_blend(self, ele):
+        """Add a 3d, blended, depth-tested object to the scene."""
         self.graph.render_3d_blend.append(ele)
         self.graph.pick_3d_blend.add_obj(ele)
 
     def remove_3d_blend(self, ele):
+        """Remove a 3d blended object from the scene."""
         self.graph.render_3d_blend.remove(ele)
         self.graph.pick_3d_blend.rem_obj(ele)
 
     def add_3d_always(self, ele):
+        """Add a 3d, blended, non-depth-tested (always visible) object to the scene."""
         self.graph.render_3d_always.append(ele)
         self.graph.pick_3d_always.add_obj(ele)
 
     def remove_3d_always(self, ele):
+        """Remove a 3d always visible obejct from the scene."""
         self.graph.render_3d_always.remove(ele)
         self.graph.pick_3d_always.rem_obj(ele)
 
     def add_skybox(self, ele):
+        """Add a Skybox or Skyball object to the scene."""
         self.graph.skybox = ele
 
     def add_light(self, light):
+        """Add a light to the scene."""
         self.graph.lights.append(light)
 
     def pick(self, mouse_pos, camera):
+        """Run picker and return which object(s) are hit in each render_3d* group in the scene.
+           mouse_pos is the position of the mouse on screen
+           camera is teh camera used to render the scene
+           Returns a PickResult object"""
         view.set3d()
 
         glEnable(GL_ALPHA_TEST)

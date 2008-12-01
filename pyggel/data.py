@@ -1,11 +1,13 @@
 """
 pyggle.data
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The data module holds all classes used to create, store and access OpenGL data,
+like textures, display lists and vertex arrays.
 """
 
 from include import *
 import view, misc
-import numpy
 
 class Texture(object):
     """An object to load and store an OpenGL texture"""

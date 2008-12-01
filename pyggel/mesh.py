@@ -1,39 +1,17 @@
 """
 pyggle.mesh
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The mesh module contains mesh classes for different kinds of meshes, as well as loaders for various kinds of meshes.
 """
 
 from include import *
 import os
 import image, view, misc, data
-
-def MTL(filename, path=''):
-    contents = {}
-    mtl = None
-    for line in open(os.path.join(path,filename), "r"):
-        if line.startswith('#'): continue
-        values = line.split()
-        if not values: continue
-        if values[0] == 'newmtl':
-            contents[values[1]] = None
-            mtl = values[1]
-        elif mtl is None:
-            raise ValueError, "mtl file doesn't start with newmtl stmt"
-        elif values[0] == 'map_Kd':
-            # load the texture referred to by this declaration
-            tex = image.Texture(os.path.join(path,mtl['map_Kd']), 1)
-            contents[mtl] = tex
-        elif values[0]=="Kd":
-            #create a color texture
-            tex = misc.create_empty_texture(color=map(float, values[1:]))
-            contents[mtl] = tex
-        else:
-            pass
-    return contents
  
 def OBJ(filename, swapyz=True, pos=(0,0,0),
         rotation=(0,0,0), colorize=(1,1,1,1)):
-    """Loads a Wavefront OBJ file. """
+    """Loads a Wavefront OBJ file. Returns a BasicMesh object representing the OBJ mesh."""
     view.require_init()
     svertices = []
     snormals = []
@@ -61,7 +39,24 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
         elif values[0] in ('usemtl', 'usemat'):
             material = values[1]
         elif values[0] == 'mtllib':
-            smtl = MTL(values[1], os.path.split(filename)[0])
+            path = os.path.split(filename)[0]
+            smtl = {}
+            mtl = None
+            for line in open(os.path.join(path, values[1]), "r"):
+                if line.startswith('#'): continue
+                values = line.split()
+                if not values: continue
+                if values[0] == 'newmtl':
+                    smtl[values[1]] = None
+                    mtl = values[1]
+                elif mtl is None:
+                    raise ValueError, "mtl file doesn't start with newmtl stmt"
+                elif values[0] == 'map_Kd':
+                    tex = image.Texture(os.path.join(path, mtl['map_Kd']), 1)
+                    smtl[mtl] = tex
+                elif values[0]=="Kd":
+                    tex = misc.create_empty_texture(color=map(float, values[1:]))
+                    smtl[mtl] = tex
         elif values[0] == 'f':
             face = []
             texcoords = []
@@ -110,10 +105,19 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
     return BasicMesh(gl_list, pos, rotation, verts, 1, colorize, smtl)
 
 class BasicMesh(object):
+    """A basic, static (non-animated) mesh class."""
     def __init__(self, display_list, pos=(0,0,0),
                  rotation=(0,0,0), verts=[],
                  scale=1, colorize=(1,1,1,1),
                  materials=None):
+        """Create the mesh object
+           display_list is the data.DisplayList holding the 3d rendering of the mesh
+           pos must be a three-part tuple representing the position of the mesh
+           rotation must be a three-part tuple representing the rotation of the mesh
+           verts is a list of vertices in the mesh
+           scale must be a number or three part tuple representing the scale value of the mesh
+           colorize is a 4 part tuple representing the (RGBA 0-1) color of the mesh
+           materials are the texture/color materials the mesh uses"""
         view.require_init()
         self.display_list = display_list
         self.pos = pos
@@ -125,6 +129,7 @@ class BasicMesh(object):
         self.materials = materials #this is necessary so the textures aren't deleted when they no longer have references to them!
 
     def get_dimensions(self):
+        """Return the width/height/depth of the mesh"""
         x = []
         y = []
         z = []
@@ -136,15 +141,19 @@ class BasicMesh(object):
         return max((x, abs(min(x)))), max((y, abs(min(y)))), max((z, abs(min(z))))
 
     def get_pos(self):
+        """Return the position of the mesh"""
         return self.pos
 
     def copy(self):
+        """Return a copy of the mesh, sharing the same data.DisplayList"""
         return BasicMesh(self.display_list, list(self.pos),
                          list(self.rotation), list(self.verts),
                          self.scale, list(self.colorize),
                          self.materials)
 
     def render(self, camera=None):
+        """Render the mesh
+           camera must be None of the camera the scene is using"""
         glPushMatrix()
         x,y,z = self.pos
         glTranslatef(x,y,-z)

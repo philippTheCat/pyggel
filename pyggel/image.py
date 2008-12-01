@@ -1,6 +1,8 @@
 """
 pyggle.image
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The image module contains classes to load and render both 2d and 3d (billboarded) images.
 """
 
 from include import *
