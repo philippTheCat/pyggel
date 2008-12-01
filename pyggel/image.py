@@ -250,6 +250,11 @@ class Image3D(Image):
         """Return the position of the Image3D"""
         return self.pos
 
+    def get_scale(self):
+        """Return the scale of the object."""
+        try: return self.scale[0], self.scale[1], self.scale[2]
+        except: return self.scale, self.scale, self.scale
+
     def render(self, camera=None):
         """Render the Image3D
            camera can be None or the camera the scene is using to render from"""

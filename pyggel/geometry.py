@@ -138,6 +138,11 @@ class Cube(object):
         n.scale = self.scale
         return n
 
+    def get_scale(self):
+        """Return the scale of the object."""
+        try: return self.scale[0], self.scale[1], self.scale[2]
+        except: return self.scale, self.scale, self.scale
+
 class Quad(Cube):
     """An object representing only one face of a cube"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
@@ -403,6 +408,11 @@ class Sphere(object):
         n.scale = self.scale
         n.display_list = self.display_list
         return n
+
+    def get_scale(self):
+        """Return the scale of the object."""
+        try: return self.scale[0], self.scale[1], self.scale[2]
+        except: return self.scale, self.scale, self.scale
 
 class Skyball(Sphere):
     """A Skyball is like a Skybox - except it is a sphere intead of a cube"""

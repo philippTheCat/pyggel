@@ -230,13 +230,15 @@ class Sphere(Vector):
            radius must be a positive number"""
         Vector.__init__(self, pos)
         self.radius = radius
+        self.scale = 1
 
     def collide(self, other):
         """Return whether this Sphere is colliding with another object"""
+        r = self.radius * self.scale
         if other.ctype == "Vector":
-            return other.fast_distance(self) <= self.radius ** 2 #this so we avoid the sqrt call ;)
+            return other.fast_distance(self) <= r ** 2 #this so we avoid the sqrt call ;)
         elif other.ctype == "Sphere":
-            return other.fast_distance(self) <= (self.radius + other.radius) ** 2
+            return other.fast_distance(self) <= (r + other.radius * other.scale) ** 2
         else:
             return other.collide(self)
 
@@ -255,12 +257,14 @@ class AABox(Vector):
         except:
             self.width = self.height = self.depth = size
 
+        self.scale = 1,1,1
+
     def collide(self, other):
         """Return whether this AABox is colliding with another object"""
 
-        width = self.width / 2
-        height = self.height / 2
-        depth = self.depth / 2
+        width = self.width / 2 * self.scale[0]
+        height = self.height / 2 * self.scale[1]
+        depth = self.depth / 2 * self.scale[2]
 
         left = self.x - width
         right = self.x + width
@@ -292,9 +296,9 @@ class AABox(Vector):
                     return True
 
             #test them against us now...
-            width = other.width / 2
-            height = other.height / 2
-            depth = other.depth / 2
+            width = other.width / 2 * other.scale[0]
+            height = other.height / 2 * other.scale[1]
+            depth = other.depth / 2 * other.scale[2]
 
             left = other.x - width
             right = other.x + width

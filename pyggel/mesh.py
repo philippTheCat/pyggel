@@ -144,6 +144,11 @@ class BasicMesh(object):
         """Return the position of the mesh"""
         return self.pos
 
+    def get_scale(self):
+        """Return the scale of the object."""
+        try: return self.scale[0], self.scale[1], self.scale[2]
+        except: return self.scale, self.scale, self.scale
+
     def copy(self):
         """Return a copy of the mesh, sharing the same data.DisplayList"""
         return BasicMesh(self.display_list, list(self.pos),

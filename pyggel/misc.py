@@ -61,6 +61,7 @@ class StaticObjectGroup(object):
         self.gl_list = data.DisplayList()
 
         self.visible = True
+        self.pos = (0,0,0)
 
         self.compile()
 
@@ -75,10 +76,35 @@ class StaticObjectGroup(object):
             i.render()
         self.gl_list.end()
 
+        self.compile_bounding_data = []
+        x = []
+        y = []
+        z = []
+        for i in self.objects:
+            a, b, c = i.get_dimensions()
+            x.append(a)
+            y.append(b)
+            z.append(c)
+
+        self.compile_bounding_data.append([max(x), max(y), max(z)])
+        self.compile_bounding_data.append([1,1,1])
+
     def render(self, camera=None):
         """Render the group.
            camera should be None or the camera the scene is using - only here for compatability"""
         self.gl_list.render()
+
+    def get_dimensions(self):
+        """Return the width/height/depth of the mesh"""
+        return self.compile_bounding_data[0]
+
+    def get_pos(self):
+        """Return the position of the mesh"""
+        return self.pos
+
+    def get_scale(self):
+        """Return the scale of the object."""
+        return self.compile_bounding_data[1]
 
 def save_screenshot(filename):
     """Save a screenshot to filename"""
@@ -105,6 +131,8 @@ class VolumeStore(object):
         self.vector.set_pos(self.parent.get_pos())
         self.sphere.set_pos(self.parent.get_pos())
         self.box.set_pos(self.parent.get_pos())
+        self.sphere.scale = max(self.parent.get_scale())
+        self.box.scale = self.parent.get_scale()
 
     def collide(self, other):
         """Returns whether this VolumeStore is colliding with another VolumeStore or math3d collision object."""

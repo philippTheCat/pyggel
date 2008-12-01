@@ -66,6 +66,10 @@ class Emitter3D(object):
         """Return the emitter position."""
         return self.pos
 
+    def get_scale(self):
+        """Return the scale of the object."""
+        return 1,1,1
+
     def update(self):
         """Update the emitter."""
         self.behavior.emitter_update()
@@ -234,6 +238,10 @@ class EmitterPoint(object):
     def get_pos(self):
         """Return the emitter position."""
         return self.pos
+
+    def get_scale(self):
+        """Return the scale of the object."""
+        return 1,1,1
 
     def add_particle(self, part):
         """Add the particle to the vertex array and assign it it's own index."""
