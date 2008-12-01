@@ -99,8 +99,15 @@ class VolumeStore(object):
 
         self.collision_geom = self.sphere
 
+    def update(self):
+        """Update the position of the object to match our parent object."""
+        self.vector.set_pos(self.parent.get_pos())
+        self.sphere.set_pos(self.parent.get_pos())
+        self.box.set_pos(self.parent.get_pos())
+
     def collide(self, other):
         """Returns whether this VolumeStore is colliding with another VolumeStore or math3d collision object."""
+        self.update()
         if other.ctype == "VolumeStore":
             return self.collision_geom.collide(other.collision_geom)
         else:
