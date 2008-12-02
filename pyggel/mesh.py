@@ -52,7 +52,7 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
                 elif mtl is None:
                     raise ValueError, "mtl file doesn't start with newmtl stmt"
                 elif values[0] == 'map_Kd':
-                    tex = data.Texture(os.path.join(path, mtl['map_Kd']), 1)
+                    tex = data.Texture(os.path.join(path, values[1]), 1)
                     smtl[mtl] = tex
                 elif values[0]=="Kd":
                     tex = misc.create_empty_texture(color=map(float, values[1:]))
