@@ -30,10 +30,7 @@ class Light(object):
         self.diffuse = diffuse
         self.specular = specular
         self.spot_direction = spot_direction
-        try:
-            self.gl_light = all_lights.pop()
-        except:
-            self.gl_light = None
+        self.gl_light = GL_LIGHT0
 
     def shine(self):
         """Resets the position and enables the light, called after a camera is pushed to ensure it remains in the right place"""

@@ -7,6 +7,7 @@ The scene module contains classes used to represent an entire group of renderabl
 
 from include import *
 import camera, view, picker
+from light import all_lights
 
 class Tree(object):
     """A simple class used to keep track of all objects in a scene."""
@@ -53,11 +54,13 @@ class Scene(object):
         """Render all objects.
            camera must be the camera object used to render the scene"""
         view.set3d()
+        my_lights = list(all_lights)
         if self.graph.skybox:
             self.graph.skybox.render(camera)
         if self.render3d:
             camera.push()
             for i in self.graph.lights:
+                i.gl_light = my_lights.pop()
                 i.shine()
             glEnable(GL_ALPHA_TEST)
             for i in self.graph.render_3d:
@@ -71,6 +74,9 @@ class Scene(object):
             for i in self.graph.render_3d_always:
                 if i.visible: i.render(camera)
             glEnable(GL_DEPTH_TEST)
+
+            for i in self.graph.lights:
+                i.hide()
             camera.pop()
 
         if self.render2d:
@@ -125,7 +131,14 @@ class Scene(object):
 
     def add_light(self, light):
         """Add a light to the scene."""
-        self.graph.lights.append(light)
+        if len(self.graph.lights) < 8:
+            self.graph.lights.append(light)
+        else:
+            raise ValueError("Too many Lights - max 8")
+
+    def remove_light(self, light):
+        if light in self.graph.lights:
+            self.graph.lights.remove(light)
 
     def pick(self, mouse_pos, camera):
         """Run picker and return which object(s) are hit in each render_3d* group in the scene.
