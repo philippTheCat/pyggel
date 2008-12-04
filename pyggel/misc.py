@@ -65,6 +65,8 @@ class StaticObjectGroup(object):
 
         self.compile()
 
+        self.volume = VolumeStore(self)
+
     def add_object(self, obj):
         """Add an object to the group - if called then group.compile() must be called afterwards, to recreate the display list"""
         self.objects.append(obj)
@@ -92,6 +94,8 @@ class StaticObjectGroup(object):
     def render(self, camera=None):
         """Render the group.
            camera should be None or the camera the scene is using - only here for compatability"""
+        if not self.volume.test_visible(camera):
+            return None
         self.gl_list.render()
 
     def get_dimensions(self):
@@ -143,7 +147,7 @@ class VolumeStore(object):
             return other.collide(self.collision_geom)
 
     def test_visible(self, camera):
-        if camera:
-            self.update()
-            return self.sphere.in_frustum(camera.frustum)
+##        if camera:
+##            self.update()
+##            return self.sphere.in_frustum(camera.frustum)
         return True

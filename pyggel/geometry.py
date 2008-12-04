@@ -117,6 +117,8 @@ class Cube(object):
     def render(self, camera=None):
         """Render the cube
            camera is None or the camera object the scene is using to render this object"""
+        if not self.volume.test_visible(camera):
+            return None
         glPushMatrix()
         x, y, z = self.pos
         glTranslatef(x, y, -z)
@@ -281,6 +283,8 @@ class Plane(Quad):
     def render(self, camera=None):
         """Render the Plane
            camera is None or the camera object the scene is using to render this object"""
+        if not self.volume.test_visible(camera):
+            return None
         glPushMatrix()
         x, y, z = self.pos
         glTranslatef(x, y, -z)
@@ -389,7 +393,9 @@ class Sphere(object):
 
     def render(self, camera=None):
         """Render the Sphere
-           camera can be None or the camera obejct teh scene is using"""
+           camera can be None or the camera obejct the scene is using"""
+        if not self.volume.test_visible(camera):
+            return None
         glPushMatrix()
         x, y, z = self.pos
         glTranslatef(x, y, -z)

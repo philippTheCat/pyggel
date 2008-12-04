@@ -79,6 +79,8 @@ class Emitter3D(object):
     def render(self, camera):
         """Render and update all particles.
            camera must be None of the camera the scene is using"""
+        if not self.volume.test_visible(camera):
+            return None
         self.update()
         for i in self.particles:
             i.render(camera)
@@ -273,6 +275,8 @@ class EmitterPoint(object):
     def render(self, camera):
         """Render and update all particles.
            camera must be None of the camera the scene is using"""
+        if not self.volume.test_visible(camera):
+            return None
         self.update()
         glPointSize(self.behavior.point_size)
         for i in self.particles:

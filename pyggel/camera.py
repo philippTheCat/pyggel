@@ -21,8 +21,8 @@ class Base(object):
         self.frustum = None
 
     def get_frustum(self):
-        proj = glGetFloatv(GL_PROJECTION_MATRIX).ravel()
-        modl = glGetFloatv(GL_MODELVIEW_MATRIX).ravel()
+        proj = glGetDoublev(GL_PROJECTION_MATRIX).ravel()
+        modl = glGetDoublev(GL_MODELVIEW_MATRIX).ravel()
 
         clip = numpy.empty(16, dtype=float)
 
