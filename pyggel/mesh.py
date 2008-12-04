@@ -128,6 +128,8 @@ class BasicMesh(object):
         self.visible = True
         self.materials = materials #this is necessary so the textures aren't deleted when they no longer have references to them!
 
+        self.volume = misc.VolumeStore(self)
+
     def get_dimensions(self):
         """Return the width/height/depth of the mesh"""
         x = []

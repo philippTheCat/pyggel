@@ -141,3 +141,9 @@ class VolumeStore(object):
             return self.collision_geom.collide(other.collision_geom)
         else:
             return other.collide(self.collision_geom)
+
+    def test_visible(self, camera):
+        if camera:
+            self.update()
+            return self.sphere.in_frustum(camera.frustum)
+        return True

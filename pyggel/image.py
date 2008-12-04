@@ -7,7 +7,7 @@ The image module contains classes to load and render both 2d and 3d (billboarded
 
 from include import *
 
-import view, data
+import view, data, misc
 
 class Image(object):
     """A 2d image object"""
@@ -245,6 +245,8 @@ class Image3D(Image):
                Deprecated - used to create an image from a surface instead of loading"""
         Image.__init__(self, filename, pos, rotation,
                        scale, colorize, dont_load)
+
+        self.volume = misc.VolumeStore(self)
 
     def get_dimensions(self):
         """Return a tuple of (1,1,1) signifying the 3d dimensions of teh image - used by the quad tree"""

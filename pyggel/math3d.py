@@ -221,6 +221,16 @@ class Vector(object):
         else:
             return other.collide(self)
 
+    def get_plane_distance(self, plane):
+        return plane[0] * self.x + plane[1] * self.y +\
+               plane[2] * self.z + plane[3]
+
+    def in_frustum(self, frustum):
+        for plane in frustum:
+            if self.get_plane_distance(plane) < 0:
+                return False
+        return True
+
 class Sphere(Vector):
     """A simple Sphere object - same as Vector except has a radius"""
     ctype = "Sphere"
@@ -241,6 +251,12 @@ class Sphere(Vector):
             return other.fast_distance(self) <= (r + other.radius * other.scale) ** 2
         else:
             return other.collide(self)
+
+    def in_frustum(self, frustum):
+        for plane in frustum:
+            if self.get_plane_distance(plane) < -self.radius:
+                return False
+        return True
 
 class AABox(Vector):
     """A simple, axis-aligned Cube object - same as Vector except has a size(width/height/depth)"""

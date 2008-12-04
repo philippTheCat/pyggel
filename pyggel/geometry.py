@@ -6,7 +6,7 @@ The geometry module contains classes used to render 3d geometric primitives.
 """
 
 from include import *
-import view, data
+import view, data, misc
 
 class Cube(object):
     """A geometric cube that can be colored and textured"""
@@ -66,6 +66,8 @@ class Cube(object):
         self.visible = True
 
         self._compile()
+
+        self.volume = misc.VolumeStore(self)
 
     def get_dimensions(self):
         """Return a tuple of the size of the cube - to be used by the quad tree and collision testing"""
@@ -365,6 +367,8 @@ class Sphere(object):
         self.visible = True
 
         self._compile()
+
+        self.volume = misc.VolumeStore(self)
 
     def get_dimensions(self):
         """Return a three part tuple of the radius of the sphere - used in teh quadtree and collision testing"""
