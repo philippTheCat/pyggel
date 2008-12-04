@@ -225,6 +225,10 @@ class Image(object):
             if i[0] == image:
                 self.to_be_blitted.remove(i)
 
+    def sub_image(self, topleft, size):
+        image = self._pimage.subsurface(topleft, size)
+        return Image(image, self.pos, self.rotation, self.scale, self.colorize)
+
 
 class Image3D(Image):
     """A billboarded 3d image"""
@@ -379,3 +383,7 @@ class Image3D(Image):
         glEnd()
 
         self.display_list.end()
+
+    def sub_image(self, topleft, size):
+        image = self._pimage.subsurface(topleft, size)
+        return Image3D(image, self.pos, self.rotation, self.scale, self.colorize)

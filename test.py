@@ -18,6 +18,9 @@ def main():
     img.colorize=(1,0,0,1)
     img2 = pyggel.image.Image("data/ar.png", pos=(50,0))
     img2.colorize=(1,1,1,0.5)
+    img2sub = img2.sub_image((0,0), (15, 15))
+    img2sub.colorize=(1, 0, 0, 1)
+    img2sub.pos = (100, 75)
     img3d = []
     for x in xrange(10):
         img3d.append(pyggel.image.Image3D("data/tile_example.png",
@@ -42,6 +45,7 @@ def main():
     my_scene = pyggel.scene.Scene()
     my_scene.add_2d(img)
     my_scene.add_2d(img2)
+    my_scene.add_2d(img2sub)
     my_scene.add_2d(img4)
     my_scene.add_3d(obj)
     my_scene.add_3d(obj2)
