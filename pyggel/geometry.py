@@ -210,7 +210,7 @@ class Quad(Cube):
         n.display_list = self.display_list
         return n
 
-    def render(self, camera):
+    def render(self, camera=None):
         """Render the Quad
            camera is None or the camera object the scene is using to render this object"""
         Cube.render(self, camera)
