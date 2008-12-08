@@ -94,8 +94,6 @@ class StaticObjectGroup(object):
     def render(self, camera=None):
         """Render the group.
            camera should be None or the camera the scene is using - only here for compatability"""
-        if not self.volume.test_visible(camera):
-            return None
         self.gl_list.render()
 
     def get_dimensions(self):
@@ -145,9 +143,3 @@ class VolumeStore(object):
             return self.collision_geom.collide(other.collision_geom)
         else:
             return other.collide(self.collision_geom)
-
-    def test_visible(self, camera):
-##        if camera:
-##            self.update()
-##            return self.sphere.in_frustum(camera.frustum)
-        return True

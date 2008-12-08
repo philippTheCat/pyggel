@@ -161,8 +161,6 @@ class BasicMesh(object):
     def render(self, camera=None):
         """Render the mesh
            camera must be None of the camera the scene is using"""
-        if not self.volume.test_visible(camera):
-            return None
         glPushMatrix()
         x,y,z = self.pos
         glTranslatef(x,y,-z)

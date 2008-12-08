@@ -264,8 +264,6 @@ class Image3D(Image):
     def render(self, camera=None):
         """Render the Image3D
            camera can be None or the camera the scene is using to render from"""
-        if not self.volume.test_visible(camera):
-            return None
         h, w = self.get_size()
 
         pos = self.pos
