@@ -21,7 +21,6 @@ class Tree(object):
         self.lights = []
 
         self.hash_3d = misc.SpaceTree(hs)
-        self.partition_3d = misc.SpaceTree(ps)
 
         self.pick_3d = picker.Group()
         self.pick_3d_blend = picker.Group()
