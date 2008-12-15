@@ -143,3 +143,71 @@ class VolumeStore(object):
             return self.collision_geom.collide(other.collision_geom)
         else:
             return other.collide(self.collision_geom)
+
+class SpaceTreeObject(object):
+    def __init__(self, tree, obj): #obj should be a VolumeStore object...
+        self.tree = tree
+        self.obj = obj
+        self.in_nodes = []
+
+    def norm_node(self, pos):
+        return ((int(pos[0] / self.size) if pos[0] else 0),
+                (int(pos[1] / self.size) if pos[1] else 0),
+                (int(pos[2] / self.size) if pos[2] else 0))
+
+    def update(self):
+        #clear current nodes:
+        for i in self.in_nodes:
+            self.tree.nodes[i].remove(self.obj)
+        self.in_nodes = []
+
+        #get current obj pos
+        self.obj.update()
+        sphere = math3d.Sphere(self.norm_node(self.obj.sphere.get_pos()),
+                               self.obj.sphere.radius) #get a sphere bounding volume for the object...
+        sphere.radius = sphere.radius / self.tree.size if sphere.radius else 0
+
+        #update nodes...
+        c = math3d.AABox((0,0,0), self.tree.size)
+        for n in self.tree.get_possible_nodes((x, y, z), sphere.radius):
+            c.set_pos(n)
+            if c.collide(sphere):
+                self.tree.add_node(n)
+                self.tree.nodes[n].append(self.obj)
+                self.in_nodes.append(n)
+
+class SpaceTree(object):
+    def __init__(self, size=10):
+        self.size = size
+        self.nodes = {}
+        self.objs = {}
+
+    def add_node(self, pos): #should never need to be removed - just add slowly...
+        if not pos in self.nodes:
+            self.nodes[pos] = []
+
+    def get_possible_nodes(self, pos, radius):
+        r = radius + 1
+        n = []
+        xr = xrange(-r, r)
+        for x in xr:
+            for y in xr:
+                for z in xr:
+                    n.append((x, y, z))
+        return n
+
+    def add_object(self, obj):
+        self.objs[obj] = SpaceTreeObject(self, obj)
+        self.objs[obj].update()
+
+    def get_nodes_object_is_in(self, obj):
+        return self.objs[obj].in_nodes
+
+    def update_object(self, obj):
+        self.objs[obj].update()
+
+    def remove_object(self, obj):
+        sobj = self.objs[obj]
+        for i in sobj.in_nodes:
+            self.nodes[i].remove(obj)
+        del self.objs[obj]
