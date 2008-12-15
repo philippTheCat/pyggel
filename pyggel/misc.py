@@ -84,6 +84,49 @@ class ObjectInstance(object):
         l = []; [l.extend(i) for i in self._groups]
         return self in l
 
+class VolumeStore(object):
+    """A class that is used by objects, that stores a Vector, a Sphere and an AABox representing the object.
+       Used for collision detection, the quadtree, and eventually frustum culling."""
+    ctype = "VolumeStore"
+    def __init__(self, parent):
+        """Create the VolumeStore.
+           parent must be the renderable object that is creating/using the store"""
+        self.parent = parent
+
+        self.vector = math3d.Vector((0,0,0))
+        self.sphere = math3d.Sphere((0,0,0), max(parent.get_dimensions()))
+        x, y, z = parent.get_dimensions()
+        self.box = math3d.AABox((0,0,0), (x*2, y*2, z*2))
+
+        self.collision_geom = self.sphere
+        self.collisions = []
+
+    def update(self):
+        """Update the position of the object to match our parent object.
+           Gather collisions as well..."""
+        self.vector.set_pos(self.parent.get_pos())
+        self.sphere.set_pos(self.parent.get_pos())
+        self.box.set_pos(self.parent.get_pos())
+        self.sphere.scale = max(self.parent.get_scale())
+        self.box.scale = self.parent.get_scale()
+
+        self.collisions = []
+
+        if self.parent.scene:
+            allo = self.parent.scene.hash_3d.get_nodes_obj_is_in(self.parent)
+            l = []; [l.extend(i) for i in allo]
+            for x in set(l): #get all_objects!
+                if self.collision_geom.collide(x.collision_geom):
+                    self.collisions.append(x)
+
+    def collide(self, other):
+        """Returns whether this VolumeStore is colliding with another VolumeStore or math3d collision object."""
+        self.update()
+        if other.ctype == "VolumeStore":
+            return self.collision_geom.collide(other.collision_geom)
+        else:
+            return other.collide(self.collision_geom)
+
 class StaticObjectGroup(object):
     """A class that takes a list of renderable objects (that won't ever change position, rotation, etc.
            This includes Image3D's - as they require a dynamic look-up of the camera to billboard correctly)
@@ -99,7 +142,7 @@ class StaticObjectGroup(object):
 
         self.compile()
 
-        self.volume = VolumeStore(self)
+        self.scene = None
 
     def add_object(self, obj):
         """Add an object to the group - if called then group.compile() must be called afterwards, to recreate the display list"""
@@ -112,35 +155,14 @@ class StaticObjectGroup(object):
             i.render()
         self.gl_list.end()
 
-        self.compile_bounding_data = []
-        x = []
-        y = []
-        z = []
-        for i in self.objects:
-            a, b, c = i.get_dimensions()
-            x.append(a)
-            y.append(b)
-            z.append(c)
-
-        self.compile_bounding_data.append([max(x), max(y), max(z)])
-        self.compile_bounding_data.append([1,1,1])
-
     def render(self, camera=None):
         """Render the group.
            camera should be None or the camera the scene is using - only here for compatability"""
         self.gl_list.render()
 
-    def get_dimensions(self):
-        """Return the width/height/depth of the mesh"""
-        return self.compile_bounding_data[0]
-
     def get_pos(self):
         """Return the position of the mesh"""
         return self.pos
-
-    def get_scale(self):
-        """Return the scale of the object."""
-        return self.compile_bounding_data[1]
 
 def save_screenshot(filename):
     """Save a screenshot to filename"""
@@ -161,14 +183,25 @@ class VolumeStore(object):
         self.box = math3d.AABox((0,0,0), (x*2, y*2, z*2))
 
         self.collision_geom = self.sphere
+        self.collisions = []
 
     def update(self):
-        """Update the position of the object to match our parent object."""
+        """Update the position of the object to match our parent object.
+           Gather collisions as well..."""
         self.vector.set_pos(self.parent.get_pos())
         self.sphere.set_pos(self.parent.get_pos())
         self.box.set_pos(self.parent.get_pos())
         self.sphere.scale = max(self.parent.get_scale())
         self.box.scale = self.parent.get_scale()
+
+        self.collisions = []
+
+        if self.parent.scene:
+            allo = self.parent.scene.hash_3d.get_nodes_obj_is_in(self.parent)
+            l = []; [l.extend(i) for i in allo]
+            for x in set(l): #get all_objects!
+                if self.collision_geom.collide(x.collision_geom):
+                    self.collisions.append(x)
 
     def collide(self, other):
         """Returns whether this VolumeStore is colliding with another VolumeStore or math3d collision object."""
@@ -177,7 +210,7 @@ class VolumeStore(object):
             return self.collision_geom.collide(other.collision_geom)
         else:
             return other.collide(self.collision_geom)
-
+        
 class SpaceTreeObject(object):
     def __init__(self, tree, obj): #obj should be a VolumeStore object...
         self.tree = tree
@@ -185,9 +218,9 @@ class SpaceTreeObject(object):
         self.in_nodes = []
 
     def norm_node(self, pos):
-        return ((int(pos[0] / self.size) if pos[0] else 0),
-                (int(pos[1] / self.size) if pos[1] else 0),
-                (int(pos[2] / self.size) if pos[2] else 0))
+        return ((int(pos[0] / self.tree.size) if pos[0] else 0),
+                (int(pos[1] / self.tree.size) if pos[1] else 0),
+                (int(pos[2] / self.tree.size) if pos[2] else 0))
 
     def update(self):
         #clear current nodes:
@@ -195,15 +228,17 @@ class SpaceTreeObject(object):
             self.tree.nodes[i].remove(self.obj)
         self.in_nodes = []
 
+        objv = self.obj.volume
+
         #get current obj pos
-        self.obj.update()
-        sphere = math3d.Sphere(self.norm_node(self.obj.sphere.get_pos()),
-                               self.obj.sphere.radius) #get a sphere bounding volume for the object...
+        objv.update()
+        sphere = math3d.Sphere(self.norm_node(objv.sphere.get_pos()),
+                               objv.sphere.radius) #get a sphere bounding volume for the object...
         sphere.radius = sphere.radius / self.tree.size if sphere.radius else 0
 
         #update nodes...
         c = math3d.AABox((0,0,0), self.tree.size)
-        for n in self.tree.get_possible_nodes((x, y, z), sphere.radius):
+        for n in self.tree.get_possible_nodes(sphere.get_pos(), sphere.radius):
             c.set_pos(n)
             if c.collide(sphere):
                 self.tree.add_node(n)
@@ -223,7 +258,7 @@ class SpaceTree(object):
     def get_possible_nodes(self, pos, radius):
         r = radius + 1
         n = []
-        xr = xrange(-r, r)
+        xr = xrange(-int(r)-1, int(r)+1)
         for x in xr:
             for y in xr:
                 for z in xr:
@@ -231,8 +266,12 @@ class SpaceTree(object):
         return n
 
     def add_object(self, obj):
-        self.objs[obj] = SpaceTreeObject(self, obj)
-        self.objs[obj].update()
+        if isinstance(obj, StaticObjectGroup):
+            for i in obj.objects:
+                self.add_object(i)
+        else:
+            self.objs[obj] = SpaceTreeObject(self, obj)
+            self.objs[obj].update()
 
     def get_nodes_object_is_in(self, obj):
         return self.objs[obj].in_nodes
@@ -241,7 +280,15 @@ class SpaceTree(object):
         self.objs[obj].update()
 
     def remove_object(self, obj):
-        sobj = self.objs[obj]
-        for i in sobj.in_nodes:
-            self.nodes[i].remove(obj)
-        del self.objs[obj]
+        if isinstance(obj, StaticObjectGroup):
+            for i in obj.objects:
+                self.remove_object(i)
+        else:
+            sobj = self.objs[obj]
+            for i in sobj.in_nodes:
+                self.nodes[i].remove(obj)
+            del self.objs[obj]
+
+    def sort(self, func):
+        for i in self.nodes:
+            self.nodes[i].sort(func)

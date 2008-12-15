@@ -246,6 +246,8 @@ class Image3D(Image):
         Image.__init__(self, filename, pos, rotation,
                        scale, colorize, dont_load)
 
+        self.scene = None
+
         self.volume = misc.VolumeStore(self)
 
     def get_dimensions(self):

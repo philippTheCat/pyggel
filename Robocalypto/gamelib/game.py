@@ -194,6 +194,8 @@ class Game(object):
         self.update_camera_pos()
         for o in self.objects:
             o.update()
+
+        walls = []
         for w in self.walls:
             r = [w.pos[0]-3.0, w.pos[1]-3.0, 6.0, 6.0]
             self.player.collide(r) 

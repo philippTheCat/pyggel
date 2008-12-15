@@ -128,6 +128,7 @@ class BasicMesh(object):
         self.visible = True
         self.materials = materials #this is necessary so the textures aren't deleted when they no longer have references to them!
 
+        self.scene = None
         self.volume = misc.VolumeStore(self)
 
     def get_dimensions(self):
@@ -140,7 +141,11 @@ class BasicMesh(object):
             y.append(i[1])
             z.append(i[2])
 
-        return max((x, abs(min(x)))), max((y, abs(min(y)))), max((z, abs(min(z))))
+        x.append(abs(min(x)))
+        y.append(abs(min(y)))
+        z.append(abs(min(z)))
+
+        return max(x), max(y), max(z)
 
     def get_pos(self):
         """Return the position of the mesh"""

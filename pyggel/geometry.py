@@ -68,6 +68,7 @@ class Cube(object):
         self._compile()
 
         self.volume = misc.VolumeStore(self)
+        self.scene = None
 
     def get_dimensions(self):
         """Return a tuple of the size of the cube - to be used by the quad tree and collision testing"""
@@ -367,6 +368,8 @@ class Sphere(object):
         self.visible = True
 
         self._compile()
+
+        self.scene = None
 
         self.volume = misc.VolumeStore(self)
 
