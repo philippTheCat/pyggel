@@ -4,9 +4,10 @@ from pygame.locals import *
 import math, random
 
 import pyggel
+from pyggel.misc import ObjectGroup as Group
+from pyggel.misc import ObjectInstance
 
 def colliderect(a, b):
-    print a, b
     return a[0] + a[2] > b[0] and b[0] + b[2] > a[0] and a[1] + a[3] > b[1] and b[1] + b[3] > a[1]
 
 def collidepoint(p, r):
@@ -15,44 +16,14 @@ def collidepoint(p, r):
             return True
     return False
 
-class Group(object):
-    
-    def __init__(self):
-        self._objects = []
-    
-    def __iter__(self):
-        return iter(self._objects)
-    
-    def __len__(self):
-        return len(self._objects)
-   
-    def add(self, o):
-        self._objects.append(o)
-   
-    def remove(self, o):
-        if o in self._objects:
-            self._objects.remove(o)
-
-class Object(object):
+class Object(ObjectInstance):
     
     def __init__(self, groups):
         self.grid_color = [0, 0, 0]
-        for g in groups:
-            g.add(self)
-        self._groups = groups
-        
-    def kill(self):
-        for g in self._groups:
-            g.remove(self)
-            
-    def update(self):
-        pass
+        ObjectInstance.__init__(self, groups)
         
     def draw(self, surface):
         surface.blit(self.image, self.rect)
-        
-    def alive(self):
-        return self in self._groups[0] #HACK -- need to check to see if its in all groups efficiently
 
 class GameObject(Object):
     

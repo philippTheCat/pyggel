@@ -50,6 +50,40 @@ def create_empty_image3d(size=(2,2), color=(1,1,1,1)):
     i.fill((255,255,255,255))
     return image.Image3D(i, colorize=color)
 
+class ObjectGroup(object):
+    def __init__(self):
+        self._objects = []
+
+    def __iter__(self):
+        return iter(self._objects)
+
+    def __len__(self):
+        return len(self._objects)
+
+    def add(self, o):
+        self._objects.append(o)
+
+    def remove(self, o):
+        if o in self._objects:
+            self._objects.remove(o)
+
+class ObjectInstance(object):
+    def __init__(self, groups):
+        for g in groups:
+            g.add(self)
+        self._groups = groups
+
+    def kill(self):
+        for g in self._groups:
+            g.remove(self)
+
+    def update(self):
+        pass
+
+    def alive(self):
+        l = []; [l.extend(i) for i in self._groups]
+        return self in l
+
 class StaticObjectGroup(object):
     """A class that takes a list of renderable objects (that won't ever change position, rotation, etc.
            This includes Image3D's - as they require a dynamic look-up of the camera to billboard correctly)
