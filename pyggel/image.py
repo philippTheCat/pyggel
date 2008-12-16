@@ -226,6 +226,7 @@ class Image(object):
                 self.to_be_blitted.remove(i)
 
     def sub_image(self, topleft, size):
+        """Return a new Image object representing a smaller region of this Image."""
         image = self._pimage.subsurface(topleft, size)
         return Image(image, self.pos, self.rotation, self.scale, self.colorize)
 
@@ -385,5 +386,6 @@ class Image3D(Image):
         self.display_list.end()
 
     def sub_image(self, topleft, size):
+        """Return a new Image3D object representing a smaller region of this Image3D."""
         image = self._pimage.subsurface(topleft, size)
         return Image3D(image, self.pos, self.rotation, self.scale, self.colorize)

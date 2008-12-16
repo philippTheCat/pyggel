@@ -51,36 +51,48 @@ def create_empty_image3d(size=(2,2), color=(1,1,1,1)):
     return image.Image3D(i, colorize=color)
 
 class ObjectGroup(object):
+    """A simple Group object for storing a lot of similar objects in."""
     def __init__(self):
+        """Create the group."""
         self._objects = []
 
     def __iter__(self):
+        """Return an iteration object to iterate over all objects in the group."""
         return iter(self._objects)
 
     def __len__(self):
+        """Return the size of the group."""
         return len(self._objects)
 
     def add(self, o):
+        """Add object "o" to group."""
         self._objects.append(o)
 
     def remove(self, o):
+        """Remove object "o" from group."""
         if o in self._objects:
             self._objects.remove(o)
 
 class ObjectInstance(object):
+    """An instance of a group of objects."""
     def __init__(self, groups):
+        """Create the instance.
+           groups are the ObjectGroup's this instance belongs to."""
         for g in groups:
             g.add(self)
         self._groups = groups
 
     def kill(self):
+        """Kill the instance, removes from all groups."""
         for g in self._groups:
             g.remove(self)
 
     def update(self):
+        """Update the instance."""
         pass
 
     def alive(self):
+        """Return whether or not the object is alive."""
         l = []; [l.extend(i) for i in self._groups]
         return self in l
 

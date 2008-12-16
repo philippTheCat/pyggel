@@ -10,6 +10,7 @@ import scene, font, geometry, misc, picker, data
 import particle
 
 def quit():
+    """Deinitialize PYGGEL..."""
     view.clear_screen()
     glFlush()
     pygame.quit()
@@ -17,4 +18,5 @@ def quit():
 init = view.init
 
 def get_events():
+    """Return (for now) generated pygame events..."""
     return pygame.event.get()
