@@ -246,10 +246,6 @@ class Image3D(Image):
         Image.__init__(self, filename, pos, rotation,
                        scale, colorize, dont_load)
 
-        self.scene = None
-
-        self.volume = misc.VolumeStore(self)
-
     def get_dimensions(self):
         """Return a tuple of (1,1,1) signifying the 3d dimensions of teh image - used by the quad tree"""
         return 1, 1, 1

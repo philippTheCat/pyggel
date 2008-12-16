@@ -58,10 +58,6 @@ class Emitter3D(object):
 
         self.visible = True
 
-        self.scene = None
-
-        self.volume = misc.VolumeStore(self)
-
     def get_dimensions(self):
         """Return the maximum dimensions (width/height/depth) of the emitter and particles."""
         return self.behavior.get_dimensions()
@@ -234,10 +230,6 @@ class EmitterPoint(object):
 
         self.visible = True
         self.particle_type = ParticlePoint
-
-        self.scene = None
-
-        self.volume = misc.VolumeStore(self)
 
     def get_dimensions(self):
         """Return the maximum dimensions (width/height/depth) of the emitter and particles."""

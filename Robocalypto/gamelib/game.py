@@ -55,14 +55,6 @@ def level_parse(game, scene):
     for row in GRID:
         for column in row:
             
-##            #Floor tiles
-##            quad = pyggel.geometry.Quad(4.55, pos=[x*5, 0, y*5], facing="bottom", texture=pyggel.data.Texture("data/floor.png"), tile=2)
-##            static.append(quad)
-##            
-##            #Ceiling tiles
-##            quad = pyggel.geometry.Quad(4.55, pos=[x*5, 0, y*5], facing="top", texture=pyggel.data.Texture("data/ceiling.png"), tile=2)
-##            static.append(quad)
-            
             #Walls
             if column == 1:
                 box = pyggel.geometry.Cube(4.55, texture=[data.Texture("data/%s" % random.choice(["wall.png", "door.png", "wall.png", "wall.png"]))]*6)
