@@ -23,6 +23,6 @@ The examples and tutorials (along with assets) are released into the public doma
 
 
 CONTRIBUTORS:
-Matthew Roe: project lead / main programmer / assistant developer(PYGGEL programming and optimizations)
+Matthew Roe: project lead / main programmer / assistant developer of Robocalypto (PYGGEL programming and optimizations)
 Ian Mallet: programmer / tester
 Pymike: tester / lead developer(artist, main programmer, testing) of Robocalypto demo.
