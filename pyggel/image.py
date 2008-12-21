@@ -389,3 +389,19 @@ class Image3D(Image):
         """Return a new Image3D object representing a smaller region of this Image3D."""
         image = self._pimage.subsurface(topleft, size)
         return Image3D(image, self.pos, self.rotation, self.scale, self.colorize)
+
+def create_empty_image(size=(2,2), color=(1,1,1,1)):
+    """Same as create_empty_texture, except returns an image.Image instead"""
+    i = pygame.Surface(size)
+    if len(color) == 3:
+        color = color + (1,)
+    i.fill((255,255,255,255))
+    return Image(i, colorize=color)
+
+def create_empty_image3d(size=(2,2), color=(1,1,1,1)):
+    """Same as create_empty_texture, except returns an image.Image3D instead"""
+    i = pygame.Surface(size)
+    if len(color) == 3:
+        color = color + (1,)
+    i.fill((255,255,255,255))
+    return Image3D(i, colorize=color)
