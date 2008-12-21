@@ -77,6 +77,7 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
 
     gl_list = data.DisplayList()
     gl_list.begin()
+    glBegin(GL_POLYGON)
     for face in sfaces:
         vertices, normals, texture_coords, material = face
         if smtl:
@@ -87,14 +88,15 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
                 blank_texture.bind()
         else:
             blank_texture.bind()
-        glBegin(GL_POLYGON)
+##        glBegin(GL_POLYGON)
         for i in xrange(len(vertices)):
             if normals[i] > 0:
                 glNormal3fv(snormals[normals[i] - 1])
             if texture_coords[i] > 0:
                 glTexCoord2fv(stexcoords[texture_coords[i] - 1])
             glVertex3fv(svertices[vertices[i] - 1])
-        glEnd()
+##        glEnd()
+    glEnd()
     gl_list.end()
 
     verts = []
