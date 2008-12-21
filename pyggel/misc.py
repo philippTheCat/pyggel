@@ -6,7 +6,7 @@ The misc module contains various functions and classes that don't fit anywhere e
 """
 
 from include import *
-import image, view, data, math3d
+import view, math3d
 
 import random
 

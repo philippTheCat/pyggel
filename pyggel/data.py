@@ -7,7 +7,7 @@ like textures, display lists and vertex arrays.
 """
 
 from include import *
-import view, misc
+import view
 
 class Texture(object):
     """An object to load and store an OpenGL texture"""

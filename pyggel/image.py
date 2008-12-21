@@ -7,7 +7,7 @@ The image module contains classes to load and render both 2d and 3d (billboarded
 
 from include import *
 
-import view, data, misc
+import view, data
 
 class Image(object):
     """A 2d image object"""
