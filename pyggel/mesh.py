@@ -8,6 +8,7 @@ The mesh module contains mesh classes for different kinds of meshes, as well as 
 from include import *
 import os
 import image, view, data
+from data import blank_texture
  
 def OBJ(filename, swapyz=True, pos=(0,0,0),
         rotation=(0,0,0), colorize=(1,1,1,1)):
