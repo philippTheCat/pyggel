@@ -4,6 +4,10 @@ OVERVIEW:
 PYGGEL (PYthon Graphical Game Engine and Libraries) is an Opengl powered 2d/3d game engine.
 It supports 3d models, lights, shadows, etc. as well as a wide array of 2d operations, such as images and blitting.
 
+Currently PYGGEL includes one demo called Robocalypto. To start:
+From the commandline: cd into the Robocalypto directory and execute python run_game.py
+Elsewhere: Double click run_game.py in the Robocalypto directory
+
 
 REQUIREMENTS:
 PyOpenGL version 3.0.0 or higher (untested on lower, but may work)
@@ -25,4 +29,5 @@ The examples and tutorials (along with assets) are released into the public doma
 CONTRIBUTORS:
 Matthew Roe: project lead / main programmer / assistant developer of Robocalypto (PYGGEL programming and optimizations)
 Ian Mallet: programmer / tester
-Pymike: tester / lead developer(artist, main programmer, testing) of Robocalypto demo.
+Pymike: tester / lead developer (artist, main programmer, testing) of Robocalypto demo.
+Markus Martin: bug fixes / tester
