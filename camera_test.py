@@ -2,7 +2,7 @@ import pyggel
 from pyggel import *
 
 def main():
-    pyggel.init()
+    pyggel.init(icon_image="data/ar.png")
 
 ##    pyggel.view.set_lighting(False)
 

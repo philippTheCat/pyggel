@@ -68,7 +68,7 @@ class _Screen(object):
 
 screen = _Screen()
 
-def init(screen_size=None, use_psyco=True):
+def init(screen_size=None, use_psyco=True, icon_image=None):
     """Initialize the display, OpenGL and whether to use psyco or not.
        screen_size must be the pixel dimensions of the display window
        use_psyco must be a boolean value indicating whether psyco should be used or not"""
@@ -85,6 +85,14 @@ def init(screen_size=None, use_psyco=True):
             pass
 
     pygame.init()
+
+    if type(icon_image) is type(""):
+        pygame.display.set_icon(pygame.image.load(icon_image))
+    elif icon_image:
+        pygame.display.set_icon(icon_image)
+
+    set_title()
+
     build_screen()
 
     glEnable(GL_TEXTURE_2D)
@@ -131,6 +139,9 @@ def set_fullscreen(boolean):
 def toggle_fullscreen():
     """Toggles fullscreen mode."""
     set_fullscreen(not screen.fullscreen)
+
+def set_title(text="PYGGEL App"):
+    pygame.display.set_caption(text)
 
 def set_lighting(boolean):
     """Enable/Disable OpenGL lighting."""
