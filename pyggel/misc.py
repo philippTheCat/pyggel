@@ -6,8 +6,7 @@ The misc module contains various functions and classes that don't fit anywhere e
 """
 
 from include import *
-import view, math3d
-from data import DisplayList
+import view, math3d, data
 
 import random
 
@@ -72,7 +71,7 @@ class StaticObjectGroup(object):
         """Create the group.
            objects must be a list of renderable objects"""
         self.objects = objects
-        self.gl_list = DisplayList()
+        self.gl_list = data.DisplayList()
 
         self.visible = True
         self.pos = (0,0,0)
