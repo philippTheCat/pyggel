@@ -16,6 +16,7 @@ class _Screen(object):
     def __init__(self):
         """Create the screen."""
         self.screen_size = (640, 480)
+        self.screen_size_2d = (640, 480)
         self.rect = pygame.rect.Rect(0,0,*self.screen_size)
         self.fullscreen = False
         self.hwrender = True
@@ -28,16 +29,26 @@ class _Screen(object):
 
         self.have_init = False
 
+        self.icon = None
+        self.title = None
+
         self.clips = [(0,0,self.screen_size[0],self.screen_size[1])]
         glScissor(*self.clips[0])
 
-    def set_size(self, size):
+    def set_size(self, size, size2d):
         """Set the screen size."""
-        self.screen_size = size
+        if size:
+            self.screen_size = size
+        if size2d:
+            self.screen_size_2d = size2d
+
+        size = self.screen_size
         self.clips = [] #clear!
         self.clips.append((0,0,size[0],size[1]))
         self.rect = pygame.rect.Rect(0,0,*size)
         glScissor(*self.clips[0])
+
+        return self.screen_size
 
     def get_params(self):
         """Return the pygame window initiation parameters needed."""
@@ -68,14 +79,16 @@ class _Screen(object):
 
 screen = _Screen()
 
-def init(screen_size=None, use_psyco=True, icon_image=None):
+def init(screen_size=None, screen_size_2d=None,
+         use_psyco=True, icon_image=None,
+         fullscreen=False, hwrender=True,
+         decorated=True):
     """Initialize the display, OpenGL and whether to use psyco or not.
        screen_size must be the pixel dimensions of the display window
        use_psyco must be a boolean value indicating whether psyco should be used or not"""
-    if screen_size:
-        screen.set_size(screen_size)
-    else:
-        screen_size = screen.screen_size
+    if screen_size and not screen_size_2d:
+        screen_size_2d = screen_size
+    screen_size = screen.set_size(screen_size, screen_size_2d)
 
     if use_psyco:
         try:
@@ -84,12 +97,17 @@ def init(screen_size=None, use_psyco=True, icon_image=None):
         except:
             pass
 
+    screen.fullscreen = fullscreen
+    screen.hwrender = hwrender
+    screen.decorated = decorated
+
     pygame.init()
 
     if type(icon_image) is type(""):
         pygame.display.set_icon(pygame.image.load(icon_image))
     elif icon_image:
         pygame.display.set_icon(icon_image)
+    screen.icon = icon_image
 
     set_title()
 
@@ -131,17 +149,9 @@ def set_background_color(rgb=(0,0,0)):
     """Set the background color (RGB 0-1) of the display."""
     glClearColor(*rgb+(0,))
 
-def set_fullscreen(boolean):
-    """Enable/Disable fullscreen mode."""
-    screen.fullscreen = boolean
-    build_screen()
-
-def toggle_fullscreen():
-    """Toggles fullscreen mode."""
-    set_fullscreen(not screen.fullscreen)
-
 def set_title(text="PYGGEL App"):
     pygame.display.set_caption(text)
+    screen.title = text
 
 def set_lighting(boolean):
     """Enable/Disable OpenGL lighting."""
@@ -154,24 +164,6 @@ def set_lighting(boolean):
 def toggle_lighting():
     """Toggle OpenGL lighting."""
     set_lighting(not screen.lighting)
-
-def set_hardware_render(boolean):
-    """Enable/Disable hardware rendering of screen."""
-    screen.hwrender = boolean
-    build_screen()
-
-def toggle_hardware_render():
-    """Toggle hardware rendering."""
-    set_hardware_render(not screen.hwrender)
-
-def set_decorated(boolean):
-    """Enable/Disable window decorations (title bar, sides, etc.)"""
-    screen.decorated = boolean
-    build_screen()
-
-def toggle_decorated():
-    """Toggle window decorations."""
-    set_decorated(not screen.decorated)
 
 def set_fog_color(rgba=(.5,.5,.5,.5)):
     """Set the fog color (RGBA 0-1)"""
