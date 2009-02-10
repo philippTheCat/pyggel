@@ -18,6 +18,7 @@ class _Screen(object):
         self.screen_size = (640, 480)
         self.screen_size_2d = (640, 480)
         self.rect = pygame.rect.Rect(0,0,*self.screen_size)
+        self.rect2d = pygame.rect.Rect(0,0,*self.screen_size_2d)
         self.fullscreen = False
         self.hwrender = True
         self.decorated = True
@@ -41,6 +42,7 @@ class _Screen(object):
             self.screen_size = size
         if size2d:
             self.screen_size_2d = size2d
+            self.rect2d = pygame.rect.Rect(0,0,*size2d)
 
         size = self.screen_size
         self.clips = [] #clear!

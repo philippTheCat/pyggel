@@ -4,7 +4,7 @@ from pyggel import *
 import random
 
 def main():
-    pyggel.view.init()
+    pyggel.view.init(screen_size=(800,600), screen_size_2d=(640, 480))
     pyggel.view.set_debug(False)
 
     my_light = pyggel.light.Light((0,100,0), (0.5,0.5,0.5,1),
@@ -20,7 +20,7 @@ def main():
     img2.colorize=(1,1,1,0.5)
     img2sub = img2.sub_image((0,0), (15, 15))
     img2sub.colorize=(1, 0, 0, 1)
-    img2sub.pos = (100, 75)
+    img2sub.pos = (600, 400)
     img3d = []
     for x in xrange(10):
         img3d.append(pyggel.image.Image3D("data/tile_example.png",

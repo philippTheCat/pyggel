@@ -68,7 +68,7 @@ class Image(object):
     def test_on_screen(self):
         """Return whether the image is onscreen or not"""
         r = pygame.rect.Rect(self.pos, self._image_size)
-        return view.screen.rect.colliderect(r)
+        return view.screen.rect2d.colliderect(r)
 
     def _load_file(self):
         """Load an image file"""
@@ -125,6 +125,7 @@ class Image(object):
         self.display_list.begin()
         self.texture.bind()
         off = self.offset
+
         l = -off[0]
         r = off[0]
         t = -off[1]
@@ -172,6 +173,9 @@ class Image(object):
         pos = self.pos
 
         glPushMatrix()
+        rx = 1.0 * view.screen.screen_size[0] / view.screen.screen_size_2d[0]
+        ry = 1.0 * view.screen.screen_size[1] / view.screen.screen_size_2d[1]
+        glScalef(rx, ry, 1)
         glTranslatef(pos[0]+ox, pos[1]+oy, 0)
 
         glRotatef(self.rotation[0], 1, 0, 0)
@@ -187,7 +191,7 @@ class Image(object):
         self.display_list.render()
         glPopMatrix()
         if self.to_be_blitted:
-            view.screen.push_clip((pos[0], view.screen.screen_size[1]-pos[1]-h,w,h))
+##            view.screen.push_clip((int(pos[0]*rx), int((view.screen.screen_size[1]-pos[1]-h)*ry,int(w*rx,int(h*ry)))
             for i in self.to_be_blitted:
                 x, y = i[1]
                 x += pos[0]
