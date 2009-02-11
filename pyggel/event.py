@@ -83,9 +83,10 @@ class Handler(object):
                 self.dispatch.fire("key", str(event.unicode), event.key)
 
             elif event.type == KEYUP:
-                s = self.keyboard.scancodes[event.scancode]
-                if s in self.keyboard.strings:
-                    self.keyboard.strings[s] = False
+                if event.scancode in self.keyboard.scancodes:
+                    s = self.keyboard.scancodes[event.scancode]
+                    if s in self.keyboard.strings:
+                        self.keyboard.strings[s] = False
                 if event.key in self.keyboard.active:
                     self.keyboard.active.remove(event.key)
 
