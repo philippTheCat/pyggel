@@ -176,6 +176,12 @@ class MEFontImage(object):
         """Return the size of the text - in pixels"""
         return (self.get_width, self.get_height)
 
+    def get_rect(self):
+        """Return a pygame.Rect of the font image"""
+        a = pygame.rect.Rect(self.pos, self.get_size())
+        a.center = self.pos
+        return a
+
 class MEFont(object):
     """A font the produces text images that render a little slower, but are much faster to change text"""
     def __init__(self, filename=None, fsize=32):

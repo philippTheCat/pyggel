@@ -12,7 +12,6 @@ def main():
                                   (0,0,0), True)
 
     camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
-##    camera = pyggel.camera.LookFromCamera((0,0,10))
 
     img = pyggel.image.Image("data/tile_example.png", pos=(50, 50))
     img.colorize=(1,0,0,1)
@@ -67,6 +66,26 @@ def main():
 
     meh = pyggel.event.Handler()
     meh.bind_to_event(" ", lambda: pyggel.misc.save_screenshot("Test.png"))
+
+    my_app = pyggel.gui.App(meh)
+    pyggel.gui.Label(my_app, "testy!!!")
+    pyggel.gui.Label(my_app, "123!!!")
+    pyggel.gui.Label(my_app, "testy!!!")
+    pyggel.gui.Label(my_app, "123!!!")
+    pyggel.gui.Label(my_app, "testy!!!")
+    pyggel.gui.Label(my_app, "123!!!")
+    pyggel.gui.Label(my_app, "testy!!!")
+    pyggel.gui.Label(my_app, "123!!!")
+    pyggel.gui.Label(my_app, "testy!!!")
+    pyggel.gui.Label(my_app, "123!!!")
+    pyggel.gui.Label(my_app, "testy!!!")
+    pyggel.gui.Label(my_app, "123!!!")
+    pyggel.gui.Label(my_app, "testy!!!")
+    pyggel.gui.Label(my_app, "123!!!")
+    pyggel.gui.Label(my_app, "testy!!!")
+    pyggel.gui.Label(my_app, "123!!!")
+
+    my_scene.add_2d(my_app)
 
     while 1:
         clock.tick(999)
