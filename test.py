@@ -65,7 +65,7 @@ def main():
     last_hit = None
 
     meh = pyggel.event.Handler()
-    meh.bind_to_event(" ", lambda: pyggel.misc.save_screenshot("Test.png"))
+    meh.bind_to_event(" ", lambda a,b: pyggel.misc.save_screenshot("Test.png"))
 
     my_app = pyggel.gui.App(meh)
     pyggel.gui.Label(my_app, "testy!!!")
@@ -84,6 +84,11 @@ def main():
     pyggel.gui.Label(my_app, "123!!!")
     pyggel.gui.Label(my_app, "testy!!!")
     pyggel.gui.Label(my_app, "123!!!")
+    pyggel.gui.Label(my_app, "testy!!!")
+
+    def test_callback():
+        pyggel.gui.Label(my_app, "umm.......")
+    pyggel.gui.Button(my_app, "BUTTON!", callbacks=[test_callback])
 
     my_scene.add_2d(my_app)
 
@@ -103,31 +108,31 @@ def main():
                 else:
                     img.blit(img2, (0,0))
 
-        if meh.keyboard.all[K_LEFT]:
+        if K_LEFT in meh.keyboard.active:
             camera.roty -= .5
-        if meh.keyboard.all[K_RIGHT]:
+        if K_RIGHT in meh.keyboard.active:
             camera.roty += .5
-        if meh.keyboard.all[K_DOWN]:
+        if K_DOWN in meh.keyboard.active:
             camera.rotx -= .5
-        if meh.keyboard.all[K_UP]:
+        if K_UP in meh.keyboard.active:
             camera.rotx += .5
-        if meh.keyboard.all[K_1]:
+        if K_1 in meh.keyboard.active:
             camera.rotz -= .5
-        if meh.keyboard.all[K_2]:
+        if "2" in meh.keyboard.active: #just to throw you off ;)
             camera.rotz += .5
 
-        if meh.keyboard.all[K_EQUALS]:
+        if "=" in meh.keyboard.active:
             camera.distance -= .1
-        if meh.keyboard.all[K_MINUS]:
+        if "-" in meh.keyboard.active:
             camera.distance += .1
 
-        if meh.keyboard.all[K_a]:
+        if "a" in meh.keyboard.active:
             camera.posx -= .1
-        if meh.keyboard.all[K_d]:
+        if K_d in meh.keyboard.active:
             camera.posx += .1
-        if meh.keyboard.all[K_s]:
+        if K_s in meh.keyboard.active:
             camera.posz -= .1
-        if meh.keyboard.all[K_w]:
+        if K_w in meh.keyboard.active:
             camera.posz += .1
 
         rot += 1
