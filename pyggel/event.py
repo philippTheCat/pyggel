@@ -35,92 +35,92 @@ class Mouse(object):
 
         return int(mx*rx), int(my*ry)
 
+class Dispatcher(object):
+    def __init__(self):
+        self.name_bindings = {}
+
+    def bind(self, name, function):
+        if name in self.name_bindings:
+            self.name_bindings[name].append(function)
+        else:
+            self.name_bindings[name] = [function]
+
+    def fire(self, name, *args, **kwargs):
+        if name in self.name_bindings:
+            for func in self.name_bindings[name]:
+                func(*args, **kwargs)
+
 class Handler(object):
     def __init__(self):
         self.keyboard = Keyboard()
         self.mouse = Mouse()
         self.quit = False
 
-        self.name_bindings = {}
+        self.dispatch = Dispatcher()
 
-    def bind_to_event(self, event, function, args=[]):
-        if event in self.name_bindings:
-            self.name_bindings[event].append([function, args])
-        else:
-            self.name_bindings[event] = [[function, args]]
+        self.uncaught_events = []
+
+    def bind_to_event(self, event, function):
+        self.dispatch.bind(event, function)
 
     def update(self):
         self.keyboard.hit = []
         self.mouse.hit = []
+        self.uncaught_events = []
         for event in pygame.event.get():
             if event.type == KEYDOWN:
                 s = str(event.unicode)
                 self.keyboard.scancodes[event.scancode] = s
                 if s in self.keyboard.strings:
                     self.keyboard.strings[s] = True
-                    if s in self.name_bindings:
-                        for func in self.name_bindings[s]:
-                            func[0](*func[1])
+                    self.dispatch.fire(s)
                 if not event.key in self.keyboard.active:
                     self.keyboard.active.append(event.key)
 
-                if event.key in self.name_bindings:
-                    for func in self.name_bindings[event.key]:
-                        func[0](*func[1])
+                self.dispatch.fire(event.key)
 
                 self.keyboard.hit.extend([s, event.key])
+                self.dispatch.fire("key", str(event.unicode), event.key)
 
-            if event.type == KEYUP:
+            elif event.type == KEYUP:
                 s = self.keyboard.scancodes[event.scancode]
                 if s in self.keyboard.strings:
                     self.keyboard.strings[s] = False
                 if event.key in self.keyboard.active:
                     self.keyboard.active.remove(event.key)
 
-            if event.type == MOUSEBUTTONDOWN:
+            elif event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.mouse.hit.append("left")
                     self.mouse.strings["left"] = True
-                    if "mouseleft" in self.name_bindings:
-                        for func in self.name_bindings["mouseleft"]:
-                            func[0](*func[1])
+                    self.dispatch.fire("mouseleft")
                 elif event.button == 2:
                     self.mouse.hit.append("middle")
                     self.mouse.strings["middle"] = True
-                    if "mousemiddle" in self.name_bindings:
-                        for func in self.name_bindings["mousemiddle"]:
-                            func[0](*func[1])
+                    self.dispatch.fire("mousemiddle")
                 elif event.button == 3:
                     self.mouse.hit.append("right")
                     self.mouse.strings["right"] = True
-                    if "mouseright" in self.name_bindings:
-                        for func in self.name_bindings["mouseright"]:
-                            func[0](*func[1])
+                    self.dispatch.fire("mouseright")
                 elif event.button == 4:
                     self.mouse.hit.append("wheel-up")
                     self.mouse.strings["wheel-up"] = True
-                    if "mousewheel-up" in self.name_bindings:
-                        for func in self.name_bindings["mousewheel-up"]:
-                            func[0](*func[1])
+                    self.dispatch.fire("mousewheel-up")
                 elif event.button == 5:
                     self.mouse.hit.append("wheel-down")
                     self.mouse.strings["wheel-down"] = True
-                    if "mousewheel-down" in self.name_bindings:
-                        for func in self.name_bindings["mousewheel-down"]:
-                            func[0](*func[1])
+                    self.dispatch.fire("mousewheel-down")
                 else:
                     self.mouse.hit.append("mouse-extra%s"%event.button)
                     self.mouse.extra[event.button] = True
-                    if "mouse-extra%s"%event.button in self.name_bindings:
-                        for func in self.name_bindings["mouse-extra%s"%event.button]:
-                            func[0](*func[1])
+                    self.dispatch.fire("mouse-extra%s"%event.button)
 
                 if not event.button in self.mouse.active:
                     self.mouse.active.append(event.button)
 
                 self.mouse.hit.append(event.button)
 
-            if event.type == MOUSEBUTTONUP:
+            elif event.type == MOUSEBUTTONUP:
                 if event.button == 1: self.mouse.strings["left"] = False
                 elif event.button == 2: self.mouse.strings["middle"] = False
                 elif event.button == 3: self.mouse.strings["right"] = False
@@ -130,10 +130,13 @@ class Handler(object):
                 if event.button in self.mouse.active:
                     self.mouse.active.remove(event.button)
                 
-            if event.type == QUIT:
+            elif event.type == QUIT:
                 self.quit = True
-                if "quit" in self.name_bindings:
-                    for func in self.name_bindings["quit"]:
-                        func[0](*func[1])
+                self.dispatch.fire("quit")
+
+            else:
+                self.uncaught_events.append(event)
+                self.dispatch.fire("uncaught_event", event)
         self.keyboard.all = pygame.key.get_pressed()
         self.mouse.all = pygame.mouse.get_pressed()
+        self.dispatch.fire("update")

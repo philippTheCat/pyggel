@@ -66,11 +66,10 @@ def main():
     last_hit = None
 
     meh = pyggel.event.Handler()
-    meh.bind_to_event(" ", pyggel.misc.save_screenshot, ["Test.png"])
+    meh.bind_to_event(" ", lambda: pyggel.misc.save_screenshot("Test.png"))
 
     while 1:
         clock.tick(999)
-##        print clock.get_fps()
         pyggel.view.set_title("FPS: %s"%clock.get_fps())
 
         meh.update()
