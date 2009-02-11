@@ -14,7 +14,7 @@ def main():
     camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
 ##    camera = pyggel.camera.LookFromCamera((0,0,10))
 
-    img = pyggel.image.Image("data/tile_example.png")
+    img = pyggel.image.Image("data/tile_example.png", pos=(50, 50))
     img.colorize=(1,0,0,1)
     img2 = pyggel.image.Image("data/ar.png", pos=(50,0))
     img2.colorize=(1,1,1,0.5)

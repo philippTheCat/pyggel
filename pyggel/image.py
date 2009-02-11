@@ -192,6 +192,8 @@ class Image(object):
         glPopMatrix()
         if self.to_be_blitted:
 ##            view.screen.push_clip((int(pos[0]*rx), int((view.screen.screen_size[1]-pos[1]-h)*ry,int(w*rx,int(h*ry)))
+##            view.screen.push_clip((int(pos[0]*rx), view.screen.screen_size[1]-int((pos[1]-h)*ry), int(w*rx), int(h*ry)))
+            view.screen.push_clip((int(pos[0]*rx), view.screen.screen_size[1]-int(pos[1]*ry)-int(h*ry), int(w*rx), int(h*ry)))
             for i in self.to_be_blitted:
                 x, y = i[1]
                 x += pos[0]
