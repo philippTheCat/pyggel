@@ -69,7 +69,8 @@ def main():
     meh.bind_to_event(" ", lambda a,b: pyggel.misc.save_screenshot("Test.png"))
 
     my_app = pyggel.gui.App(meh)
-    my_app.mefont.add_smilie(":)", "data/stickdude.png")
+    my_app.mefont.add_smiley(":)", "data/stickdude.png")
+    my_app.mefont.add_smiley(":P", img2sub)
     pyggel.gui.Label(my_app, "testy!!!")
     pyggel.gui.Label(my_app, "123!!!")
     pyggel.gui.Label(my_app, "testy!!!")
@@ -89,7 +90,7 @@ def main():
     pyggel.gui.Label(my_app, "testy!!!")
 
     def test_callback():
-        pyggel.gui.Label(my_app, "umm...[:)]....")
+        pyggel.gui.Label(my_app, "umm...:)...:P...")
     pyggel.gui.Button(my_app, "BUTTON!", callbacks=[test_callback])
 
     my_scene.add_2d(my_app)

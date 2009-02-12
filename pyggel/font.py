@@ -101,7 +101,7 @@ class MEFontImage(object):
         return self._text
     def set_text(self, text):
         self._text = text
-        self.glyphs = self.make_list_of_glyphs_and_smilies(text)
+        self.glyphs = self.make_list_of_glyphs_and_smileys(text)
         n = [[]]
         height = 0
         for i in self.glyphs:
@@ -117,26 +117,27 @@ class MEFontImage(object):
         self.glyphs = n
     text = property(get_text, set_text)
 
-    def make_list_of_glyphs_and_smilies(self, text):
+    def make_list_of_glyphs_and_smileys(self, text):
         g = []
         skip = 0
         num = 0
-        smilie_positions = {}
-        for s in self.fontobj.smilies:
+        smiley_positions = {}
+        for s in self.fontobj.smileys:
             last = 0
             while 1:
                 n = text.find(s, last)
                 if n >= 0:
-                    smilie_positions[n] = s
+                    smiley_positions[n] = s
                     last = n + len(s)
                 else:
                     break
+
         for i in text:
             if skip:
                 skip -= 1
-            elif text.index(i) in smilie_positions:
-                a = smilie_positions[text.index(i)]
-                g.append(self.fontobj.smilies[a])
+            elif num in smiley_positions:
+                a = smiley_positions[num]
+                g.append(self.fontobj.smileys[a])
                 skip = len(a)-1
             elif i == "\n":
                 g.append(i)
@@ -223,13 +224,18 @@ class MEFont(object):
         self.filename = filename
         self.fsize = fsize
 
-        self.smilies = {}
+        self.smileys = {}
 
         self._load_font()
 
-    def add_smilie(self, name, filename):
-        """Add a smilie to the dict. Smilies are used in text by writing '[smilie_name]some text'"""
-        self.smilies[name] = image.Image(filename)
+    def add_smiley(self, name, smiley):
+        """Add a smiley to the font.
+           smiley must be a pygame.Surface, the path to an image or a pyggel.image.Image.
+           Smileys are used in text by writing '[smiley_name]some text'"""
+        if isinstance(smiley, image.Image):
+            self.smileys[name] = smiley
+        else:
+            self.smileys[name] = image.Image(smiley)
 
     def _load_font(self):
         """Load the font, and create glyphs"""
