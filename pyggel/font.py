@@ -88,13 +88,34 @@ class MEFontImage(object):
            fontobj is the MEFont object that created this text
            text is the text string to render
            colorize is the color (0-1 RGBA) of the text"""
-        self.text = text
         self.fontobj = fontobj
         self.colorize = colorize
         self.pos = (0,0)
         self.rotation = (0,0,0)
         self.scale = 1
         self.visible = True
+
+        self.text = text
+
+    def get_text(self):
+        return self._text
+    def set_text(self, text):
+        self._text = text
+        self.glyphs = self.make_list_of_glyphs_and_smilies(text)
+        n = [[]]
+        height = 0
+        for i in self.glyphs:
+            if i == "\n":
+                n[-1] = [n[-1], height]
+                height = 0
+                n.append([])
+            else:
+                n[-1].append(i)
+                if i.get_height() > height:
+                    height = i.get_height()
+        n[-1] = [n[-1], height]
+        self.glyphs = n
+    text = property(get_text, set_text)
 
     def make_list_of_glyphs_and_smilies(self, text):
         g = []
@@ -138,28 +159,19 @@ class MEFontImage(object):
             glScalef(self.scale[0], self.scale[1], 1)
         except:
             glScalef(self.scale, self.scale, 1)
-
-        indent = 0
         downdent = 0
-        line = []
-        for i in self.make_list_of_glyphs_and_smilies(self.text):
-            if i == "\n":
-                indent = 0
-                m = 0
-                for x in line:
-                    if x.get_height() > m:
-                        m = x.get_height()
-                downdent += m + 1
-                line = []
-            else:
+        for line in self.glyphs:
+            line, height = line
+            indent = 0
+            for glyph in line:
                 x, y = self.pos
                 x += indent
                 y += downdent
-                i.pos = (x, y)
-                i.colorize = self.colorize
-                i.render()
-                indent += i.get_width()
-                line.append(i)
+                glyph.pos = (x, y)
+                glyph.colorize = self.colorize
+                glyph.render()
+                indent += glyph.get_width()
+            downdent += height
         glPopMatrix()
 
     def copy(self):
@@ -173,35 +185,23 @@ class MEFontImage(object):
 
     def get_width(self):
         """Return the max width of the text - in pixels"""
-        g = self.make_list_of_glyphs_and_smilies(self.text)
         width = 0
-        linew = 0
-        for i in g:
-            if i == "\n":
-                if linew >= width:
-                    width = linew
-                linew = 0
-            else:
-                linew += i.get_width()
-        if linew > width:
-            width = linew
+        for line in self.glyphs:
+            line = line[0]
+            indent = 0
+            for glyph in line:
+                indent += glyph.get_width()
+            if indent > width:
+                width = indent
         return width
                 
 
     def get_height(self):
         """return the max height of the text - in pixels"""
-        g = self.make_list_of_glyphs_and_smilies(self.text)
-        height = 0
-        lineh = 0
-        for i in g:
-            if i == "\n":
-                height += lineh
-                lineh = 0
-            else:
-                if i.get_height() > lineh:
-                    lineh = i.get_height()
-        height += lineh
-        return height
+        downdent = 0
+        for line in self.glyphs:
+            downdent += line[1]
+        return downdent
 
     def get_size(self):
         """Return the size of the text - in pixels"""
