@@ -88,6 +88,8 @@ class Handler(object):
                 if not event.button in self.mouse.active:
                     self.mouse.active.append(event.button)
                     self.mouse.active.append(name)
+                    self.mouse.hit.append(event.button)
+                    self.mouse.hit.append(name)
                 self.dispatch.fire("mousedown", event.button, name)
 
             elif event.type == MOUSEBUTTONUP:
