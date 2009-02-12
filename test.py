@@ -48,6 +48,7 @@ def main():
     my_scene.add_2d(img2)
     my_scene.add_2d(img2sub)
     my_scene.add_2d(img4)
+
     my_scene.add_3d(obj)
     my_scene.add_3d(obj2)
     my_scene.add_3d(horse)
@@ -68,6 +69,7 @@ def main():
     meh.bind_to_event(" ", lambda a,b: pyggel.misc.save_screenshot("Test.png"))
 
     my_app = pyggel.gui.App(meh)
+    my_app.mefont.add_smilie(":)", "data/stickdude.png")
     pyggel.gui.Label(my_app, "testy!!!")
     pyggel.gui.Label(my_app, "123!!!")
     pyggel.gui.Label(my_app, "testy!!!")
@@ -87,7 +89,7 @@ def main():
     pyggel.gui.Label(my_app, "testy!!!")
 
     def test_callback():
-        pyggel.gui.Label(my_app, "umm.......")
+        pyggel.gui.Label(my_app, "umm...[:)]....")
     pyggel.gui.Button(my_app, "BUTTON!", callbacks=[test_callback])
 
     my_scene.add_2d(my_app)

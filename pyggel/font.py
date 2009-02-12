@@ -82,7 +82,7 @@ class Font(object):
 
 class MEFontImage(object):
     """A font image that renders more slowly,
-       but allows faster and more efficient changing of text"""
+       but allows faster and more efficient changing of text, as well as imbedded image 'smilies'"""
     def __init__(self, fontobj, text="", colorize=(1,1,1,1)):
         """Create the text
            fontobj is the MEFont object that created this text
@@ -95,6 +95,34 @@ class MEFontImage(object):
         self.rotation = (0,0,0)
         self.scale = 1
         self.visible = True
+
+    def make_list_of_glyphs_and_smilies(self, text):
+        g = []
+        skip = 0
+        num = 0
+        smilie_positions = {}
+        for s in self.fontobj.smilies:
+            last = 0
+            while 1:
+                n = text.find(s, last)
+                if n >= 0:
+                    smilie_positions[n] = s
+                    last = n + len(s)
+                else:
+                    break
+        for i in text:
+            if skip:
+                skip -= 1
+            elif text.index(i) in smilie_positions:
+                a = smilie_positions[text.index(i)]
+                g.append(self.fontobj.smilies[a])
+                skip = len(a)-1
+            elif i == "\n":
+                g.append(i)
+            else:
+                g.append(self.fontobj.glyphs[i])
+            num += 1
+        return g
 
     def render(self, camera=None):
         """Render the object
@@ -111,31 +139,27 @@ class MEFontImage(object):
         except:
             glScalef(self.scale, self.scale, 1)
 
-        if "\n" in self.text:
-            atext = self.text.split("\n")
-            height = 0
-            for text in atext:
+        indent = 0
+        downdent = 0
+        line = []
+        for i in self.make_list_of_glyphs_and_smilies(self.text):
+            if i == "\n":
                 indent = 0
-                for c in text:
-                    o = fo.glyphs[c]
-                    o.colorize = self.colorize
-                    x, y = self.pos
-                    x += indent
-                    y += height
-                    o.pos = (x, y)
-                    o.render(camera)
-                    indent += o.get_width()
-                height += self.fontobj.pygame_font.get_height()
-        else:
-            indent = 0
-            for c in self.text:
-                o = fo.glyphs[c]
-                o.colorize = self.colorize
+                m = 0
+                for x in line:
+                    if x.get_height() > m:
+                        m = x.get_height()
+                downdent += m + 1
+                line = []
+            else:
                 x, y = self.pos
                 x += indent
-                o.pos = (x, y)
-                o.render(camera)
-                indent += o.get_width()
+                y += downdent
+                i.pos = (x, y)
+                i.colorize = self.colorize
+                i.render()
+                indent += i.get_width()
+                line.append(i)
         glPopMatrix()
 
     def copy(self):
@@ -149,50 +173,63 @@ class MEFontImage(object):
 
     def get_width(self):
         """Return the max width of the text - in pixels"""
-        fo = self.fontobj
-        if "\n" in self.text:
-            mx = 0
-            for text in self.text.split("\n"):
-                x = 0
-                for c in text:
-                    x += fo.glyphs[c].get_width()
-                if x > mx:
-                    mx = x
-        else:
-            mx = 0
-            for c in self.text:
-                mx += fo.glyphs[c].get_width()
-        return mx
+        g = self.make_list_of_glyphs_and_smilies(self.text)
+        width = 0
+        linew = 0
+        for i in g:
+            if i == "\n":
+                if linew >= width:
+                    width = linew
+                linew = 0
+            else:
+                linew += i.get_width()
+        if linew > width:
+            width = linew
+        return width
+                
 
     def get_height(self):
         """return the max height of the text - in pixels"""
-        fo = self.fontobj
-        x = 0
-        if "\n" in self.text:
-            return len(self.text.split("\n")) * self.fontobj.pygame_font.get_height()
-        return self.fontobj.pygame_font.get_height()
+        g = self.make_list_of_glyphs_and_smilies(self.text)
+        height = 0
+        lineh = 0
+        for i in g:
+            if i == "\n":
+                height += lineh
+                lineh = 0
+            else:
+                if i.get_height() > lineh:
+                    lineh = i.get_height()
+        height += lineh
+        return height
 
     def get_size(self):
         """Return the size of the text - in pixels"""
-        return (self.get_width, self.get_height)
+        return (self.get_width(), self.get_height())
 
     def get_rect(self):
         """Return a pygame.Rect of the font image"""
-        a = pygame.rect.Rect(self.pos, self.get_size())
-        a.center = self.pos
-        return a
+        return pygame.rect.Rect(self.pos, self.get_size())
 
 class MEFont(object):
-    """A font the produces text images that render a little slower, but are much faster to change text"""
+    """A font the produces text images that render a little slower, but are much faster to change text,
+       and support image 'smilies'"""
     def __init__(self, filename=None, fsize=32):
         """Create the font object
            filename can be None or the filename of the font to load (TTF)
-           fsize is the size of the font"""
+           fsize is the size of the font
+           smilies is a dict of name:image smilies"""
         view.require_init()
         self.filename = filename
         self.fsize = fsize
 
+        self.smilies = {}
+
         self._load_font()
+
+    def add_smilie(self, name, filename):
+        """Add a smilie to the dict. Smilies are used in text by writing '[smilie_name]some text'"""
+        self.smilies[name] = image.Image(filename)
 
     def _load_font(self):
         """Load the font, and create glyphs"""

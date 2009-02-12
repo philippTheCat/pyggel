@@ -114,7 +114,7 @@ class Label(Widget):
         Widget.__init__(self, app)
 
         self.text = text
-        self.text_image = self.app.regfont.make_text_image(text)
+        self.text_image = self.app.mefont.make_text_image(text)
 
         if pos == None:
             self.text_image.pos = self.app.get_next_position(self.text_image.get_size())
