@@ -96,7 +96,7 @@ class GIFImage(object):
                 if len(tile) > 0:
                     x0, y0, x1, y1 = tile[0][1]
 
-                    if tile[0][3][0] == 4:
+                    if tile[0][3][0] in (4, 5):
                         palette = base_palette
                     else:
                         pal = image.getpalette()
@@ -201,6 +201,7 @@ def main():
     hulk2.reverse()
     hulk3 = hulk.copy()
     hulk3.set_bounds(0, 2)
+    spiderman = GIFImage("spiderman7.gif")
 
     while 1:
         for event in pygame.event.get():
@@ -213,6 +214,7 @@ def main():
         hulk2.render(screen, (50, 150))
         hulk3.render(screen, (50, 300))
         football.render(screen, (200, 50))
+        spiderman.render(screen, (200, 150))
         pygame.display.flip()
 
 main()
