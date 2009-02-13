@@ -62,15 +62,50 @@ class GIFImage(object):
         self.cur = 0
         self.ptime = time.time()
 
-    def render(self, screen, pos):
-        if time.time() - self.ptime > self.frames[self.cur][1]:
-            self.cur += 1
-            if self.cur >= len(self.frames):
-                self.cur = 0
+        self.running = True
+        self.breakpoint = len(self.frames)-1
+        self.startpoint = 0
 
-            self.ptime = time.time()
+    def render(self, screen, pos):
+        if self.running:
+            if time.time() - self.ptime > self.frames[self.cur][1]:
+                self.cur += 1
+                if self.cur >= self.breakpoint:
+                    self.cur = self.startpoint
+
+                self.ptime = time.time()
 
         screen.blit(self.frames[self.cur][0], pos)
+
+    def seek(self, num):
+        self.cur = num
+        if self.cur < 0:
+            self.cur = 0
+        if self.cur >= len(self.frames):
+            self.cur = len(self.frames)-1
+
+    def set_bounds(self, start, end):
+        if start < 0:
+            start = 0
+        if start >= len(self.frames):
+            start = len(self.frames) - 1
+        if end < 0:
+            end = 0
+        if end >= len(self.frames):
+            end = len(self.frames) - 1
+        if end < start:
+            end = start
+        self.startpoint = start
+        self.breakpoint = end
+
+    def pause(self):
+        self.running = False
+
+    def play(self):
+        self.running = True
+
+    def rewind(self):
+        self.seek(0)
 
 def main():
     pygame.init()
@@ -78,6 +113,7 @@ def main():
 
     hulk = GIFImage("data/hulk.gif")
     football = GIFImage("data/football.gif")
+    hulk.set_bounds(0, 2)
 
     while 1:
         for event in pygame.event.get():
