@@ -54,15 +54,30 @@ def get_all_frames(filename):
 
     return surfs
 
+class GIFImage(object):
+    def __init__(self, filename):
+        self.filename = filename
+        self.frames = get_all_frames(self.filename)
+
+        self.cur = 0
+        self.ptime = time.time()
+
+    def render(self, screen, pos):
+        if time.time() - self.ptime > self.frames[self.cur][1]:
+            self.cur += 1
+            if self.cur >= len(self.frames):
+                self.cur = 0
+
+            self.ptime = time.time()
+
+        screen.blit(self.frames[self.cur][0], pos)
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
 
-    surfs = get_all_frames("data/football.gif")
-    surfs2 = get_all_frames("data/football.gif")
-    cur = 0
-    ptime = time.time()
+    hulk = GIFImage("data/hulk.gif")
+    football = GIFImage("data/football.gif")
 
     while 1:
         for event in pygame.event.get():
@@ -71,14 +86,8 @@ def main():
                 return
 
         screen.fill((255,255,255))
-        if time.time() - ptime > surfs[cur][1]:
-            cur += 1
-            if cur >= len(surfs):
-                cur = 0
-            ptime = time.time()
-
-        screen.blit(surfs[cur][0], (50, 50))
-        screen.blit(surfs2[43][0], (100,50))
+        hulk.render(screen, (50, 50))
+        football.render(screen, (200, 50))
         pygame.display.flip()
 
 main()
