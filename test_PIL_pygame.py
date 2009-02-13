@@ -7,11 +7,10 @@ import time
 def get_all_frames(image):
     surfs = []
     pal = image.getpalette()
-    n = []
+    base_palette = []
     for i in range(0, len(pal), 3):
         rgb = pal[i:i+3]
-        n.append(rgb)
-    palette = n
+        base_palette.append(rgb)
     try:
         while 1:
             try:
@@ -25,7 +24,18 @@ def get_all_frames(image):
             if len(image.tile) > 0:
                 x0, y0, x1, y1 = image.tile[0][1]
 
-            pi = pygame.image.fromstring(image.tostring(), image.size, "P")
+                if image.tile[0][3][0] == 4:
+                    palette = base_palette
+                else:
+                    pal = image.getpalette()
+                    palette = []
+                    for i in range(0, len(pal), 3):
+                        rgb = pal[i:i+3]
+                        palette.append(rgb)
+            else:
+                palette = base_palette
+
+            pi = pygame.image.fromstring(image.tostring(), image.size, image.mode)
             pi.set_palette(palette)
             pi.set_colorkey(image.info["transparency"])
             pi2 = pygame.Surface(image.size, SRCALPHA)
@@ -44,7 +54,9 @@ def main():
     screen = pygame.display.set_mode((640, 480))
 
     src_image = Image.open("data/hulk.gif")
+    src_image2 = Image.open("data/football.gif")
     surfs = get_all_frames(src_image)
+    surfs2 = get_all_frames(src_image2)
     cur = 0
     ptime = time.time()
 
@@ -62,6 +74,7 @@ def main():
             ptime = time.time()
 
         screen.blit(surfs[cur][0], (50, 50))
+        screen.blit(surfs2[43][0], (100,50))
         pygame.display.flip()
 
 main()
