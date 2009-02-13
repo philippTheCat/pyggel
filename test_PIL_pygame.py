@@ -4,7 +4,8 @@ from pygame.locals import *
 
 import time
 
-def get_all_frames(image):
+def get_all_frames(filename):
+    image = Image.open(filename)
     surfs = []
     pal = image.getpalette()
     base_palette = []
@@ -21,10 +22,15 @@ def get_all_frames(image):
             duration *= .001 #convert to milliseconds!
 
             x0, y0, x1, y1 = (0, 0) + image.size
-            if len(image.tile) > 0:
-                x0, y0, x1, y1 = image.tile[0][1]
+            if image.tile:
+                tile = image.tile
+            else:
+                image.seek(0)
+                tile = image.tile
+            if len(tile) > 0:
+                x0, y0, x1, y1 = tile[0][1]
 
-                if image.tile[0][3][0] == 4:
+                if tile[0][3][0] == 4:
                     palette = base_palette
                 else:
                     pal = image.getpalette()
@@ -53,10 +59,8 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
 
-    src_image = Image.open("data/hulk.gif")
-    src_image2 = Image.open("data/football.gif")
-    surfs = get_all_frames(src_image)
-    surfs2 = get_all_frames(src_image2)
+    surfs = get_all_frames("data/football.gif")
+    surfs2 = get_all_frames("data/football.gif")
     cur = 0
     ptime = time.time()
 
