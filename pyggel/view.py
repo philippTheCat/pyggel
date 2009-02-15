@@ -261,7 +261,7 @@ def set3d():
 
 def refresh_screen():
     """Flip the screen buffer, displaying any changes since the last clear."""
-    if screen.cursor and screen.cursor_visible:
+    if screen.cursor and screen.cursor_visible and pygame.mouse.get_focused():
         glDisable(GL_LIGHTING)
         screen.cursor.pos = screen.get_mouse_pos()
         if screen.cursor_center:

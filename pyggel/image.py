@@ -518,7 +518,8 @@ class Animation(object):
         self.reversed = False
 
     def loop(self, boolean=True):
-        self.loop = boolean
+        self.looping = boolean
+        self.ptime = time.time()
 
     def copy(self):
         new = Animation(self.frames, self.pos, self.rotation, self.scale, self.colorize)

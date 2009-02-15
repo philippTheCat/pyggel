@@ -119,6 +119,13 @@ def main():
                     img.clear_blits()
                 else:
                     img.blit(img2, (0,0))
+        if "right" in meh.mouse.hit:
+##            view.screen.cursor.loop(not view.screen.cursor.looping)
+            cur = view.screen.cursor
+            if cur.running:
+                cur.pause()
+            else:
+                cur.play()
 
         if K_LEFT in meh.keyboard.active:
             camera.roty -= .5
