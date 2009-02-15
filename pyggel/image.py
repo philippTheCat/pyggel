@@ -434,19 +434,22 @@ class Animation(object):
 
     def render(self, camera=None):
         if self.running:
-            if self.looping:
-                if time.time() - self.ptime > self.frames[self.cur][1]:
-                    if self.reversed:
-                        self.cur -= 1
-                        if self.cur < self.startpoint:
+            if time.time() - self.ptime > self.frames[self.cur][1]:
+                if self.reversed:
+                    self.cur -= 1
+                    if self.cur < self.startpoint:
+                        if self.looping:
                             self.cur = self.breakpoint
-                    else:
-                        self.cur += 1
-                        if self.cur >= self.breakpoint:
+                        else:
+                            self.cur += 1
+                else:
+                    self.cur += 1
+                    if self.cur >= self.breakpoint:
+                        if self.looping:
                             self.cur = self.startpoint
+                        else:
+                            self.cur -= 1
 
-                    self.ptime = time.time()
-            else:
                 self.ptime = time.time()
 
         frame = self.current()
@@ -495,13 +498,13 @@ class Animation(object):
         self.ptime = time.time()
 
     def get_width(self):
-        return self.image.size[0]
+        return self.current().get_width()
 
     def get_height(self):
-        return self.image.size[1]
+        return self.current().get_height()
 
     def get_size(self):
-        return self.image.size
+        return self.current().get_size()
 
     def length(self):
         return len(self.frames)
@@ -551,7 +554,7 @@ class Animation(object):
 
     def sub_image(self, topleft, size):
         """Return a new Image object representing a smaller region of the current frame of this Image."""
-        return self.current.sub_image(topleft, size)
+        return self.current().sub_image(topleft, size)
 
     def blit(self, other, pos):
         """Blit another image to this one at pos offset - ONLY allowing an image to blitted once

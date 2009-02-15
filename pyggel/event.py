@@ -19,12 +19,7 @@ class Mouse(object):
         self.held = []
 
     def get_pos(self):
-        rx = 1.0 * view.screen.screen_size_2d[0] / view.screen.screen_size[0]
-        ry = 1.0 * view.screen.screen_size_2d[1] / view.screen.screen_size[1]
-
-        mx, my = pygame.mouse.get_pos()
-
-        return int(mx*rx), int(my*ry)
+        return view.screen.get_mouse_pos()
 
     def get_name(self, button):
         if button in self.all_names:

@@ -35,6 +35,10 @@ def main():
     img6 = pyggel.image.GIFImage("data/football.gif", pos=(150, 150))
     img7 = pyggel.image.GIFImage3D("data/hulk.gif", pos=(0,0,1))
 
+    pyggel.view.set_cursor(pyggel.image.GIFImage("data/hulk.gif"),
+                           center=True)
+    pyggel.view.screen.cursor.scale = 0.2
+
     img.blit(img2, (0, 0))
 
     obj = pyggel.mesh.OBJ("data/carrot.obj")

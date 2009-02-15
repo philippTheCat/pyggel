@@ -26,6 +26,10 @@ class _Screen(object):
         self.fog = True
         self.fog_color = (.5,.5,.5,.5)
 
+        self.cursor = None
+        self.cursor_visible = True
+        self.cursor_center = False
+
         self.debug = True
 
         self.have_init = False
@@ -78,6 +82,14 @@ class _Screen(object):
             return #don't pop the starting clip!
         self.clips.pop()
         glScissor(*self.clips[-1])
+
+    def get_mouse_pos(self):
+        rx = 1.0 * self.screen_size_2d[0] / self.screen_size[0]
+        ry = 1.0 * self.screen_size_2d[1] / self.screen_size[1]
+
+        mx, my = pygame.mouse.get_pos()
+
+        return int(mx*rx), int(my*ry)
 
 screen = _Screen()
 
@@ -167,6 +179,25 @@ def toggle_lighting():
     """Toggle OpenGL lighting."""
     set_lighting(not screen.lighting)
 
+def set_cursor(image, center=False):
+    """Set the cursor to image.Image or image.Animation."""
+    screen.cursor = image
+    screen.cursor_visible = True
+    screen.cursor_center = center
+    pygame.mouse.set_visible(0)
+
+def set_cursor_visible(boolean=True):
+    """Enable/Disable cursor visiblity."""
+    screen.cursor_visible = boolean
+    if boolean and not screen.cursor:
+        pygame.mouse.set_visible(1)
+    else:
+        pygame.mouse.set_visible(0)
+
+def toggle_cursor_visible():
+    """Toggle cursor visibility."""
+    screen.cursor_visible = not screen.cursor_visible
+
 def set_fog_color(rgba=(.5,.5,.5,.5)):
     """Set the fog color (RGBA 0-1)"""
     glFogfv(GL_FOG_COLOR, rgba)
@@ -230,6 +261,17 @@ def set3d():
 
 def refresh_screen():
     """Flip the screen buffer, displaying any changes since the last clear."""
+    if screen.cursor and screen.cursor_visible:
+        glDisable(GL_LIGHTING)
+        screen.cursor.pos = screen.get_mouse_pos()
+        if screen.cursor_center:
+            x, y = screen.cursor.pos
+            x -= int(screen.cursor.get_width() / 2)
+            y -= int(screen.cursor.get_height() / 2)
+            screen.cursor.pos = (x, y)
+        screen.cursor.render()
+        if screen.lighting:
+            glEnable(GL_LIGHTING)
     pygame.display.flip()
 
 def clear_screen(scene=None):
