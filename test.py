@@ -32,6 +32,9 @@ def main():
     img5 = font.make_text_image3D("Hello World: 3D", (0, 255, 255))
     img5.scale = 2
 
+    img6 = pyggel.image.GIFImage("data/football.gif", pos=(150, 150))
+    img7 = pyggel.image.GIFImage3D("data/hulk.gif", pos=(0,0,1))
+
     img.blit(img2, (0, 0))
 
     obj = pyggel.mesh.OBJ("data/carrot.obj")
@@ -48,6 +51,7 @@ def main():
     my_scene.add_2d(img2)
     my_scene.add_2d(img2sub)
     my_scene.add_2d(img4)
+    my_scene.add_2d(img6)
 
     my_scene.add_3d(obj)
     my_scene.add_3d(obj2)
@@ -56,6 +60,7 @@ def main():
     for i in img3d:
         my_scene.add_3d(i)
     my_scene.add_3d(img5)
+    my_scene.add_3d(img7)
 
     my_scene.add_light(my_light)
 
