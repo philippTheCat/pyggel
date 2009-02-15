@@ -22,7 +22,7 @@ class Image(object):
            pos is the 2d position of the image
            rotation is the 3d rotation of the image
            scale is the scale factor for the image
-           colorize is the color of the Image"""
+           colorize is the color of the image"""
         view.require_init()
         self.filename = filename
 
@@ -245,9 +245,7 @@ class Image3D(Image):
            pos is the 3d position of the image
            rotation is the 3d rotation of the image
            scale is the scale factor for the image
-           colorize is the color of the Image
-           dont_load forces the Image not to load a filename and compile
-               Deprecated - used to create an image from a surface instead of loading"""
+           colorize is the color of the image"""
         Image.__init__(self, filename, pos, rotation,
                        scale, colorize)
 
@@ -411,9 +409,16 @@ def create_empty_image3d(size=(2,2), color=(1,1,1,1)):
     return Image3D(i, colorize=color)
 
 class Animation(object):
+    """A simple object used to store, manipulate, animate and render a bunch of frames of 2d Image obejcts."""
     def __init__(self, frames=[], pos=(0,0),
                  rotation=(0,0,0), scale=1,
                  colorize=(1,1,1,1)):
+        """Create the Animation
+           frames must be a list/tuple of [frame, duration] objects
+           pos is the 2d position of the image
+           rotation is the 3d rotation of the image
+           scale is the scale factor for the image
+           colorize is the color of the image"""
         self.frames = frames
 
         self.pos = pos
@@ -433,6 +438,8 @@ class Animation(object):
         self.filename = None
 
     def render(self, camera=None):
+        """Render the animation - this also keeps track of swapping frames when they have run for their duration.
+           camera must be None or the camera.Camera object used to render the scene."""
         if self.running:
             if time.time() - self.ptime > self.frames[self.cur][1]:
                 if self.reversed:
@@ -460,6 +467,7 @@ class Animation(object):
         frame.render(camera)
 
     def seek(self, num):
+        """'Jump' to a specific frame in the animation."""
         self.cur = num
         if self.cur < 0:
             self.cur = 0
@@ -469,6 +477,7 @@ class Animation(object):
         self.ptime = time.time()
 
     def set_bounds(self, start, end):
+        """Set the start/end 'bounds' for playback, ie which range of frames to play."""
         if start < 0:
             start = 0
         if start >= len(self.frames):
@@ -483,45 +492,56 @@ class Animation(object):
         self.breakpoint = end
 
     def pause(self):
+        """Pause the running of the animation, and locks rendering to the current frame."""
         self.running = False
 
     def play(self):
+        """Play the animation - only needed if pause has been called."""
         self.running = True
         self.ptime = time.time()
 
     def rewind(self):
+        """Rewind the playback to first frame."""
         self.seek(0)
-        self.ptime = time.time()
 
     def fastforward(self):
+        """Fast forward playback to the last frame."""
         self.seek(self.length()-1)
         self.ptime = time.time()
 
     def get_width(self):
+        """Return the width of the image."""
         return self.current().get_width()
 
     def get_height(self):
+        """Return the height of the image."""
         return self.current().get_height()
 
     def get_size(self):
+        """Return the width/height size of the image."""
         return self.current().get_size()
 
     def length(self):
+        """Return the number of frames of the animation."""
         return len(self.frames)
 
     def reverse(self):
+        """Reverse the playback of the image animation."""
         self.reversed = not self.reversed
     
     def reset(self):
+        """Reset the image playback."""
         self.cur = 0
         self.ptime = time.time()
         self.reversed = False
 
     def loop(self, boolean=True):
+        """Set looping of playback on/off - if looping is off animation will continue until the last frame and freeze."""
         self.looping = boolean
         self.ptime = time.time()
 
     def copy(self):
+        """Return a copy of this Animation. Frames are shared..."""
         new = Animation(self.frames, self.pos, self.rotation, self.scale, self.colorize)
         new.running = self.running
         new.breakpoint = self.breakpoint
@@ -532,6 +552,7 @@ class Animation(object):
         return new
 
     def current(self):
+        """Return the current frame Image."""
         return self.frames[self.cur][0]
 
     def get_rect(self):
@@ -573,8 +594,15 @@ class Animation(object):
             frame.to_be_blitted.append([other, pos])
 
 class Animation3D(Animation):
+    """3D version of Animation."""
     def __init__(self, frames=[], pos=(0,0,0), rotation=(0,0,0),
                  scale=1, colorize=(1,1,1,1)):
+        """Create the Animation3D
+           frames must be a list/tuple of [frame, duration] objects
+           pos is the 3d position of the image
+           rotation is the 3d rotation of the image
+           scale is the scale factor for the image
+           colorize is the color of the image"""
         Animation.__init__(self, frames, pos, rotation, scale, colorize)
 
     def blit(self, *args, **kwargs):
@@ -601,6 +629,12 @@ class Animation3D(Animation):
 def GIFImage(filename, pos=(0,0),
              rotation=(0,0,0), scale=1,
              colorize=(1,1,1,1)):
+    """Load a GIF image into an Animation object.
+       filename must be the name of a gif image one disk
+       pos is the 2d position of the image
+       rotation is the 3d rotation of the image
+       scale is the scale factor for the image
+       colorize is the color of the image"""
     view.require_init()
     image = pilImage.open(filename)
 
@@ -684,8 +718,14 @@ def GIFImage(filename, pos=(0,0),
     return Animation(new_frames, pos, rotation, scale, colorize)
 
 def GIFImage3D(filename, pos=(0,0,0),
-             rotation=(0,0,0), scale=1,
-             colorize=(1,1,1,1)):
+               rotation=(0,0,0), scale=1,
+               colorize=(1,1,1,1)):
+    """Load a GIF image into an Animation3D object.
+       filename must be the name of a gif image one disk
+       pos is the 3d position of the image
+       rotation is the 3d rotation of the image
+       scale is the scale factor for the image
+       colorize is the color of the image"""
     view.require_init()
     image = pilImage.open(filename)
 
@@ -767,3 +807,96 @@ def GIFImage3D(filename, pos=(0,0,0),
     for i in frames:
         new_frames.append([Image3D(i[0]), i[1]])
     return Animation3D(new_frames, pos, rotation, scale, colorize)
+
+def SpriteSheet(filename, frames=[], durations=100,
+                pos=(0,0), rotation=(0,0,0), scale=1,
+                colorize=(1,1,1,1)):
+    """Load a "spritesheet" (basically, a flat 2d image that holds a lot of different images) into an Animation object.
+       filename must be the name of an image on disk
+       frames must be a tuple/list of [x,y,width,height] portions of the image that are unique frames
+       durations must be an int/float or list/tuple of int/float representing the duration (in milliseconds) of all/each frame
+       pos is the 2d position of the image
+       rotation is the 3d rotation of the image
+       scale is the scale factor for the image
+       colorize is the color of the image"""
+    view.require_init()
+    if type(durations) in [type(1), type(1.2)]:
+        durations = [durations]*len(frames)
+    new = []
+    image = pygame.image.load(filename).convert_alpha()
+
+    for (frame, dur) in zip(frames, durations):
+        new.append([Image(image.subsurface(*frame)), dur*0.001])
+
+    return Animation(new, pos, rotation, scale, colorize)
+
+
+def SpriteSheet3D(filename, frames=[], durations=[],
+                  pos=(0,0), rotation=(0,0,0), scale=1,
+                  colorize=(1,1,1,1)):
+    """Load a "spritesheet" (basically, a flat 2d image that holds a lot of different images) into an Animation3D object.
+       filename must be the name of an image on disk
+       frames must be a tuple/list of [x,y,width,height] portions of the image that are unique frames
+       durations must be an int/float or list/tuple of int/float representing the duration (in milliseconds) of all/each frame
+       pos is the 3d position of the image
+       rotation is the 3d rotation of the image
+       scale is the scale factor for the image
+       colorize is the color of the image"""
+    view.require_init()
+    new = []
+    image = pygame.image.load(filename).convert_alpha()
+
+    for (frame, dur) in zip(frames, durations):
+        new.append([Image3D(image.subsurface(*frame)), dur*0.001])
+
+    return Animation3D(new, pos, rotation, scale, colorize)
+
+def GridSpriteSheet(filename, frames=(1,1), duration=100,
+                    pos=(0,0), rotation=(0,0,0), scale=1,
+                    colorize=(1,1,1,1)):
+    """Load a "spritesheet" (basically, a flat 2d image that holds a lot of different images) into an Animation object.
+       filename must be the name of an image on disk
+       frames must be a tuple/list of two ints, indicating the number of frames in the x/y axis
+       durations must be an int/float representing the duration (in milliseconds) of all frames
+       pos is the 2d position of the image
+       rotation is the 3d rotation of the image
+       scale is the scale factor for the image
+       colorize is the color of the image"""
+    view.require_init()
+    new = []
+
+    image = pygame.image.load(filename).convert_alpha()
+
+    x_size = int(image.get_width() / frames[0])
+    y_size = int(image.get_height() / frames[1])
+
+    for x in xrange(frames[0]):
+        for y in xrange(frames[1]):
+            new.append([Image(image.subsurface(x*x_size, y*y_size, x_size, y_size)),
+                        duration*0.001])
+    return Animation(new, pos, rotation, scale, colorize)
+
+def GridSpriteSheet3D(filename, frames=(1,1), duration=100,
+                    pos=(0,0,0), rotation=(0,0,0), scale=1,
+                    colorize=(1,1,1,1)):
+    """Load a "spritesheet" (basically, a flat 2d image that holds a lot of different images) into an Animation object.
+       filename must be the name of an image on disk
+       frames must be a tuple/list of two ints, indicating the number of frames in the x/y axis
+       durations must be an int/float representing the duration (in milliseconds) of all frames
+       pos is the 2d position of the image
+       rotation is the 3d rotation of the image
+       scale is the scale factor for the image
+       colorize is the color of the image"""
+    view.require_init()
+    new = []
+
+    image = pygame.image.load(filename).convert_alpha()
+
+    x_size = int(image.get_width() / frames[0])
+    y_size = int(image.get_height() / frames[1])
+
+    for x in xrange(frames[0]):
+        for y in xrange(frames[1]):
+            new.append([Image3D(image.subsurface(x*x_size, y*y_size, x_size, y_size)),
+                        duration*0.001])
+    return Animation3D(new, pos, rotation, scale, colorize)

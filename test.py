@@ -35,9 +35,9 @@ def main():
     img6 = pyggel.image.GIFImage("data/football.gif", pos=(150, 150))
     img7 = pyggel.image.GIFImage3D("data/hulk.gif", pos=(0,0,1))
 
-    pyggel.view.set_cursor(pyggel.image.GIFImage("data/hulk.gif"),
-                           center=True)
-    pyggel.view.screen.cursor.scale = 0.2
+    pyggel.view.set_cursor(pyggel.image.SpriteSheet("data/ar.png",
+                                    [(0,0,16,16), (16,0,16,16), (32,0,16,16), (16,0,16,16)],
+                                    100))
 
     img.blit(img2, (0, 0))
 
@@ -79,7 +79,7 @@ def main():
 
     my_app = pyggel.gui.App(meh)
     my_app.mefont.add_smiley(":)", "data/stickdude.png")
-    my_app.mefont.add_smiley(":P", img2sub)
+    my_app.mefont.add_smiley(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
     pyggel.gui.Label(my_app, "testy!!!")
     pyggel.gui.Label(my_app, "123!!!")
     pyggel.gui.Label(my_app, "testy!!!")
@@ -120,7 +120,6 @@ def main():
                 else:
                     img.blit(img2, (0,0))
         if "right" in meh.mouse.hit:
-##            view.screen.cursor.loop(not view.screen.cursor.looping)
             cur = view.screen.cursor
             if cur.running:
                 cur.pause()

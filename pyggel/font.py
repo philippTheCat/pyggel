@@ -232,7 +232,8 @@ class MEFont(object):
         """Add a smiley to the font.
            smiley must be a pygame.Surface, the path to an image or a pyggel.image.Image.
            Smileys are used in text by writing '[smiley_name]some text'"""
-        if isinstance(smiley, image.Image):
+        if isinstance(smiley, image.Image) or\
+           isinstance(smiley, image.Animation):
             self.smileys[name] = smiley
         else:
             self.smileys[name] = image.Image(smiley)
