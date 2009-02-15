@@ -1,9 +1,22 @@
+"""
+pyggle.event
+This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The event module contains classes to grab and access events.
+"""
+
 from include import *
 import view
 import string
 
 class Keyboard(object):
+    """A simple class to store keyboard events."""
     def __init__(self):
+        """Create the holder.
+           Attributes:
+               active -> a list of all keys hit or held
+               hit -> a list of all keys hit
+               held -> a list of all keys held"""
         self.active = []
         self.hook = {}
 
@@ -11,38 +24,66 @@ class Keyboard(object):
         self.held = []
 
 class Mouse(object):
+    """A simple class to store mouse events."""
     all_names = {1:"left", 2:"middle", 3:"right", 4:"wheel-up", 5:"wheel-down"}
     def __init__(self):
+        """Create the holder.
+           Attributes:
+               active -> a list of all mouse buttons that were clicked or held
+               hit -> a list of all mouse buttons that were clicked
+               held -> a list of all mouse buttons that were held"""
         self.active = []
 
         self.hit = []
         self.held = []
 
     def get_pos(self):
+        """Return the mouse pos."""
         return view.screen.get_mouse_pos()
 
     def get_name(self, button):
+        """Return the 'name' that matches the button, ie:
+           1 -> left
+           2 -> middle
+           3 -> right"""
         if button in self.all_names:
             return self.all_names[button]
         return "extra-%s"%button
 
 class Dispatcher(object):
+    """A simple dispatcher class, that allows you to bind functions to events, and execute them all with a single command."""
     def __init__(self):
+        """Create the Dispatcher object."""
         self.name_bindings = {}
 
     def bind(self, name, function):
+        """Bind 'function' to the event 'name'.
+           name can be anything that works as a python dict key (string, number, etc.)
+           function must be a python function or method"""
         if name in self.name_bindings:
             self.name_bindings[name].append(function)
         else:
             self.name_bindings[name] = [function]
 
     def fire(self, name, *args, **kwargs):
+        """Execute command 'name', calls any functions bound to this event with args/kwargs.
+           name can be anything that works as a python dict key (string, number, etc.)
+           *args/**kwargs are the arguments to use on any function calls bound to this event"""
         if name in self.name_bindings:
             for func in self.name_bindings[name]:
                 func(*args, **kwargs)
 
 class Handler(object):
+    """A simple event handler. This object catches and stores events, as well as fire off any callbacks attached to them.
+       There should only ever be one Handler in use at once, as only one handler can get a specific event."""
     def __init__(self):
+        """Create the handler.
+           Attributes:
+               keyboard -> a Keyboard object storing keyboard events
+               mouse -> a Mouse object storing mouse events
+               quit -> bool - whether wuit signal has been sent
+               dispatch -> Dispatcher object used for firing callbacks
+               uncaught_events -> list of all events the Handler couldn't handle"""
         self.keyboard = Keyboard()
         self.mouse = Mouse()
         self.quit = False
@@ -52,9 +93,29 @@ class Handler(object):
         self.uncaught_events = []
 
     def bind_to_event(self, event, function):
+        """Bind a callback function to an event.
+           event must be the name of an input event, event names are:
+               keydown - when a key is pressed
+               keyup - when a key is released
+               keyhold - when a mouse key is held
+               mousedown - when a mouse button is pressed
+               mouseup - when a mouse button is released
+               mousehold - when a mouse button is held
+               quit - when the QUIT event was fired (ie the X box on the window is hit)
+               uncaught-event - when an unsupported event is fired
+               update - called at end of grabbing events/firing callbacks.
+           function must be a python function or method that accepts the proper args for each event,
+           event args are:
+               keydown, keyup, keyhold: key->Pygame event key, string->the "string" of the key
+                   string will be the key pressed, ie, the a key is "a" (or "A" with shift/caps)
+               mousedown, mouseup, mousehold: button->Pygame event button, string-> the "name" of the button
+                   string will be "left", "right", "middle", "wheel-up", "wheel-down", or "extra-N" where N is the Pygame event button
+               uncaught-event: event->the Pygame event
+               quit, update: None"""
         self.dispatch.bind(event, function)
 
     def update(self):
+        """Grab all events, store in proper objects, and fire callbacks where necessary."""
         self.keyboard.hit = []
         self.mouse.hit = []
         self.uncaught_events = []

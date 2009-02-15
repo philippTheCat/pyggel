@@ -1,9 +1,19 @@
+"""
+pyggle.gui
+This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
+
+The gui module contains classes to create and use a simple Graphical User Interface.
+"""
+
 from include import *
 import image, event, view, font
 
 
 class App(object):
+    """A simple Application class, to hold and control all widgets."""
     def __init__(self, event_handler):
+        """Create the App.
+           event_handler must be the event.Handler object that the gui will use to get events"""
         self.event_handler = event_handler
         self.event_handler.bind_to_event("mousedown", self.handle_click)
         self.event_handler.bind_to_event("uncaught_event", self.handle_irregular_event)
@@ -22,15 +32,19 @@ class App(object):
         self.visible = True
 
     def new_widget(self, widget):
-        self.widgets.insert(0, widget)
+        """Add a new widget to the App."""
+        if not widget in self.widgets:
+            self.widgets.insert(0, widget)
 
     def handle_click(self, button, name):
+        """Callback for mouse click events from the event_handler."""
         for i in self.widgets:
             if i.visible:
                 if i.handle_click(button, name):
                     return
 
     def handle_irregular_event(self, event):
+        """Callback for uncaught_event events from event_handler."""
         if event.type == MOUSEMOTION:
             if self.event_handler.mouse.strings["left"]:
                 self.handle_drag(event)
@@ -41,33 +55,39 @@ class App(object):
                         return
 
     def handle_drag(self, event):
+        """Callback for mouse drag events."""
         for i in self.widgets:
             if i.handle_drag(*args, **kwargs):
                 return
 
     def handle_key(self, key, string):
+        """Callback for key press events from event_handler."""
         for i in self.widgets:
             if i.visible:
                 if i.handle_key(key, string):
                     return
 
     def next_widget(self):
+        """Cycle widgets so next widget is top one."""
         self.widgets.append(self.widgets.pop(0))
         while not self.widgets[0].visible:
             self.widgets.append(self.widgets.pop(0))
 
     def set_top_widget(self, widg):
+        """Moves widget 'widg' to top position."""
         if widg in self.widgets:
             self.widgets.remove(widg)
         self.widgets.insert(0, widg)
 
-    def render(self):
+    def render(self, camera=None):
+        """Renders all widgets, camera can be None or teh camera object used to render the scene."""
         self.widgets.reverse()
         for i in self.widgets:
             if i.visible: i.render()
         self.widgets.reverse()
 
     def get_next_position(self, size):
+        """Get next 'pad' position, ie, the next open area that this widget can be rendered to without overlapping other widgets."""
         x, y, nh = self.next_pos
         w, h = size
         if x + w > view.screen.screen_size_2d[0]:
@@ -76,6 +96,7 @@ class App(object):
         return x, y
 
     def set_next_position(self, pos, size):
+        """Change the next position for the next widget."""
         x, y = pos[0] + size[0] + 1, pos[1]
         if y + size[1] > self.next_pos[2]:
             nh = y + size[1]
