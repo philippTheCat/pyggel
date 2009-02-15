@@ -814,7 +814,7 @@ def SpriteSheet(filename, frames=[], durations=100,
     """Load a "spritesheet" (basically, a flat 2d image that holds a lot of different images) into an Animation object.
        filename must be the name of an image on disk
        frames must be a tuple/list of [x,y,width,height] portions of the image that are unique frames
-       durations must be an int/float or list/tuple of int/float representing the duration (in milliseconds) of all/each frame
+       durations must be a number or list/tuple of numbers representing the duration (in milliseconds) of all/each frame
        pos is the 2d position of the image
        rotation is the 3d rotation of the image
        scale is the scale factor for the image
@@ -837,7 +837,7 @@ def SpriteSheet3D(filename, frames=[], durations=[],
     """Load a "spritesheet" (basically, a flat 2d image that holds a lot of different images) into an Animation3D object.
        filename must be the name of an image on disk
        frames must be a tuple/list of [x,y,width,height] portions of the image that are unique frames
-       durations must be an int/float or list/tuple of int/float representing the duration (in milliseconds) of all/each frame
+       durations must be a number or list/tuple of numbers representing the duration (in milliseconds) of all/each frame
        pos is the 3d position of the image
        rotation is the 3d rotation of the image
        scale is the scale factor for the image
@@ -857,7 +857,7 @@ def GridSpriteSheet(filename, frames=(1,1), duration=100,
     """Load a "spritesheet" (basically, a flat 2d image that holds a lot of different images) into an Animation object.
        filename must be the name of an image on disk
        frames must be a tuple/list of two ints, indicating the number of frames in the x/y axis
-       durations must be an int/float representing the duration (in milliseconds) of all frames
+       duration must be a number representing the duration (in milliseconds) of all frames
        pos is the 2d position of the image
        rotation is the 3d rotation of the image
        scale is the scale factor for the image
@@ -882,7 +882,7 @@ def GridSpriteSheet3D(filename, frames=(1,1), duration=100,
     """Load a "spritesheet" (basically, a flat 2d image that holds a lot of different images) into an Animation object.
        filename must be the name of an image on disk
        frames must be a tuple/list of two ints, indicating the number of frames in the x/y axis
-       durations must be an int/float representing the duration (in milliseconds) of all frames
+       duration must be a number representing the duration (in milliseconds) of all frames
        pos is the 2d position of the image
        rotation is the 3d rotation of the image
        scale is the scale factor for the image

@@ -75,7 +75,12 @@ class Dispatcher(object):
 
 class Handler(object):
     """A simple event handler. This object catches and stores events, as well as fire off any callbacks attached to them.
-       There should only ever be one Handler in use at once, as only one handler can get a specific event."""
+       There should only ever be one Handler in use at once, as only one handler can get a specific event.
+       If a gui is used, it will "take control" of teh event handler, ie,
+           any events it catches will be suppressed here
+               (if gui_suppress_events is set, a gui will set this based on the suppress_events arg passed to it's app),
+           no callbacks will be fired, no values set - the only exceptions are:
+               quit, update, mouseup, and keyup - these values will be set, but no callbacks will be fired."""
     def __init__(self):
         """Create the handler.
            Attributes:
@@ -91,6 +96,9 @@ class Handler(object):
         self.dispatch = Dispatcher()
 
         self.uncaught_events = []
+
+        self.gui_suppress_events = False
+        self.gui = None
 
     def bind_to_event(self, event, function):
         """Bind a callback function to an event.
@@ -114,67 +122,86 @@ class Handler(object):
                quit, update: None"""
         self.dispatch.bind(event, function)
 
+    def handle_event(self, event):
+        """Handle an event, store in proper object, and fire callbacks."""
+        if event.type == KEYDOWN:
+            self.keyboard.hook[event.key] = str(event.unicode)
+            if self.gui and self.gui.handle_keydown(event.key, str(event.unicode)) and self.gui_suppress_events:
+                return None
+            if not event.key in self.keyboard.active:
+                self.keyboard.active.append(event.key)
+                self.keyboard.active.append(str(event.unicode))
+                self.keyboard.hit.append(event.key)
+                self.keyboard.hit.append(str(event.unicode))
+
+            self.dispatch.fire("keydown", event.key, str(event.unicode))
+
+        elif event.type == KEYUP:
+            if event.key in self.keyboard.active:
+                self.keyboard.active.remove(event.key)
+                self.keyboard.active.remove(self.keyboard.hook[event.key])
+                x = self.keyboard.hook[event.key]
+                del self.keyboard.hook[event.key]
+                if self.gui and self.gui.handle_keyup(event.key, x) and self.gui_suppress_events:
+                    return None
+                self.dispatch.fire("keyup", event.key, x)
+            else:
+                if self.gui and self.gui.handle_uncaught_event(event) and self.gui_suppress_events:
+                    return None
+                self.dispatch.fire("uncaught-event", event)
+
+        elif event.type == MOUSEBUTTONDOWN:
+            name = self.mouse.get_name(event.button)
+            if self.gui and self.gui.handle_mousedown(event.button, name) and self.gui_suppress_events:
+                return None
+            if not event.button in self.mouse.active:
+                self.mouse.active.append(event.button)
+                self.mouse.active.append(name)
+                self.mouse.hit.append(event.button)
+                self.mouse.hit.append(name)
+            self.dispatch.fire("mousedown", event.button, name)
+
+        elif event.type == MOUSEBUTTONUP:
+            name = self.mouse.get_name(event.button)
+            if event.button in self.mouse.active:
+                self.mouse.active.remove(event.button)
+                self.mouse.active.remove(name)
+            if self.gui and self.gui.handle_mouseup(event.button, name) and self.gui_suppress_events:
+                return None
+            self.dispatch.fire("mouseup", event.button, name)
+            
+        elif event.type == QUIT:
+            self.quit = True
+            self.dispatch.fire("quit")
+
+        else:
+            if self.gui and self.gui.handle_uncaught_event(event) and self.gui_suppress_events:
+                return None
+            self.uncaught_events.append(event)
+            self.dispatch.fire("uncaught-event", event)
+
     def update(self):
         """Grab all events, store in proper objects, and fire callbacks where necessary."""
         self.keyboard.hit = []
         self.mouse.hit = []
         self.uncaught_events = []
         for event in pygame.event.get():
-            if event.type == KEYDOWN:
-                if not event.key in self.keyboard.active:
-                    self.keyboard.active.append(event.key)
-                    self.keyboard.active.append(str(event.unicode))
-                    self.keyboard.hit.append(event.key)
-                    self.keyboard.hit.append(str(event.unicode))
-                    self.keyboard.hook[event.key] = str(event.unicode)
-
-                self.dispatch.fire("keydown", event.key, str(event.unicode))
-
-            elif event.type == KEYUP:
-                if event.key in self.keyboard.active:
-                    self.keyboard.active.remove(event.key)
-                    self.keyboard.active.remove(self.keyboard.hook[event.key])
-                    self.dispatch.fire("keyup", event.key, self.keyboard.hook[event.key])
-                    del self.keyboard.hook[event.key]
-                else:
-                    self.dispatch.fire("uncaught-event", event)
-
-            elif event.type == MOUSEBUTTONDOWN:
-                name = self.mouse.get_name(event.button)
-                if not event.button in self.mouse.active:
-                    self.mouse.active.append(event.button)
-                    self.mouse.active.append(name)
-                    self.mouse.hit.append(event.button)
-                    self.mouse.hit.append(name)
-                self.dispatch.fire("mousedown", event.button, name)
-
-            elif event.type == MOUSEBUTTONUP:
-                name = self.mouse.get_name(event.button)
-                if event.button in self.mouse.active:
-                    self.mouse.active.remove(event.button)
-                    self.mouse.active.remove(name)
-                self.dispatch.fire("mouseup", event.button, name)
-                
-            elif event.type == QUIT:
-                self.quit = True
-                self.dispatch.fire("quit")
-
-            else:
-                self.uncaught_events.append(event)
-                self.dispatch.fire("uncaught-event", event)
+            self.handle_event(event)
 
         for i in self.keyboard.active:
             if not i in self.keyboard.hit:
                 if i in self.keyboard.hook: #make sure these aren't the string names! Or else we would double fire, potentially
                     eventkey = i
                     name = self.keyboard.hook[eventkey]
-                    self.dispatch.fire("keyhold", eventkey, name)
-                if not i in self.keyboard.held:
-                    self.keyboard.held.append(i) #regardless of type now!
+                    if not (self.gui and self.gui.handle_keyhold(eventkey, name) and self.gui_suppress_events):
+                        self.dispatch.fire("keyhold", eventkey, name)
+                        if not i in self.keyboard.held:
+                            self.keyboard.held.append(i) #regardless of type now!
         for i in self.mouse.active:
             if not i in self.mouse.hit:
                 if type(i) is type(1): #same thing as keys, only slightly different test!
-                    self.dispatch.fire("mousehold", i, self.mouse.get_name(i))
-                if not i in self.mouse.held:
-                    self.mouse.held.append(i)
+                    if not (self.gui and self.gui.handle_mousehold(i, self.mouse.get_name(i)) and self.gui_suppress_events):
+                        self.dispatch.fire("mousehold", i, self.mouse.get_name(i))
+                        if not i in self.mouse.held:
+                            self.mouse.held.append(i)
         self.dispatch.fire("update")

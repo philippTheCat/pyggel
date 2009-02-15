@@ -11,13 +11,13 @@ import image, event, view, font
 
 class App(object):
     """A simple Application class, to hold and control all widgets."""
-    def __init__(self, event_handler):
+    def __init__(self, event_handler, suppress_events=True):
         """Create the App.
-           event_handler must be the event.Handler object that the gui will use to get events"""
+           event_handler must be the event.Handler object that the gui will use to get events,
+           and each event handler may only have on App attached to it."""
         self.event_handler = event_handler
-        self.event_handler.bind_to_event("mousedown", self.handle_click)
-        self.event_handler.bind_to_event("uncaught_event", self.handle_irregular_event)
-        self.event_handler.bind_to_event("keydown", self.handle_key)
+        self.event_handler.gui_suppress_events = suppress_events
+        self.event_handler.gui = self
 
         self.widgets = []
 
@@ -36,36 +36,70 @@ class App(object):
         if not widget in self.widgets:
             self.widgets.insert(0, widget)
 
-    def handle_click(self, button, name):
+    def handle_mousedown(self, button, name):
         """Callback for mouse click events from the event_handler."""
         for i in self.widgets:
             if i.visible:
-                if i.handle_click(button, name):
-                    return
+                if i.handle_mousedown(button, name):
+                    return True
+        return False
+    def handle_mouseup(self, button, name):
+        """Callback for mouse release events from the event_handler."""
+        for i in self.widgets:
+            if i.visible:
+                if i.handle_mouseup(button, name):
+                    return True
+        return False
+    def handle_mousehold(self, button, name):
+        """Callback for mouse hold events from the event_handler."""
+        for i in self.widgets:
+            if i.visible:
+                if i.handle_mousehold(button, name):
+                    return True
+        return False
 
-    def handle_irregular_event(self, event):
+    def handle_uncaught_event(self, event):
         """Callback for uncaught_event events from event_handler."""
         if event.type == MOUSEMOTION:
-            if self.event_handler.mouse.strings["left"]:
-                self.handle_drag(event)
+            if "left" in self.event_handler.mouse.active:
+                return self.handle_drag(event)
         else:
             for i in self.widgets:
                 if i.visible:
-                    if i.handle_irregular_event(event):
-                        return
+                    if i.handle_uncaught_event(event):
+                        return True
+        return False
 
     def handle_drag(self, event):
         """Callback for mouse drag events."""
         for i in self.widgets:
             if i.handle_drag(*args, **kwargs):
-                return
+                return True
+        return False
 
-    def handle_key(self, key, string):
+    def handle_keydown(self, key, string):
         """Callback for key press events from event_handler."""
         for i in self.widgets:
             if i.visible:
-                if i.handle_key(key, string):
-                    return
+                if i.handle_keydown(key, string):
+                    return True
+        return False
+
+    def handle_keyup(self, key, string):
+        """Callback for key release events from event_handler."""
+        for i in self.widgets:
+            if i.visible:
+                if i.handle_keyup(key, string):
+                    return True
+        return False
+
+    def handle_keyhold(self, key, string):
+        """Callback for key hold events from event_handler."""
+        for i in self.widgets:
+            if i.visible:
+                if i.handle_keyhold(key, string):
+                    return True
+        return False
 
     def next_widget(self):
         """Cycle widgets so next widget is top one."""
@@ -107,7 +141,10 @@ class App(object):
 
 
 class Widget(object):
+    """Base class all gui elements should inherit from."""
     def __init__(self, app):
+        """Create the Widget.
+           app must be the App object that this widget is part of."""
         self.app = app
         self.dispatch = event.Dispatcher()
 
@@ -115,16 +152,32 @@ class Widget(object):
 
         self.app.dispatch.fire("new-widget", self)
 
-    def handle_click(self, button, name):
+    def handle_mousedown(self, button, name):
+        """Handle a mouse click event from the App."""
+        return False
+    def handle_mouseup(self, button, name):
+        """Handle a mouse release event from the App."""
+        return False
+    def handle_mousehold(self, button, name):
+        """Handle a mouse hold event from the App."""
         return False
 
     def handle_drag(self, event):
+        """Handle a mouse drag event from the App."""
         return False
 
-    def handle_irregular_event(self, event):
+    def handle_uncaught_event(self, event):
+        """Handle an uncaught event from the App."""
         return False
 
-    def handle_key(self, key, string):
+    def handle_keydown(self, key, string):
+        """Handle a key press event from the App."""
+        return False
+    def handle_keyup(self, key, string):
+        """Handle a key release event from the App."""
+        return False
+    def handle_keyhold(self, key, string):
+        """Handle a key hold event from the App."""
         return False
 
     def render(self):
@@ -154,32 +207,29 @@ class Button(Label):
 
         self.use_image = self.text_image
 
-        self.app.event_handler.bind_to_event("mousedown", self.check_click)
-        self.app.event_handler.bind_to_event("mousehold", self.check_hold)
-        self.app.event_handler.bind_to_event("mouseup", self.check_unclick)
-
         for i in callbacks:
             self.dispatch.bind("click", i)
 
-    def check_click(self, button, name):
+    def handle_mousedown(self, button, name):
         if name == "left":
             if self.use_image.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
                 self.use_image = self.text_image_click
+                return True
 
-    def check_hold(self, button, name):
+    def handle_mousehold(self, button, name):
         if name == "left":
             if self.use_image == self.text_image_click:
                 if self.use_image.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
-                    self.use_image = self.text_image_click
-                    return
-        self.use_image = self.text_image
+                    return True
+            self.use_image = self.text_image
 
-    def check_unclick(self, button, name):
+    def handle_mouseup(self, button, name):
         if name == "left":
             if self.use_image == self.text_image_click:
                 if self.use_image.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
                     self.dispatch.fire("click")
-            self.use_image = self.text_image
+                    self.use_image = self.text_image
+                    return True
 
     def render(self):
         self.use_image.render()
