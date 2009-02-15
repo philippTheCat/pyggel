@@ -153,7 +153,7 @@ class Widget(object):
         self.app.dispatch.fire("new-widget", self)
 
     def handle_mousedown(self, button, name):
-        """Handle a mouse click event from the App."""
+        """Handle a mouse down event from the App."""
         return False
     def handle_mouseup(self, button, name):
         """Handle a mouse release event from the App."""
@@ -181,10 +181,18 @@ class Widget(object):
         return False
 
     def render(self):
+        """Render the widget."""
         pass
 
 class Label(Widget):
+    """A simple text label widget."""
     def __init__(self, app, text, pos=None):
+        """Create the Label.
+           app must be the App object that this widget is a part of
+           text must be the text string to render (supports smileys, via the app.mefont object)
+           pos must be None or the 2d (x,y) position of the label
+               if None, the gui will automaticall assign a position that it tries to fit on screen
+               without overlapping other widgets"""
         Widget.__init__(self, app)
 
         self.text = text
@@ -197,10 +205,19 @@ class Label(Widget):
             self.text_image.pos = pos
 
     def render(self):
+        """Render the Label."""
         self.text_image.render()
 
 class Button(Label):
+    """A simple button widget."""
     def __init__(self, app, text, pos=None, callbacks=[]):
+        """Create the Button.
+           app must be the App object that this widget is a part of
+           text must be the text string to render (supports smileys, via the app.mefont object)
+           pos must be None or the 2d (x,y( position of the button
+               if None, the gui will automaticall assign a position that it tries to fit on screen
+               without overlapping other widgets
+           callbacks must be a list/tuple of functions/methods to call when the button is clicked"""
         Label.__init__(self, app, text, pos)
         self.text_image_click = self.text_image.copy()
         self.text_image_click.colorize=(1,0,0,1)
@@ -211,12 +228,14 @@ class Button(Label):
             self.dispatch.bind("click", i)
 
     def handle_mousedown(self, button, name):
+        """Handle a mouse down event from the App."""
         if name == "left":
             if self.use_image.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
                 self.use_image = self.text_image_click
                 return True
 
     def handle_mousehold(self, button, name):
+        """Handle a mouse hold event from the App."""
         if name == "left":
             if self.use_image == self.text_image_click:
                 if self.use_image.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
@@ -224,6 +243,8 @@ class Button(Label):
             self.use_image = self.text_image
 
     def handle_mouseup(self, button, name):
+        """Handle a mouse release (possible click) event from the App.
+           If clicked, will execute all callbacks (if any) supplied."""
         if name == "left":
             if self.use_image == self.text_image_click:
                 if self.use_image.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
@@ -232,4 +253,5 @@ class Button(Label):
                     return True
 
     def render(self):
+        """Render the button."""
         self.use_image.render()
