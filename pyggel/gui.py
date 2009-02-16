@@ -306,7 +306,14 @@ class Checkbox(Widget):
             self.on.render()
 
 class Radio(Widget):
+    """Basic Radio widget."""
     def __init__(self, app, options=[], pos=None):
+        """Create the Radio.
+           app must be the App object that this widget is a part of
+           options must be a list of strings for each option this radio can have
+           pos must be None or the 2d (x,y( position of the button
+               if None, the gui will automaticall assign a position that it tries to fit on screen
+               without overlapping other widgets"""
         Widget.__init__(self, app)
 
         self.option = 0
@@ -355,6 +362,7 @@ class Radio(Widget):
             if x:
                 return True
     def handle_check(self, check):
+        """Handle a check click from one of the options."""
         for i in self.checks:
             if not i is check:
                 i.state = 0
