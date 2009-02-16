@@ -104,6 +104,7 @@ def main():
     pyggel.gui.Button(my_app, "BUTTON!", callbacks=[test_callback])
     pyggel.gui.Checkbox(my_app)
     pyggel.gui.Radio(my_app, ["test1", "test2", "test3"])
+    pyggel.gui.MultiChoiceRadio(my_app, ["mtest1", "mtest2", "mtest3", "mtest4"])
 
     my_scene.add_2d(my_app)
 

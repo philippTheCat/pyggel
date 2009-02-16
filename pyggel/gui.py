@@ -328,7 +328,7 @@ class Radio(Widget):
             n = Label(app, i, (int(x.off.get_width()*1.25), height))
             self.labels.append(n)
             height += max([x.off.get_height(), n.text_image.get_height()])
-            w = x.off.get_width() + n.text_image.get_width()
+            w = x.off.get_width() + n.text_image.get_width() + 1
             if w > width:
                 width = w
 
@@ -372,3 +372,27 @@ class Radio(Widget):
         """Render the radio."""
         for i in self.checks + self.labels:
             i.render()
+
+class MultiChoiceRadio(Radio):
+    """Basic Multiple choice radio widget."""
+    def __init__(self, app, options=[], pos=None):
+        """Create the MultiChoiceRadio.
+           app must be the App object that this widget is a part of
+           options must be a list of strings for each option this radio can have
+           pos must be None or the 2d (x,y( position of the button
+               if None, the gui will automaticall assign a position that it tries to fit on screen
+               without overlapping other widgets"""
+        Radio.__init__(self, app, options, pos)
+
+        self.states = []
+        for i in self.checks:
+            self.states.append(False)
+            i.dispatch.bind("uncheck", self.handle_uncheck)
+
+    def handle_check(self, check):
+        """Handle a check click from one of the options."""
+        self.states[self.checks.index(check)] = True
+
+    def handle_uncheck(self, check):
+        """Handle a check unclick from one of the options."""
+        self.states[self.checks.index(check)] = False
