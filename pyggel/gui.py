@@ -292,6 +292,10 @@ class Checkbox(Widget):
             if self.clicked and self.off.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
                 self.clicked = False
                 self.state = not self.state
+                if self.state:
+                    self.dispatch.fire("check", self)
+                else:
+                    self.dispatch.fire("uncheck", self)
                 return True
             self.clicked = False
 
@@ -300,3 +304,63 @@ class Checkbox(Widget):
         self.off.render()
         if self.state:
             self.on.render()
+
+class Radio(Widget):
+    def __init__(self, app, options=[], pos=None):
+        Widget.__init__(self, app)
+
+        self.option = 0
+        self.checks = []
+        self.labels = []
+        height = 0
+        width = 0
+        for i in options:
+            x = Checkbox(app, (0,height))
+            x.dispatch.bind("check", self.handle_check)
+            self.checks.append(x)
+            n = Label(app, i, (int(x.off.get_width()*1.25), height))
+            self.labels.append(n)
+            height += max([x.off.get_height(), n.text_image.get_height()])
+            w = x.off.get_width() + n.text_image.get_width()
+            if w > width:
+                width = w
+
+        if pos == None:
+            x, y = self.app.get_next_position((width, height))
+            self.app.set_next_position((x,y), (width, height))
+        else:
+            x, y = pos
+        for i in self.checks:
+            a, b = i.off.pos
+            a += x
+            b += y
+            i.off.pos = (a, b)
+            i.on.pos = (a, b)
+        for i in self.labels:
+            a, b = i.text_image.pos
+            a += x
+            b += y
+            i.text_image.pos = (a, b)
+
+    def handle_mousedown(self, button, name):
+        """Handle a mouse press event from the App."""
+        for i in self.checks:
+            x = i.handle_mousedown(button, name)
+            if x:
+                return True
+    def handle_mouseup(self, button, name):
+        """Handle a mouse release event from the App."""
+        for i in self.checks:
+            x = i.handle_mouseup(button, name)
+            if x:
+                return True
+    def handle_check(self, check):
+        for i in self.checks:
+            if not i is check:
+                i.state = 0
+        self.option = self.checks.index(check)
+
+    def render(self):
+        """Render the radio."""
+        for i in self.checks + self.labels:
+            i.render()

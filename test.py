@@ -37,7 +37,8 @@ def main():
 
     pyggel.view.set_cursor(pyggel.image.SpriteSheet("data/ar.png",
                                     [(0,0,16,16), (16,0,16,16), (32,0,16,16), (16,0,16,16)],
-                                    100))
+                                    100),
+                           True)
 
     img.blit(img2, (0, 0))
 
@@ -102,6 +103,7 @@ def main():
         pyggel.gui.Label(my_app, "umm...:)...:P...")
     pyggel.gui.Button(my_app, "BUTTON!", callbacks=[test_callback])
     pyggel.gui.Checkbox(my_app)
+    pyggel.gui.Radio(my_app, ["test1", "test2", "test3"])
 
     my_scene.add_2d(my_app)
 
