@@ -101,6 +101,7 @@ def main():
     def test_callback():
         pyggel.gui.Label(my_app, "umm...:)...:P...")
     pyggel.gui.Button(my_app, "BUTTON!", callbacks=[test_callback])
+    pyggel.gui.Checkbox(my_app)
 
     my_scene.add_2d(my_app)
 

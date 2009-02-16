@@ -255,3 +255,48 @@ class Button(Label):
     def render(self):
         """Render the button."""
         self.use_image.render()
+
+class Checkbox(Widget):
+    """Basic checkbox selection widget."""
+    def __init__(self, app, pos=None):
+        """Create the Checkbox.
+           app must be the App object that this widget is a part of
+           pos must be None or the 2d (x,y( position of the button
+               if None, the gui will automaticall assign a position that it tries to fit on screen
+               without overlapping other widgets"""
+        Widget.__init__(self, app)
+
+        self.off = self.app.regfont.make_text_image("O")
+        self.on = self.app.regfont.make_text_image("X")
+
+        if pos == None:
+            self.off.pos = self.app.get_next_position(self.off.get_size())
+            self.app.set_next_position(self.off.pos, self.off.get_size())
+            self.on.pos = self.off.pos
+        else:
+            self.off.pos = pos
+            self.on.pos = pos
+
+        self.state = 0
+        self.clicked = False
+
+    def handle_mousedown(self, button, name):
+        """Handle a mouse press event from the App."""
+        if name == "left":
+            if self.off.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
+                self.clicked = True
+                return True
+    def handle_mouseup(self, button, name):
+        """Handle a mouse release event from the App."""
+        if name == "left":
+            if self.clicked and self.off.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
+                self.clicked = False
+                self.state = not self.state
+                return True
+            self.clicked = False
+
+    def render(self):
+        """Render the checkbox."""
+        self.off.render()
+        if self.state:
+            self.on.render()
