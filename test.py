@@ -105,6 +105,8 @@ def main():
     pyggel.gui.Checkbox(my_app)
     pyggel.gui.Radio(my_app, ["test1", "test2", "test3"])
     pyggel.gui.MultiChoiceRadio(my_app, ["mtest1", "mtest2", "mtest3", "mtest4"])
+    my_app.newline()
+    pyggel.gui.Input(my_app, "testing...", 600)
 
     my_scene.add_2d(my_app)
 

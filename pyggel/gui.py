@@ -139,6 +139,11 @@ class App(object):
 
         self.next_pos = x, y, nh
 
+    def newline(self):
+        """Force the next widget to be on a new line (if pos is not explicitly set) - unless it is already there..."""
+        nh = self.next_pos[2]
+        self.next_pos = (0, nh+1, nh)
+
 
 class Widget(object):
     """Base class all gui elements should inherit from."""
@@ -214,7 +219,7 @@ class Button(Label):
         """Create the Button.
            app must be the App object that this widget is a part of
            text must be the text string to render (supports smileys, via the app.mefont object)
-           pos must be None or the 2d (x,y( position of the button
+           pos must be None or the 2d (x,y) position of the button
                if None, the gui will automaticall assign a position that it tries to fit on screen
                without overlapping other widgets
            callbacks must be a list/tuple of functions/methods to call when the button is clicked"""
@@ -261,7 +266,7 @@ class Checkbox(Widget):
     def __init__(self, app, pos=None):
         """Create the Checkbox.
            app must be the App object that this widget is a part of
-           pos must be None or the 2d (x,y( position of the button
+           pos must be None or the 2d (x,y) position of the button
                if None, the gui will automaticall assign a position that it tries to fit on screen
                without overlapping other widgets"""
         Widget.__init__(self, app)
@@ -311,7 +316,7 @@ class Radio(Widget):
         """Create the Radio.
            app must be the App object that this widget is a part of
            options must be a list of strings for each option this radio can have
-           pos must be None or the 2d (x,y( position of the button
+           pos must be None or the 2d (x,y) position of the button
                if None, the gui will automaticall assign a position that it tries to fit on screen
                without overlapping other widgets"""
         Widget.__init__(self, app)
@@ -379,7 +384,7 @@ class MultiChoiceRadio(Radio):
         """Create the MultiChoiceRadio.
            app must be the App object that this widget is a part of
            options must be a list of strings for each option this radio can have
-           pos must be None or the 2d (x,y( position of the button
+           pos must be None or the 2d (x,y) position of the button
                if None, the gui will automaticall assign a position that it tries to fit on screen
                without overlapping other widgets"""
         Radio.__init__(self, app, options, pos)
@@ -396,3 +401,58 @@ class MultiChoiceRadio(Radio):
     def handle_uncheck(self, check):
         """Handle a check unclick from one of the options."""
         self.states[self.checks.index(check)] = False
+
+class Input(Label):
+    """Basic text input widget."""
+    def __init__(self, app, start_text="", width=100, pos=None):
+        """Create the Input widget.
+           app must be the App object that this widget is a part of
+           start_text must be the string of text the input box starts with
+           width must be the max width (in pixels) if the box
+           pos must be None or the 2d (x,y) position of the button
+               if None, the gui will automaticall assign a position that it tries to fit on screen
+               without overlapping other widgets"""
+        Label.__init__(self, app, start_text, pos)
+
+        self.width = width
+        self.height = self.app.mefont.pygame_font.get_height()
+
+        self.pos = self.text_image.pos
+        if pos == None:
+            self.app.set_next_position(self.pos, (self.width, self.height))
+
+        self.working = len(self.text)
+
+    def get_clip(self):
+        """Return the "clip" of view - to limit rendering outside of the box."""
+        rx = 1.0 * view.screen.screen_size[0] / view.screen.screen_size_2d[0]
+        ry = 1.0 * view.screen.screen_size[1] / view.screen.screen_size_2d[1]
+
+        x, y = self.pos
+        w = self.width
+        h = self.height
+
+        return int(x*rx), view.screen.screen_size[1]-int(y*ry)-int(h*ry), int(w*rx), int(h*ry)
+
+    def handle_keydown(self, key, string):
+        """Handle a key click event from the App."""
+        if string in self.app.mefont.acceptable:
+            self.text = self.text[0:self.working] + string + self.text[self.working::]
+            self.text_image.text = self.text
+            self.working += 1
+            return True
+    def handle_keyhold(self, key, string):
+        """Handle a key hold event from the App."""
+        pass
+
+    def render(self):
+        """Render the Input widget."""
+        if self.text_image.get_width() > self.width:
+            x, y = self.text_image.pos
+            x = self.pos[0] - (self.text_image.get_width() - self.width)
+            self.text_image.pos = (x, y)
+        else:
+            self.text_image.pos = self.pos
+        view.screen.push_clip(self.get_clip())
+        Label.render(self)
+        view.screen.pop_clip()

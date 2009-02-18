@@ -226,6 +226,7 @@ class MEFont(object):
 
         self.smileys = {}
 
+        self.acceptable = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=+_)(*&^%$#@!~[]\\;',./<>?:\"{}| "
         self._load_font()
 
     def add_smiley(self, name, smiley):
@@ -243,7 +244,7 @@ class MEFont(object):
         self.pygame_font = pygame.font.Font(self.filename, self.fsize)
 
         L = {}
-        for i in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=+_)(*&^%$#@!~[]\\;',./<>?:\"{}| ":
+        for i in self.acceptable:
             L[i] = image.Image(self.pygame_font.render(i, True, (255,255,255)))
 
         self.glyphs = L
