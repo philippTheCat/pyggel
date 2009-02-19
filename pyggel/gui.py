@@ -422,6 +422,9 @@ class Input(Label):
             self.app.set_next_position(self.pos, (self.width, self.height))
 
         self.working = len(self.text)
+        self.working_image = image.Animation([[self.app.regfont.make_text_image("|"), .5],
+                                              [self.app.regfont.make_text_image(""), .5]])
+        self.xwidth = self.width - self.working_image.get_width()
 
     def get_clip(self):
         """Return the "clip" of view - to limit rendering outside of the box."""
@@ -433,6 +436,16 @@ class Input(Label):
         h = self.height
 
         return int(x*rx), view.screen.screen_size[1]-int(y*ry)-int(h*ry), int(w*rx), int(h*ry)
+
+    def calc_working_pos(self):
+        """Calculate the position of the text cursor - ie, where in the text are we typing..."""
+        width = 0
+        for i in self.text_image.glyphs[0][0][0:self.working]:
+            width += i.get_width()
+        x, y = width-1, self.pos[1]
+        if self.text_image.get_width() > self.xwidth:
+            x = self.pos[0] - (self.text_image.get_width() - self.xwidth)+x
+        return x, y
 
     def handle_keydown(self, key, string):
         """Handle a key click event from the App."""
@@ -447,12 +460,14 @@ class Input(Label):
 
     def render(self):
         """Render the Input widget."""
-        if self.text_image.get_width() > self.width:
+        if self.text_image.get_width() > self.xwidth:
             x, y = self.text_image.pos
-            x = self.pos[0] - (self.text_image.get_width() - self.width)
+            x = self.pos[0] - (self.text_image.get_width() - self.xwidth)
             self.text_image.pos = (x, y)
         else:
             self.text_image.pos = self.pos
         view.screen.push_clip(self.get_clip())
         Label.render(self)
         view.screen.pop_clip()
+        self.working_image.pos = self.calc_working_pos()
+        self.working_image.render()

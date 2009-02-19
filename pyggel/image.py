@@ -429,13 +429,14 @@ class Animation(object):
         self.cur = 0
         self.ptime = time.time()
         self.running = True
-        self.breakpoint = len(self.frames)-1
+        self.breakpoint = len(self.frames)
         self.startpoint = 0
         self.reversed = False
         self.looping = True
 
         self.visible = True
         self.filename = None
+        self.debug=False
 
     def render(self, camera=None):
         """Render the animation - this also keeps track of swapping frames when they have run for their duration.
@@ -481,11 +482,11 @@ class Animation(object):
         if start < 0:
             start = 0
         if start >= len(self.frames):
-            start = len(self.frames) - 1
+            start = len(self.frames)-1
         if end < 0:
             end = 0
         if end >= len(self.frames):
-            end = len(self.frames) - 1
+            end = len(self.frames)-1
         if end < start:
             end = start
         self.startpoint = start
