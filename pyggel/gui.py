@@ -73,7 +73,7 @@ class App(object):
     def handle_drag(self, event):
         """Callback for mouse drag events."""
         for i in self.widgets:
-            if i.handle_drag(*args, **kwargs):
+            if i.handle_drag(event):
                 return True
         return False
 
