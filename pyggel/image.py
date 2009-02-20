@@ -39,6 +39,7 @@ class Image(object):
         self.scale = scale
         self.colorize = colorize
         self.visible = True
+        print self.colorize
 
     def copy(self):
         """Return a copy of the image - sharing the same data.DisplayList"""
@@ -412,7 +413,7 @@ class Animation(object):
     """A simple object used to store, manipulate, animate and render a bunch of frames of 2d Image obejcts."""
     def __init__(self, frames=[], pos=(0,0),
                  rotation=(0,0,0), scale=1,
-                 colorize=(1,1,1,1)):
+                 colorize=None):
         """Create the Animation
            frames must be a list/tuple of [frame, duration] objects
            pos is the 2d position of the image
@@ -464,7 +465,8 @@ class Animation(object):
         frame.pos = self.pos
         frame.rotation = self.rotation
         frame.scale = self.scale
-        frame.colorize = self.colorize
+        if self.colorize:
+            frame.colorize = self.colorize
         frame.render(camera)
 
     def seek(self, num):

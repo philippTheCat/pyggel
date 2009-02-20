@@ -422,11 +422,8 @@ class Input(Label):
             self.app.set_next_position(self.pos, (self.width, self.height))
 
         self.working = len(self.text)
-        print self.app.regfont.pygame_font.size("|")[0]
-        self.working_image = image.Animation([[image.create_empty_image((
-            int(self.app.mefont.glyphs["|"].get_width()/2),
-            self.height)), .5],
-                                              [image.create_empty_image((1, 1),(0,0,0,0)), .5]])
+        self.working_image = image.Animation([[self.app.regfont.make_text_image("|"), .5],
+                                              [self.app.regfont.make_text_image("|",color=(0,0,0,0)), .5]])
         self.xwidth = self.width - self.working_image.get_width()
 
     def get_clip(self):
@@ -448,15 +445,29 @@ class Input(Label):
         x, y = width, self.pos[1]
         if self.text_image.get_width() > self.xwidth:
             x = self.pos[0] - (self.text_image.get_width() - self.xwidth)+x
-        return x, y
+        return x-int(self.working_image.get_width()/2), y
+
+    def move_working(self, x):
+        self.working += x
+        if self.working < 0:
+            self.working = 0
+        if self.working > len(self.text):
+            self.working = len(self.text)
 
     def handle_keydown(self, key, string):
         """Handle a key click event from the App."""
-        if string in self.app.mefont.acceptable:
+        if string and string in self.app.mefont.acceptable:
             self.text = self.text[0:self.working] + string + self.text[self.working::]
             self.text_image.text = self.text
             self.working += 1
             return True
+        if key == K_LEFT:
+            self.move_working(-1)
+            return True
+        if key == K_RIGHT:
+            self.move_working(1)
+            return True
+
     def handle_keyhold(self, key, string):
         """Handle a key hold event from the App."""
         pass
