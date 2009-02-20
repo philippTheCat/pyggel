@@ -429,7 +429,7 @@ class Animation(object):
         self.cur = 0
         self.ptime = time.time()
         self.running = True
-        self.breakpoint = len(self.frames)
+        self.breakpoint = len(self.frames)-1
         self.startpoint = 0
         self.reversed = False
         self.looping = True
@@ -452,7 +452,7 @@ class Animation(object):
                             self.cur += 1
                 else:
                     self.cur += 1
-                    if self.cur >= self.breakpoint:
+                    if self.cur > self.breakpoint:
                         if self.looping:
                             self.cur = self.startpoint
                         else:
