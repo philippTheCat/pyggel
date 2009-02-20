@@ -422,8 +422,11 @@ class Input(Label):
             self.app.set_next_position(self.pos, (self.width, self.height))
 
         self.working = len(self.text)
-        self.working_image = image.Animation([[self.app.regfont.make_text_image("|"), .5],
-                                              [self.app.regfont.make_text_image(""), .5]])
+        print self.app.regfont.pygame_font.size("|")[0]
+        self.working_image = image.Animation([[image.create_empty_image((
+            int(self.app.mefont.glyphs["|"].get_width()/2),
+            self.height)), .5],
+                                              [image.create_empty_image((1, 1),(0,0,0,0)), .5]])
         self.xwidth = self.width - self.working_image.get_width()
 
     def get_clip(self):
@@ -442,7 +445,7 @@ class Input(Label):
         width = 0
         for i in self.text_image.glyphs[0][0][0:self.working]:
             width += i.get_width()
-        x, y = width-1, self.pos[1]
+        x, y = width, self.pos[1]
         if self.text_image.get_width() > self.xwidth:
             x = self.pos[0] - (self.text_image.get_width() - self.xwidth)+x
         return x, y
