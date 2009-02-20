@@ -7,16 +7,16 @@ The gui module contains classes to create and use a simple Graphical User Interf
 
 from include import *
 import image, event, view, font
+import time
 
 
 class App(object):
     """A simple Application class, to hold and control all widgets."""
-    def __init__(self, event_handler, suppress_events=True):
+    def __init__(self, event_handler):
         """Create the App.
            event_handler must be the event.Handler object that the gui will use to get events,
            and each event handler may only have on App attached to it."""
         self.event_handler = event_handler
-        self.event_handler.gui_suppress_events = suppress_events
         self.event_handler.gui = self
 
         self.widgets = []
@@ -426,6 +426,9 @@ class Input(Label):
                                               [self.app.regfont.make_text_image("|",color=(0,0,0,0)), .5]])
         self.xwidth = self.width - self.working_image.get_width()
 
+        self.key_hold_lengths = {}
+        self.key_hold_length = 100 #milliseconds...
+
     def get_clip(self):
         """Return the "clip" of view - to limit rendering outside of the box."""
         rx = 1.0 * view.screen.screen_size[0] / view.screen.screen_size_2d[0]
@@ -438,16 +441,37 @@ class Input(Label):
         return int(x*rx), view.screen.screen_size[1]-int(y*ry)-int(h*ry), int(w*rx), int(h*ry)
 
     def calc_working_pos(self):
-        """Calculate the position of the text cursor - ie, where in the text are we typing..."""
+        """Calculate the position of the text cursor - ie, where in the text are we typing... and the text offset."""
         width = 0
         for i in self.text_image.glyphs[0][0][0:self.working]:
             width += i.get_width()
         x, y = width, self.pos[1]
         if self.text_image.get_width() > self.xwidth:
             x = self.pos[0] - (self.text_image.get_width() - self.xwidth)+x
-        return x-int(self.working_image.get_width()/2), y
+
+        wx, wy = x-int(self.working_image.get_width()/2), y
+
+        if self.text_image.get_width() > self.xwidth:
+            x, y = self.text_image.pos
+            x = self.pos[0] - (self.text_image.get_width() - self.xwidth)
+            if self.working_image.pos[0] < 0:
+                x -= self.working_image.pos[0]
+                self.working_image.pos = 5, self.working_image.pos[1]
+            px, py = x, y
+        else:
+            px, py = self.pos
+
+        n = 0
+        while wx < self.pos[0]:
+            w = self.text_image.glyphs[0][0][n].get_width()
+            wx += w
+            px += w
+            n += 1
+        return (wx, wy), (px, py)
 
     def move_working(self, x):
+        """Move the working position of the cursor."""
+        self.working_image.reset()
         self.working += x
         if self.working < 0:
             self.working = 0
@@ -467,21 +491,30 @@ class Input(Label):
         if key == K_RIGHT:
             self.move_working(1)
             return True
+        return True #hack for now
 
     def handle_keyhold(self, key, string):
         """Handle a key hold event from the App."""
-        pass
+        if key in self.key_hold_lengths:
+            if time.time() - self.key_hold_lengths[key] >= self.key_hold_length * 0.001:
+                self.handle_keydown(key, string)
+                self.key_hold_lengths[key] = time.time()
+        else:
+            self.key_hold_lengths[key] = time.time()
+        return True
+
+    def handle_keyup(self, key, string):
+        """Handle a key release event form the App."""
+        if key in self.key_hold_lengths:
+            del self.key_hold_lengths[key]
+            return True
 
     def render(self):
         """Render the Input widget."""
-        if self.text_image.get_width() > self.xwidth:
-            x, y = self.text_image.pos
-            x = self.pos[0] - (self.text_image.get_width() - self.xwidth)
-            self.text_image.pos = (x, y)
-        else:
-            self.text_image.pos = self.pos
+        wpos, tpos = self.calc_working_pos()
+        self.text_image.pos = tpos
         view.screen.push_clip(self.get_clip())
         Label.render(self)
         view.screen.pop_clip()
-        self.working_image.pos = self.calc_working_pos()
+        self.working_image.pos = wpos
         self.working_image.render()

@@ -39,7 +39,6 @@ class Image(object):
         self.scale = scale
         self.colorize = colorize
         self.visible = True
-        print self.colorize
 
     def copy(self):
         """Return a copy of the image - sharing the same data.DisplayList"""
