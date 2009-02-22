@@ -179,6 +179,7 @@ class Handler(object):
                 self.dispatch.fire("uncaught-event", event)
 
         elif event.type == MOUSEBUTTONDOWN:
+            name = self.mouse.get_name(event.button)
             if self.gui and self.gui.handle_mousedown(event.button, name):
                 self.gui_mouse.do_active_hit(event)
                 return None
@@ -188,6 +189,7 @@ class Handler(object):
         elif event.type == MOUSEBUTTONUP:
             self.gui_mouse.do_buttonup(event)
             self.mouse.do_buttonup(event)
+            name = self.mouse.get_name(event.button)
             if self.gui and self.gui.handle_mouseup(event.button, name):
                 return None
             self.dispatch.fire("mouseup", event.button, name)

@@ -232,30 +232,34 @@ class Button(Label):
         for i in callbacks:
             self.dispatch.bind("click", i)
 
+        self._mdown = False
+
     def handle_mousedown(self, button, name):
         """Handle a mouse down event from the App."""
         if name == "left":
-            if self.use_image.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
+            if self.use_image.get_rect().collidepoint(view.screen.get_mouse_pos()):
                 self.use_image = self.text_image_click
+                self._mdown = True
                 return True
 
     def handle_mousehold(self, button, name):
         """Handle a mouse hold event from the App."""
         if name == "left":
-            if self.use_image == self.text_image_click:
-                if self.use_image.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
-                    return True
+            if self._mdown and self.use_image.get_rect().collidepoint(view.screen.get_mouse_pos()):
+                self.use_image = self.text_image_click
+                return True
             self.use_image = self.text_image
 
     def handle_mouseup(self, button, name):
         """Handle a mouse release (possible click) event from the App.
            If clicked, will execute all callbacks (if any) supplied."""
         if name == "left":
-            if self.use_image == self.text_image_click:
-                if self.use_image.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
-                    self.dispatch.fire("click")
-                    self.use_image = self.text_image
-                    return True
+            if self._mdown and self.use_image.get_rect().collidepoint(view.screen.get_mouse_pos()):
+                self._mdown = False
+                self.dispatch.fire("click")
+                self.use_image = self.text_image
+                return True
+            self._mdown = False
 
     def render(self):
         """Render the button."""
@@ -288,13 +292,13 @@ class Checkbox(Widget):
     def handle_mousedown(self, button, name):
         """Handle a mouse press event from the App."""
         if name == "left":
-            if self.off.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
+            if self.off.get_rect().collidepoint(view.screen.get_mouse_pos()):
                 self.clicked = True
                 return True
     def handle_mouseup(self, button, name):
         """Handle a mouse release event from the App."""
         if name == "left":
-            if self.clicked and self.off.get_rect().collidepoint(self.app.event_handler.mouse.get_pos()):
+            if self.clicked and self.off.get_rect().collidepoint(view.screen.get_mouse_pos()):
                 self.clicked = False
                 self.state = not self.state
                 if self.state:
@@ -429,6 +433,9 @@ class Input(Label):
         self.key_hold_lengths = {}
         self.key_hold_length = 100 #milliseconds...
 
+        self.active = False
+        self._mdown = False
+
     def get_clip(self):
         """Return the "clip" of view - to limit rendering outside of the box."""
         rx = 1.0 * view.screen.screen_size[0] / view.screen.screen_size_2d[0]
@@ -480,34 +487,57 @@ class Input(Label):
 
     def handle_keydown(self, key, string):
         """Handle a key click event from the App."""
-        if string and string in self.app.mefont.acceptable:
-            self.text = self.text[0:self.working] + string + self.text[self.working::]
-            self.text_image.text = self.text
-            self.working += 1
-            return True
-        if key == K_LEFT:
-            self.move_working(-1)
-            return True
-        if key == K_RIGHT:
-            self.move_working(1)
-            return True
-        return True #hack for now
+        if self.active:
+            if string and string in self.app.mefont.acceptable:
+                self.text = self.text[0:self.working] + string + self.text[self.working::]
+                self.text_image.text = self.text
+                self.working += 1
+                return True
+            if key == K_LEFT:
+                self.move_working(-1)
+                return True
+            if key == K_RIGHT:
+                self.move_working(1)
+                return True
+            return True #hack for now
 
     def handle_keyhold(self, key, string):
         """Handle a key hold event from the App."""
-        if key in self.key_hold_lengths:
-            if time.time() - self.key_hold_lengths[key] >= self.key_hold_length * 0.001:
-                self.handle_keydown(key, string)
+        if self.active:
+            if key in self.key_hold_lengths:
+                if time.time() - self.key_hold_lengths[key] >= self.key_hold_length * 0.001:
+                    self.handle_keydown(key, string)
+                    self.key_hold_lengths[key] = time.time()
+            else:
                 self.key_hold_lengths[key] = time.time()
-        else:
-            self.key_hold_lengths[key] = time.time()
-        return True
+            return True
 
     def handle_keyup(self, key, string):
-        """Handle a key release event form the App."""
-        if key in self.key_hold_lengths:
-            del self.key_hold_lengths[key]
-            return True
+        """Handle a key release event from the App."""
+        if self.active:
+            if key in self.key_hold_lengths:
+                del self.key_hold_lengths[key]
+                return True
+
+    def handle_mousedown(self, button, name):
+        """Handle mouse down event from the App."""
+        if name == "left":
+            r = pygame.Rect(self.pos, (self.width, self.height))
+            if r.collidepoint(self.app.event_handler.mouse.get_pos()):
+                self._mdown = True
+                return True
+            else:
+                self.active = False
+
+    def handle_mouseup(self, button, name):
+        """Handle mouse release event from the App."""
+        if name == "left":
+            m = self._mdown
+            self._mdown = False
+            r = pygame.Rect(self.pos, (self.width, self.height))
+            if m and r.collidepoint(self.app.event_handler.mouse.get_pos()):
+                self.active = True
+                return True
 
     def render(self):
         """Render the Input widget."""
@@ -517,4 +547,5 @@ class Input(Label):
         Label.render(self)
         view.screen.pop_clip()
         self.working_image.pos = wpos
-        self.working_image.render()
+        if self.active:
+            self.working_image.render()
