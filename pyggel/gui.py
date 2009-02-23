@@ -449,32 +449,35 @@ class Input(Label):
 
     def calc_working_pos(self):
         """Calculate the position of the text cursor - ie, where in the text are we typing... and the text offset."""
-        width = 0
-        for i in self.text_image.glyphs[0][0][0:self.working]:
-            width += i.get_width()
-        x, y = width, self.pos[1]
-        if self.text_image.get_width() > self.xwidth:
-            x = self.pos[0] - (self.text_image.get_width() - self.xwidth)+x
+        if self.text and self.working > 0:
+            width = 0
+            for i in self.text_image.glyphs[0][0][0:self.working]:
+                width += i.get_width()
+            x, y = width, self.pos[1]
+            if self.text_image.get_width() > self.xwidth:
+                x = self.pos[0] - (self.text_image.get_width() - self.xwidth)+x
 
-        wx, wy = x-int(self.working_image.get_width()/2), y
+            wx, wy = x-int(self.working_image.get_width()/2), y
 
-        if self.text_image.get_width() > self.xwidth:
-            x, y = self.text_image.pos
-            x = self.pos[0] - (self.text_image.get_width() - self.xwidth)
-            if self.working_image.pos[0] < 0:
-                x -= self.working_image.pos[0]
-                self.working_image.pos = 5, self.working_image.pos[1]
-            px, py = x, y
+            if self.text_image.get_width() > self.xwidth:
+                x, y = self.text_image.pos
+                x = self.pos[0] - (self.text_image.get_width() - self.xwidth)
+                if self.working_image.pos[0] < 0:
+                    x -= self.working_image.pos[0]
+                    self.working_image.pos = 5, self.working_image.pos[1]
+                px, py = x, y
+            else:
+                px, py = self.pos
+
+            n = 0
+            while wx < self.pos[0]:
+                w = self.text_image.glyphs[0][0][n].get_width()
+                wx += w
+                px += w
+                n += 1
+            return (wx, wy), (px, py)
         else:
-            px, py = self.pos
-
-        n = 0
-        while wx < self.pos[0]:
-            w = self.text_image.glyphs[0][0][n].get_width()
-            wx += w
-            px += w
-            n += 1
-        return (wx, wy), (px, py)
+            return (self.pos[0]-int(self.working_image.get_width()/2), self.pos[1]), self.pos
 
     def move_working(self, x):
         """Move the working position of the cursor."""
@@ -494,6 +497,13 @@ class Input(Label):
             return True
         return False
 
+    def submit_text(self):
+        if self.text:
+            self.dispatch.fire("submit", self.text)
+            self.text = ""
+            self.text_image.text = ""
+            self.working = 0
+
     def handle_keydown(self, key, string):
         """Handle a key click event from the App."""
         if not self.can_use(key, string):
@@ -507,6 +517,20 @@ class Input(Label):
                 self.move_working(-1)
             if key == K_RIGHT:
                 self.move_working(1)
+            if key == K_DELETE:
+                self.text = self.text[0:self.working] + self.text[self.working+1::]
+                self.text_image.text = self.text
+            if key == K_BACKSPACE:
+                if self.working:
+                    self.text = self.text[0:self.working-1] + self.text[self.working::]
+                    self.move_working(-1)
+                    self.text_image.text = self.text
+            if key == K_HOME:
+                self.working = 0
+            if key == K_END:
+                self.working = len(self.text)
+            if key == K_RETURN:
+                self.submit_text()
             return True
         return False
 
