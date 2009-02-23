@@ -485,24 +485,35 @@ class Input(Label):
         if self.working > len(self.text):
             self.working = len(self.text)
 
+    def can_use(self, key, string):
+        """Return whether or not this kind of event is captured by the widget."""
+        if string and string in self.app.mefont.acceptable:
+            return True
+        if key in (K_LEFT, K_RIGHT, K_END, K_HOME, K_DELETE,
+                   K_BACKSPACE, K_RETURN):
+            return True
+        return False
+
     def handle_keydown(self, key, string):
         """Handle a key click event from the App."""
+        if not self.can_use(key, string):
+            return False
         if self.active:
             if string and string in self.app.mefont.acceptable:
                 self.text = self.text[0:self.working] + string + self.text[self.working::]
                 self.text_image.text = self.text
                 self.working += 1
-                return True
             if key == K_LEFT:
                 self.move_working(-1)
-                return True
             if key == K_RIGHT:
                 self.move_working(1)
-                return True
-            return True #hack for now
+            return True
+        return False
 
     def handle_keyhold(self, key, string):
         """Handle a key hold event from the App."""
+        if not self.can_use(key, string):
+            return False
         if self.active:
             if key in self.key_hold_lengths:
                 if time.time() - self.key_hold_lengths[key] >= self.key_hold_length * 0.001:
@@ -511,13 +522,18 @@ class Input(Label):
             else:
                 self.key_hold_lengths[key] = time.time()
             return True
+        return False
+
 
     def handle_keyup(self, key, string):
         """Handle a key release event from the App."""
+        if not self.can_use(key, string):
+            return False
         if self.active:
             if key in self.key_hold_lengths:
                 del self.key_hold_lengths[key]
-                return True
+            return True
+        return False
 
     def handle_mousedown(self, button, name):
         """Handle mouse down event from the App."""
