@@ -79,6 +79,7 @@ def main():
     meh.bind_to_event(" ", lambda a,b: pyggel.misc.save_screenshot("Test.png"))
 
     my_app = pyggel.gui.App(meh)
+    my_app.newline(height=60)
     my_app.mefont.add_smiley(":)", "data/stickdude.png")
     my_app.mefont.add_smiley(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
     pyggel.gui.Label(my_app, "testy!!!")
@@ -101,12 +102,21 @@ def main():
 
     def test_callback():
         pyggel.gui.Label(my_app, "umm...:)...:P...")
+    def test_frame_callback():
+        print "yes!"
     pyggel.gui.Button(my_app, "BUTTON!", callbacks=[test_callback])
     pyggel.gui.Checkbox(my_app)
     pyggel.gui.Radio(my_app, ["test1", "test2", "test3"])
     pyggel.gui.MultiChoiceRadio(my_app, ["mtest1", "mtest2", "mtest3", "mtest4"])
     my_app.newline()
     pyggel.gui.Input(my_app, "testing...", 400)
+
+    frame = pyggel.gui.Frame(my_app, size=(250, 250))
+    pyggel.gui.Label(frame, "hello?")
+    pyggel.gui.Label(frame, "1")
+    pyggel.gui.Label(frame, "2")
+    frame.newline()
+    pyggel.gui.Button(frame, "sub-button!", callbacks=[test_frame_callback])
 
     my_scene.add_2d(my_app)
 

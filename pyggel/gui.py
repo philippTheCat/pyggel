@@ -31,6 +31,10 @@ class App(object):
 
         self.visible = True
 
+    def get_mouse_pos(self):
+        """Return mouse pos based on App position -always (0,0)"""
+        return view.screen.get_mouse_pos()
+
     def new_widget(self, widget):
         """Add a new widget to the App."""
         if not widget in self.widgets:
@@ -114,7 +118,7 @@ class App(object):
         self.widgets.insert(0, widg)
 
     def render(self, camera=None):
-        """Renders all widgets, camera can be None or teh camera object used to render the scene."""
+        """Renders all widgets, camera can be None or the camera object used to render the scene."""
         self.widgets.reverse()
         for i in self.widgets:
             if i.visible: i.render()
@@ -139,9 +143,9 @@ class App(object):
 
         self.next_pos = x, y, nh
 
-    def newline(self):
+    def newline(self, height=0):
         """Force the next widget to be on a new line (if pos is not explicitly set) - unless it is already there..."""
-        nh = self.next_pos[2]
+        nh = self.next_pos[2]+height
         self.next_pos = (0, nh+1, nh)
 
 
@@ -185,7 +189,7 @@ class Widget(object):
         """Handle a key hold event from the App."""
         return False
 
-    def render(self):
+    def render(self, offset=(0,0)):
         """Render the widget."""
         pass
 
@@ -209,9 +213,16 @@ class Label(Widget):
         else:
             self.text_image.pos = pos
 
-    def render(self):
+        self.pos = self.text_image.pos
+
+    def render(self, offset=(0,0)):
         """Render the Label."""
+        x, y = self.pos
+        x += offset[0]
+        y += offset[1]
+        self.text_image.pos = (x, y)
         self.text_image.render()
+        self.text_image.pos = self.pos
 
 class Button(Label):
     """A simple button widget."""
@@ -237,7 +248,7 @@ class Button(Label):
     def handle_mousedown(self, button, name):
         """Handle a mouse down event from the App."""
         if name == "left":
-            if self.use_image.get_rect().collidepoint(view.screen.get_mouse_pos()):
+            if self.use_image.get_rect().collidepoint(self.app.get_mouse_pos()):
                 self.use_image = self.text_image_click
                 self._mdown = True
                 return True
@@ -245,7 +256,7 @@ class Button(Label):
     def handle_mousehold(self, button, name):
         """Handle a mouse hold event from the App."""
         if name == "left":
-            if self._mdown and self.use_image.get_rect().collidepoint(view.screen.get_mouse_pos()):
+            if self._mdown and self.use_image.get_rect().collidepoint(self.app.get_mouse_pos()):
                 self.use_image = self.text_image_click
                 return True
             self.use_image = self.text_image
@@ -254,16 +265,21 @@ class Button(Label):
         """Handle a mouse release (possible click) event from the App.
            If clicked, will execute all callbacks (if any) supplied."""
         if name == "left":
-            if self._mdown and self.use_image.get_rect().collidepoint(view.screen.get_mouse_pos()):
+            if self._mdown and self.use_image.get_rect().collidepoint(self.app.get_mouse_pos()):
                 self._mdown = False
                 self.dispatch.fire("click")
                 self.use_image = self.text_image
                 return True
             self._mdown = False
 
-    def render(self):
+    def render(self, offset=(0,0)):
         """Render the button."""
+        x, y = self.pos
+        x += offset[0]
+        y += offset[1]
+        self.use_image.pos = (x, y)
         self.use_image.render()
+        self.use_image.pos = self.pos
 
 class Checkbox(Widget):
     """Basic checkbox selection widget."""
@@ -285,6 +301,7 @@ class Checkbox(Widget):
         else:
             self.off.pos = pos
             self.on.pos = pos
+        self.pos = self.off.pos
 
         self.state = 0
         self.clicked = False
@@ -292,13 +309,13 @@ class Checkbox(Widget):
     def handle_mousedown(self, button, name):
         """Handle a mouse press event from the App."""
         if name == "left":
-            if self.off.get_rect().collidepoint(view.screen.get_mouse_pos()):
+            if self.off.get_rect().collidepoint(self.app.get_mouse_pos()):
                 self.clicked = True
                 return True
     def handle_mouseup(self, button, name):
         """Handle a mouse release event from the App."""
         if name == "left":
-            if self.clicked and self.off.get_rect().collidepoint(view.screen.get_mouse_pos()):
+            if self.clicked and self.off.get_rect().collidepoint(self.app.get_mouse_pos()):
                 self.clicked = False
                 self.state = not self.state
                 if self.state:
@@ -308,11 +325,18 @@ class Checkbox(Widget):
                 return True
             self.clicked = False
 
-    def render(self):
+    def render(self, offset=(0,0)):
         """Render the checkbox."""
+        x, y = self.pos
+        x += offset[0]
+        y += offset[1]
+        self.off.pos = (x, y)
         self.off.render()
+        self.off.pos = self.pos
         if self.state:
+            self.on.pos = (x, y)
             self.on.render()
+            self.on.pos = self.pos
 
 class Radio(Widget):
     """Basic Radio widget."""
@@ -346,17 +370,17 @@ class Radio(Widget):
             self.app.set_next_position((x,y), (width, height))
         else:
             x, y = pos
+        self.pos = (x, y)
         for i in self.checks:
-            a, b = i.off.pos
+            a, b = i.pos
             a += x
             b += y
-            i.off.pos = (a, b)
-            i.on.pos = (a, b)
+            i.pos = (a, b)
         for i in self.labels:
             a, b = i.text_image.pos
             a += x
             b += y
-            i.text_image.pos = (a, b)
+            i.pos = (a, b)
 
     def handle_mousedown(self, button, name):
         """Handle a mouse press event from the App."""
@@ -377,10 +401,10 @@ class Radio(Widget):
                 i.state = 0
         self.option = self.checks.index(check)
 
-    def render(self):
+    def render(self, offset=(0,0)):
         """Render the radio."""
         for i in self.checks + self.labels:
-            i.render()
+            i.render(offset)
 
 class MultiChoiceRadio(Radio):
     """Basic Multiple choice radio widget."""
@@ -421,7 +445,6 @@ class Input(Label):
         self.width = width
         self.height = self.app.mefont.pygame_font.get_height()
 
-        self.pos = self.text_image.pos
         if pos == None:
             self.app.set_next_position(self.pos, (self.width, self.height))
 
@@ -563,7 +586,7 @@ class Input(Label):
         """Handle mouse down event from the App."""
         if name == "left":
             r = pygame.Rect(self.pos, (self.width, self.height))
-            if r.collidepoint(self.app.event_handler.mouse.get_pos()):
+            if r.collidepoint(self.app.get_mouse_pos()):
                 self._mdown = True
                 return True
             else:
@@ -575,17 +598,97 @@ class Input(Label):
             m = self._mdown
             self._mdown = False
             r = pygame.Rect(self.pos, (self.width, self.height))
-            if m and r.collidepoint(self.app.event_handler.mouse.get_pos()):
+            if m and r.collidepoint(self.app.get_mouse_pos()):
                 self.active = True
                 return True
 
-    def render(self):
+    def render(self, offset=(0,0)):
         """Render the Input widget."""
         wpos, tpos = self.calc_working_pos()
-        self.text_image.pos = tpos
+        tpx, tpy = tpos
+        tpx += offset[0]
+        tpy += offset[1]
+        self.text_image.pos = (tpx, tpy)
         view.screen.push_clip(self.get_clip())
         Label.render(self)
-        view.screen.pop_clip()
-        self.working_image.pos = wpos
+        self.text_image.pos = tpos
         if self.active:
+            wpx, wpy = wpos
+            wpx += offset[0]
+            wpy += offset[1]
+            self.working_image.pos = (wpx, wpy)
             self.working_image.render()
+            self.working_image.pos = wpos
+        view.screen.pop_clip()
+
+class Frame(App, Widget):
+    """A Simple Frame widget. A Frame is basically an App inside an App - allowing you to position other widgets inside it.
+       The only difference is that a Frame is also a widget - it has a pos and size attribute. Frames are nestable."""
+    def __init__(self, app, pos=None, size=(10,10)):
+        """Create the Frame.
+           app must be the App object that this widget is a part of
+           pos must be None (to position inside the parent app) or x,y pos of widget
+           size must be the pixel size of the Frame"""
+        Widget.__init__(self, app)
+
+        if pos == None:
+            pos = self.app.get_next_position(size)
+            self.app.set_next_position(pos, size)
+
+        self.widgets = []
+
+        self.dispatch.bind("new-widget", self.new_widget)
+
+        self.pos = pos
+        self.size = size
+
+        self.next_pos = 0, 0, 0 #left, top, bottom if shift
+
+        self.mefont = self.app.mefont
+        self.regfont = self.app.regfont
+
+    def get_mouse_pos(self):
+        """Return mouse pos based on Frame's position."""
+        x, y = self.app.get_mouse_pos()
+        x -= self.pos[0]
+        y -= self.pos[1]
+        return (x, y)
+
+    def get_clip(self):
+        """Return the "clip" of view - to limit rendering outside of the box."""
+        rx = 1.0 * view.screen.screen_size[0] / view.screen.screen_size_2d[0]
+        ry = 1.0 * view.screen.screen_size[1] / view.screen.screen_size_2d[1]
+
+        x, y = self.pos
+        w, h = self.size
+
+        return int(x*rx), view.screen.screen_size[1]-int(y*ry)-int(h*ry), int(w*rx), int(h*ry)
+
+    def handle_uncaught_event(self, event):
+        """Callback for uncaught_event events from App."""
+        for i in self.widgets:
+            if i.visible:
+                if i.handle_uncaught_event(event):
+                    return True
+        return False
+
+    def render(self, offset=(0,0)):
+        """Renders all widgets in the Frame."""
+        self.widgets.reverse()
+        x, y = self.pos
+        x += offset[0]
+        y += offset[1]
+        view.screen.push_clip(self.get_clip())
+        for i in self.widgets:
+            if i.visible: i.render((x, y))
+        view.screen.pop_clip()
+        self.widgets.reverse()
+
+    def get_next_position(self, size):
+        """Get next 'pad' position, ie, the next open area that this widget can be rendered to without overlapping other widgets."""
+        x, y, nh = self.next_pos
+        w, h = size
+        if x + w > self.size[0]:
+            x = 0
+            y = nh + 1
+        return x, y
