@@ -10,15 +10,17 @@ import image, view, font, event
 import time
 
 class Packer(object):
-    def __init__(self, app=None, packtype="wrap", width=10):
+    def __init__(self, app=None, packtype="wrap", size=(10,10)):
         self.app = app
         self.packtype = packtype
-        self.width = width
+        self.size = size
 
         self.need_to_pack = False
 
     def pack(self):
+        self.app.widgets.reverse()
         getattr(self, "pack_%s"%self.packtype)()
+        self.app.widgets.reverse()
         self.need_to_pack = False
 
     def pack_wrap(self):
@@ -26,18 +28,16 @@ class Packer(object):
         nh = 0
         newh = 0
 
-        self.app.widgets.reverse()
-
         for i in self.app.widgets:
             if isinstance(i, NewLine):
-                nx = 0
-                nh += newh + i.height
+                nw = 0
+                nh += newh + i.size[1]
                 newh = 0
                 continue
             if i.override_pos:
                 continue
             w, h = i.size
-            if nw + w > self.width and nw:
+            if nw + w > self.size[0] and nw:
                 nh += newh + 1
                 newh = h
                 nw = w
@@ -48,7 +48,44 @@ class Packer(object):
                 if h > newh:
                     newh = h
             i.force_pos_update(pos)
-        self.app.widgets.reverse()
+
+    def pack_center(self):
+        rows = [[]]
+        w = 0
+        for i in self.app.widgets:
+            if isinstance(i, NewLine):
+                rows.append([i])
+                rows.append([])
+                continue
+            if i.override_pos:
+                continue
+            rows[-1].append(i)
+            w += i.size[0]
+            if w >= self.size[0]:
+                rows.append([])
+                w = 0
+
+        sizes = []
+        for row in rows:
+            h = 0
+            w = 0
+            for widg in row:
+                if widg.size[1] > h:
+                    h = widg.size[1]
+                w += widg.size[0]
+            sizes.append((w, h))
+
+        center = self.size[1] / 2
+        height = 0
+        for i in sizes:
+            height += i[1]
+        top = center - height / 2
+        for i in xrange(len(rows)):
+            w = self.size[0] / 2 - sizes[i][0] / 2
+            for widg in rows[i]:
+                widg.force_pos_update((w, top))
+                w += widg.size[0]
+            top += sizes[i][1]
 
 class App(object):
     """A simple Application class, to hold and control all widgets."""
@@ -67,7 +104,7 @@ class App(object):
         self.mefont = font.MEFont()
         self.regfont = font.Font()
 
-        self.packer = Packer(self, width=view.screen.screen_size[0])
+        self.packer = Packer(self, size=view.screen.screen_size)
 
         self.visible = True
 
@@ -89,6 +126,7 @@ class App(object):
                 if i.handle_mousedown(button, name):
                     return True
         return False
+
     def handle_mouseup(self, button, name):
         """Callback for mouse release events from the event_handler."""
         for i in self.widgets:
@@ -96,6 +134,7 @@ class App(object):
                 if i.handle_mouseup(button, name):
                     return True
         return False
+
     def handle_mousehold(self, button, name):
         """Callback for mouse hold events from the event_handler."""
         for i in self.widgets:
@@ -107,8 +146,8 @@ class App(object):
     def handle_uncaught_event(self, event):
         """Callback for uncaught_event events from event_handler."""
         if event.type == MOUSEMOTION:
-            if "left" in self.event_handler.mouse.active:
-                return self.handle_drag(event)
+            if "left" in self.event_handler.gui_mouse.active:
+                return self.handle_drag(event.rel)
         else:
             for i in self.widgets:
                 if i.visible:
@@ -116,10 +155,10 @@ class App(object):
                         return True
         return False
 
-    def handle_drag(self, event):
+    def handle_drag(self, change):
         """Callback for mouse drag events."""
         for i in self.widgets:
-            if i.handle_drag(event):
+            if i.handle_drag(change):
                 return True
         return False
 
@@ -182,7 +221,7 @@ class Widget(object):
         self.app.dispatch.fire("new-widget", self)
         self.image = None
 
-        self._mdown = False
+        self._mhold = False
         self.key_active = True
         self.key_hold_lengths = {}
         self.khl = 100 #milliseconds to hold keys for repeat!
@@ -199,20 +238,20 @@ class Widget(object):
     def handle_mousedown(self, button, name):
         if name == "left":
             if self._collidem():
-                self._mdown = True
+                self._mhold = True
                 self.dispatch.fire("mousedown")
                 return True
 
     def handle_mouseup(self, button, name):
         if name == "left":
-            if self._mdown and self._collidem():
-                self._mdown = False
+            if self._mhold and self._collidem():
+                self._mhold = False
                 self.dispatch.fire("click")
                 return True
 
     def handle_mousehold(self, button, name):
         if name == "left":
-            if self._mdown:
+            if self._mhold:
                 if self._collidem():
                     self.dispatch.fire("mouseholdhover")
                 else:
@@ -246,6 +285,12 @@ class Widget(object):
                     del self.key_hold_lengths[key]
                 return True
 
+    def handle_uncaught_event(self, event):
+        pass
+
+    def handle_drag(self, change):
+        pass
+
     def force_pos_update(self, pos):
         self.pos = pos
 
@@ -257,3 +302,18 @@ class Widget(object):
             self.image.pos = (x, y)
             self.image.render()
             self.image.pos = self.pos #need to reset!
+
+class NewLine(Widget):
+    def __init__(self, app, height=0):
+        Widget.__init__(self, app)
+        self.size = (0, height)
+        self.pack()
+
+class Label(Widget):
+    def __init__(self, app, start_text="", pos=None):
+        Widget.__init__(self, app, pos)
+
+        self.text = start_text
+        self.image = self.app.mefont.make_text_image(self.text)
+        self.size = self.image.get_size()
+        self.pack()

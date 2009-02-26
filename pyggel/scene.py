@@ -51,14 +51,14 @@ class Scene(object):
         self.render2d = True
         self.render3d = True
 
-    def render(self, camera):
+    def render(self, camera=None):
         """Render all objects.
-           camera must be the camera object used to render the scene"""
+           camera must no or the camera object used to render the scene"""
         view.set3d()
         my_lights = list(all_lights)
-        if self.graph.skybox:
+        if self.graph.skybox and camera:
             self.graph.skybox.render(camera)
-        if self.render3d:
+        if self.render3d and camera:
             camera.push()
             for i in self.graph.lights:
                 i.gl_light = my_lights.pop()
