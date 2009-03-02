@@ -392,3 +392,27 @@ class Button(Widget):
         else:
             self.image = self.ireg
         Widget.render(self, offset)
+
+class Checkbox(Widget):
+    def __init__(self, app, pos=None):
+        Widget.__init__(self, app, pos)
+
+        self.off = self.app.regfont.make_text_image("( )")
+        self.on = self.app.regfont.make_text_image("(!)")
+        self.image = self.off
+
+        self.state = 0
+
+        self.size = self.off.get_size()
+
+        self.dispatch.bind("click", self._change_state)
+
+    def _change_state(self):
+        self.state = not self.state
+
+    def render(self, offset):
+        if self.state:
+            self.image = self.on
+        else:
+            self.image = self.off
+        Widget.render(self, offset)

@@ -22,6 +22,8 @@ def main():
     pyggel.Newgui.Button(frame, "click!", callbacks=[test_callback])
     pyggel.Newgui.Button(frame, "click!124675326745327645762354",
                          callbacks=[test_callback])
+    pyggel.Newgui.Label(frame, "test:")
+    pyggel.Newgui.Checkbox(frame)
 
     for i in xrange(10):
         pyggel.Newgui.Label(frame, "testing456")
