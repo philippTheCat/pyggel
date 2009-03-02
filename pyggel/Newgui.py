@@ -99,7 +99,6 @@ class App(object):
         self.widgets = []
 
         self.dispatch = event.Dispatcher()
-        self.dispatch.bind("new-widget", self.new_widget)
 
         self.mefont = font.MEFont()
         self.regfont = font.Font()
@@ -213,7 +212,7 @@ class Widget(object):
         self.dispatch = event.Dispatcher()
 
         self.visible = True
-        self.app.dispatch.fire("new-widget", self)
+        self.app.new_widget(self)
         self.image = None
 
         self._mhold = False
@@ -251,6 +250,9 @@ class Widget(object):
 
     def handle_mousemotion(self, change):
         self._mhover = self._collidem()
+        for i in self.app.widgets:
+            if not i == self:
+                i._mhover = False
         return self._mhover
 
     def can_handle_key(self, key, string):
@@ -294,6 +296,32 @@ class Widget(object):
             self.image.pos = (x, y)
             self.image.render()
             self.image.pos = self.pos #need to reset!
+
+class Frame(App, Widget):
+    def __init__(self, app, pos=None, size=(10,10)):
+        Widget.__init__(self, app, pos)
+        self.size = size
+
+        self.widgets = []
+
+        self.mefont = self.app.mefont
+        self.regfont = self.app.regfont
+
+        self.packer = Packer(self, size=self.size)
+        self.pack()
+
+    def render(self, offset=(0,0)):
+        view.screen.push_clip2d(self.pos, self.size)
+        self.widgets.reverse()
+
+        x, y = self.pos
+        x += offset[0]
+        y += offset[1]
+        offset = (x, y)
+        for i in self.widgets:
+            if i.visible: i.render(offset)
+        self.widgets.reverse()
+        view.screen.pop_clip()
 
 class NewLine(Widget):
     def __init__(self, app, height=0):

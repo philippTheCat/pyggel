@@ -16,6 +16,12 @@ def main():
     app.packer.packtype="center"
     scene.add_2d(app)
 
+    frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300))
+    frame.packer.packtype = "wrap"
+
+    for i in xrange(10):
+        pyggel.Newgui.Label(frame, "testing456")
+
     pyggel.Newgui.Button(app, "Click me!", callbacks=[test_callback])
     pyggel.Newgui.NewLine(app)
 

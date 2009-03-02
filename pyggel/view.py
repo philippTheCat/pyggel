@@ -76,6 +76,16 @@ class _Screen(object):
         self.clips.append(new)
         glScissor(*new)
 
+    def push_clip2d(self, pos, size):
+        """Convert a 2d pos/size rect into GL coords for clipping."""
+        rx = 1.0 * self.screen_size[0] / self.screen_size_2d[0]
+        ry = 1.0 * self.screen_size[1] / self.screen_size_2d[1]
+
+        x, y = pos
+        w, h = size
+
+        self.push_clip((int(x*rx), self.screen_size[1]-int(y*ry)-int(h*ry), int(w*rx), int(h*ry)))
+
     def pop_clip(self):
         """Pop the last clip off the stack."""
         if len(self.clips) == 1:
