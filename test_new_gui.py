@@ -19,6 +19,8 @@ def main():
     frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300))
     frame.packer.packtype = "wrap"
 
+    pyggel.Newgui.Button(frame, "click!", callbacks=[test_callback])
+
     for i in xrange(10):
         pyggel.Newgui.Label(frame, "testing456")
 

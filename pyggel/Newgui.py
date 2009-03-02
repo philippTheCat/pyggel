@@ -310,6 +310,12 @@ class Frame(App, Widget):
         self.packer = Packer(self, size=self.size)
         self.pack()
 
+    def get_mouse_pos(self):
+        x, y = self.app.get_mouse_pos()
+        x -= self.pos[0]
+        y -= self.pos[1]
+        return x, y
+
     def render(self, offset=(0,0)):
         view.screen.push_clip2d(self.pos, self.size)
         self.widgets.reverse()
