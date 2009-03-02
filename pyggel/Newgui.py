@@ -143,23 +143,18 @@ class App(object):
                     return True
         return False
 
+    def handle_mousemotion(self, change):
+        """Callback for mouse motion events from event_handler."""
+        for i in self.widgets:
+            if i.handle_mousemotion(change):
+                return True
+
     def handle_uncaught_event(self, event):
         """Callback for uncaught_event events from event_handler."""
-        if event.type == MOUSEMOTION:
-            if "left" in self.event_handler.gui_mouse.active:
-                return self.handle_drag(event.rel)
-        else:
-            for i in self.widgets:
-                if i.visible:
-                    if i.handle_uncaught_event(event):
-                        return True
-        return False
-
-    def handle_drag(self, change):
-        """Callback for mouse drag events."""
         for i in self.widgets:
-            if i.handle_drag(change):
-                return True
+            if i.visible:
+                if i.handle_uncaught_event(event):
+                    return True
         return False
 
     def handle_keydown(self, key, string):
@@ -222,6 +217,7 @@ class Widget(object):
         self.image = None
 
         self._mhold = False
+        self._mhover = False
         self.key_active = True
         self.key_hold_lengths = {}
         self.khl = 100 #milliseconds to hold keys for repeat!
@@ -237,14 +233,13 @@ class Widget(object):
 
     def handle_mousedown(self, button, name):
         if name == "left":
-            if self._collidem():
+            if self._mhover:
                 self._mhold = True
-                self.dispatch.fire("mousedown")
                 return True
 
     def handle_mouseup(self, button, name):
         if name == "left":
-            if self._mhold and self._collidem():
+            if self._mhold and self._mhover:
                 self._mhold = False
                 self.dispatch.fire("click")
                 return True
@@ -252,11 +247,11 @@ class Widget(object):
     def handle_mousehold(self, button, name):
         if name == "left":
             if self._mhold:
-                if self._collidem():
-                    self.dispatch.fire("mouseholdhover")
-                else:
-                    self.dispatch.fire("mouseholdoff")
                 return True
+
+    def handle_mousemotion(self, change):
+        self._mhover = self._collidem()
+        return self._mhover
 
     def can_handle_key(self, key, string):
         return False
@@ -288,9 +283,6 @@ class Widget(object):
     def handle_uncaught_event(self, event):
         pass
 
-    def handle_drag(self, change):
-        pass
-
     def force_pos_update(self, pos):
         self.pos = pos
 
@@ -317,3 +309,30 @@ class Label(Widget):
         self.image = self.app.mefont.make_text_image(self.text)
         self.size = self.image.get_size()
         self.pack()
+
+class Button(Widget):
+    def __init__(self, app, text, pos=None, callbacks=[]):
+        Widget.__init__(self, app, pos)
+        self.text = text
+        self.ireg = self.app.mefont.make_text_image(self.text)
+        self.ihov = self.app.mefont.make_text_image(self.text, (1, 0, 0, 1))
+        self.icli = self.app.mefont.make_text_image(self.text, (0, 1, 0, 1))
+        self.image = self.ireg
+        self.size = self.image.get_size()
+
+        for i in callbacks:
+            self.dispatch.bind("click", i)
+
+        self.pack()
+
+        self.handle_mousemotion((0,0)) #make sure we are set to hover at start if necessary!
+
+    def render(self, offset=(0,0)):
+        if self._mhover:
+            if self._mhold:
+                self.image = self.icli
+            else:
+                self.image = self.ihov
+        else:
+            self.image = self.ireg
+        Widget.render(self, offset)

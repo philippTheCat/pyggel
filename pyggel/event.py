@@ -193,6 +193,11 @@ class Handler(object):
             if self.gui and self.gui.handle_mouseup(event.button, name):
                 return None
             self.dispatch.fire("mouseup", event.button, name)
+
+        elif event.type == MOUSEMOTION:
+            if self.gui and self.gui.handle_mousemotion(event.rel):
+                return None
+            self.dispatch.fire("mousemotion", event.rel)
             
         elif event.type == QUIT:
             self.quit = True

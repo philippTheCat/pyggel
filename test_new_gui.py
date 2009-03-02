@@ -3,6 +3,9 @@ from pyggel import *
 
 import random
 
+def test_callback():
+    print "woo!"
+
 def main():
     pyggel.init()
 
@@ -12,6 +15,9 @@ def main():
     app = pyggel.Newgui.App(eh)
     app.packer.packtype="center"
     scene.add_2d(app)
+
+    pyggel.Newgui.Button(app, "Click me!", callbacks=[test_callback])
+    pyggel.Newgui.NewLine(app)
 
     for i in xrange(10):
         for i in xrange(random.randint(0, 4)):
