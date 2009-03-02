@@ -316,6 +316,28 @@ class Frame(App, Widget):
         y -= self.pos[1]
         return x, y
 
+    def handle_mousedown(self, button, name):
+        Widget.handle_mousedown(self, button, name)
+        if self._mhover:
+            return App.handle_mousedown(self, button, name)
+
+    def handle_mouseup(self, button, name):
+        if self._mhold:
+            Widget.handle_mouseup(self, button, name)
+            return App.handle_mouseup(self, button, name)
+
+    def handle_mousehold(self, button, name):
+        Widget.handle_mousehold(self, button, name)
+        if self._mhold:
+            return App.handle_mousehold(self, button, name)
+
+    def handle_mousemotion(self, change):
+        Widget.handle_mousemotion(self, change)
+        if self._mhover:
+            return App.handle_mousemotion(self, change)
+        for i in self.widgets:
+            i._mhover = False
+
     def render(self, offset=(0,0)):
         view.screen.push_clip2d(self.pos, self.size)
         self.widgets.reverse()
