@@ -33,6 +33,7 @@ class Packer(object):
                 nw = 0
                 nh += newh + i.size[1]
                 newh = 0
+                i.pos = (nw, nh)
                 continue
             if i.override_pos:
                 continue
@@ -86,6 +87,27 @@ class Packer(object):
                 widg.force_pos_update((w, top))
                 w += widg.size[0]
             top += sizes[i][1]
+
+    def pack_None(self):
+        nw = 0
+        nh = 0
+        newh = 0
+
+        for i in self.app.widgets:
+            if isinstance(i, NewLine):
+                nw = 0
+                nh += newh + i.size[1]
+                newh = 0
+                i.pos = (nw, nh)
+                continue
+            if i.override_pos:
+                continue
+            w, h = i.size
+            pos = (nw, nh)
+            nw += w
+            if h > newh:
+                newh = h
+            i.force_pos_update(pos)
 
 class App(object):
     """A simple Application class, to hold and control all widgets."""
@@ -408,7 +430,7 @@ class Checkbox(Widget):
         self.dispatch.bind("click", self._change_state)
 
     def _change_state(self):
-        self.state = not self.state
+        self.state = abs(self.state-1)
 
     def render(self, offset):
         if self.state:
@@ -416,3 +438,58 @@ class Checkbox(Widget):
         else:
             self.image = self.off
         Widget.render(self, offset)
+
+class Radio(Frame):
+    def __init__(self, app, pos=None, options=[]):
+        Frame.__init__(self, app, pos)
+        self.packer.packtype = None
+
+        self.options = []
+        self.states = {}
+
+        w = 0
+        for i in options:
+            c = Checkbox(self)
+            if not self.options:
+                c.state = 1
+            c.dispatch.bind("click", self.check_click)
+            l = Label(self, i)
+            NewLine(self)
+            self.options.append([i, c, l, c.state])
+            self.states[i] = c.state
+
+            _w = l.pos[0]+l.size[0]
+            if _w > w:
+                w = _w
+        h = max((c.pos[1]+c.size[1],
+                 l.pos[1]+l.size[1]))
+
+        self.size = (w, h)
+        self.pack()
+
+    def check_click(self):
+        for i in self.options:
+            name, check, label, state = i
+            if check.state != state: #changed!
+                if check.state: #selected!
+                    for x in self.options:
+                        if not i == x:
+                            x[1].state = 0
+                            x[3] = 0
+                            self.states[x[0]] = 0
+                    state = 1
+                else:
+                    check.state = 1
+            i[0], i[1], i[2], i[3] = name, check, label, state
+            self.states[name] = state
+
+class MultiChoiceRadio(Radio):
+    def __init__(self, app, pos=None, options=[]):
+        Radio.__init__(self, app, pos, options)
+
+    def check_click(self):
+        for i in self.options:
+            name, check, label, state = i
+            state = check.state
+            i[0], i[1], i[2], i[3] = name, check, label, state
+            self.states[name] = state

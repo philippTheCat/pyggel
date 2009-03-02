@@ -37,6 +37,8 @@ def main():
         pyggel.Newgui.NewLine(app, random.choice([0, 15]))
 
     pyggel.Newgui.Label(app, "Hey!", (0, 0))
+    pyggel.Newgui.Radio(app, options=["test", "34", "56"])
+    pyggel.Newgui.MultiChoiceRadio(app, options=["mc1", "mc2"])
 
     while 1:
         eh.update()
