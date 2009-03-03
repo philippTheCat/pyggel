@@ -213,6 +213,9 @@ class App(object):
         if widg in self.widgets:
             self.widgets.remove(widg)
         self.widgets.insert(0, widg)
+        for i in self.widgets:
+            if not i == widg:
+                i.unfocus()
 
     def render(self, camera=None):
         """Renders all widgets, camera can be None or the camera object used to render the scene."""
@@ -239,9 +242,9 @@ class Widget(object):
 
         self._mhold = False
         self._mhover = False
-        self.key_active = True
+        self.key_active = False
         self.key_hold_lengths = {}
-        self.khl = 100 #milliseconds to hold keys for repeat!
+        self.khl = 150 #milliseconds to hold keys for repeat!
 
     def pack(self):
         self.app.packer.pack()
@@ -252,11 +255,17 @@ class Widget(object):
         w, h = self.size
         return (x >= a and x <= a+w) and (y >= b and y <= b+h)
 
+    def focus(self):
+        self.app.set_top_widget(self)
+        self.key_active = True
+
     def handle_mousedown(self, button, name):
         if name == "left":
             if self._mhover:
                 self._mhold = True
+                self.focus()
                 return True
+            self.unfocus()
 
     def handle_mouseup(self, button, name):
         if name == "left":
@@ -290,11 +299,11 @@ class Widget(object):
         if self.can_handle_key(key, string):
             if self.key_active:
                 if key in self.key_hold_lengths:
-                    if time.time() - self.key_hold_lengths[key] >= self.khl:
+                    if time.time() - self.key_hold_lengths[key] >= self.khl*0.001:
                         self.handle_keydown(key, string)
                         self.key_hold_lengths[key] = time.time()
                 else:
-                    self.key_hold_lenths[key] = time.time()
+                    self.key_hold_lengths[key] = time.time()
                 return True
 
     def handle_keyup(self, key, string):
@@ -318,6 +327,10 @@ class Widget(object):
             self.image.pos = (x, y)
             self.image.render()
             self.image.pos = self.pos #need to reset!
+
+    def unfocus(self):
+        self.key_active=False
+        self.key_hold_lengths = {}
 
 class Frame(App, Widget):
     def __init__(self, app, pos=None, size=(10,10)):
@@ -493,3 +506,113 @@ class MultiChoiceRadio(Radio):
             state = check.state
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
+
+class Input(Widget):
+    def __init__(self, app, start_text="", width=100, pos=None):
+        Widget.__init__(self, app, pos)
+
+        self.text = start_text
+        self.image = self.app.mefont.make_text_image(self.text)
+
+        self.size = (width, self.app.mefont.pygame_font.get_height())
+
+        self.cursor_pos = len(self.text)
+        self.cursor_image = image.Animation(((self.app.regfont.make_text_image("|"), .5),
+                                             (self.app.regfont.make_text_image("|",color=(0,0,0,0)), .5)))
+        self.cwidth = int(self.cursor_image.get_width()/2)
+        self.xwidth = self.size[0] - self.cwidth*2
+        self.pack()
+
+    def can_handle_key(self, key, string):
+        if string and string in self.app.mefont.acceptable:
+            return True
+        if key in (K_LEFT, K_RIGHT, K_END, K_HOME, K_DELETE,
+                   K_BACKSPACE, K_RETURN):
+            return True
+        return False
+
+    def submit_text(self):
+        if self.text:
+            self.dispatch.fire("submit", self.text)
+        self.text = ""
+        self.image.text = ""
+        self.working = 0
+
+    def move_cursor(self, x):
+        """Move the cursor position."""
+        self.cursor_image.reset()
+        self.cursor_pos += x
+        if self.cursor_pos < 0:
+            self.cursor_pos = 0
+        if self.cursor_pos > len(self.text):
+            self.cursor_pos = len(self.text)
+
+    def handle_keydown(self, key, string):
+        if self.can_handle_key(key, string):
+            if self.key_active:
+                if key == K_LEFT:
+                    self.move_cursor(-1)
+                elif key == K_RIGHT:
+                    self.move_cursor(1)
+                elif key == K_HOME:
+                    self.cursor = 0
+                elif key == K_END:
+                    self.cursor = len(self.text)
+                elif key == K_DELETE:
+                    self.text = self.text[0:self.cursor_pos]+self.text[self.cursor_pos+1::]
+                    self.image.text = self.text
+                elif key == K_BACKSPACE:
+                    if self.cursor_pos:
+                        self.text = self.text[0:self.cursor_pos-1]+self.text[self.cursor_pos::]
+                        self.move_cursor(-1)
+                        self.image.text = self.text
+                elif key == K_RETURN:
+                    self.submit_text()
+                else:
+                    self.text = self.text[0:self.cursor_pos] + string + self.text[self.cursor_pos::]
+                    self.image.text = self.text
+                    self.move_cursor(1)
+                return True
+
+    def calc_working_pos(self):
+        """Calculate the position of the text cursor - ie, where in the text are we typing... and the text offset."""
+        tx, ty = self.pos
+        if self.text and self.cursor_pos:
+            g1 = self.image.glyphs[0][0][0:self.cursor_pos]
+            g2 = self.image.glyphs[0][0][self.cursor_pos+1::]
+
+            w1 = 0
+            w2 = 0
+            for i in g1:
+                w1 += i.get_width()
+            for i in g2:
+                w2 += i.get_width()
+
+            tp = tx + self.xwidth - w1
+            if tp > self.pos[0]:
+                tp = self.pos[0]
+
+            cp = tp + w1 - self.cwidth
+
+            return (cp+self.cwidth, ty), (tp+self.cwidth, ty)
+
+        return (tx, ty), (tx+self.cwidth, ty)
+
+    def render(self, offset=(0,0)):
+        """Render the Input widget."""
+        wpos, tpos = self.calc_working_pos()
+        tpx, tpy = tpos
+        tpx += offset[0]
+        tpy += offset[1]
+        self.image.pos = (tpx, tpy)
+        view.screen.push_clip2d(self.pos, self.size)
+        self.image.render()
+        self.image.pos = tpos
+        if self.key_active:
+            wpx, wpy = wpos
+            wpx += offset[0]
+            wpy += offset[1]
+            self.cursor_image.pos = (wpx, wpy)
+            self.cursor_image.render()
+            self.cursor_image.pos = wpos
+        view.screen.pop_clip()

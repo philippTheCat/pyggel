@@ -31,14 +31,16 @@ def main():
     pyggel.Newgui.Button(app, "Click me!", callbacks=[test_callback])
     pyggel.Newgui.NewLine(app)
 
-    for i in xrange(10):
-        for i in xrange(random.randint(0, 4)):
+    for i in xrange(5):
+        for i in xrange(random.randint(1, 3)):
             pyggel.Newgui.Label(app, "testing!123")
         pyggel.Newgui.NewLine(app, random.choice([0, 15]))
 
     pyggel.Newgui.Label(app, "Hey!", (0, 0))
     pyggel.Newgui.Radio(app, options=["test", "34", "56"])
     pyggel.Newgui.MultiChoiceRadio(app, options=["mc1", "mc2"])
+    pyggel.Newgui.NewLine(app)
+    pyggel.Newgui.Input(app, "test me...")
 
     while 1:
         eh.update()
