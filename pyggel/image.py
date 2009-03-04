@@ -902,3 +902,56 @@ def GridSpriteSheet3D(filename, frames=(1,1), duration=100,
             new.append([Image3D(image.subsurface(x*x_size, y*y_size, x_size, y_size)),
                         duration*0.001])
     return Animation3D(new, pos, rotation, scale, colorize)
+
+def load_and_tile_resize_image(filename, size, pos=(0,0),
+                               rotation=(0,0,0), scale=1,
+                               colorize=(1,1,1,1)):
+    """Load an image, resize it by tiling
+           (ie, each image is 9 tiles, and then the parts are scaled so that it fits or greator than size)
+       filename must be the filename of the image to load
+       size must be the (x, y) size of the image (may be larger)
+       pos is the 2d position of the image
+       rotation is the 3d rotation of the image
+       scale is the scale factor of the image
+       colorize is the color of the image
+       Returns Image, tile_size"""
+    view.require_init()
+    image = pygame.image.load(filename)
+    x, y = size
+    if x < image.get_width(): x = image.get_width()
+    if y < image.get_height(): y = image.get_height()
+    size = x, y
+    bsize = (int(image.get_width() / 3),
+             int(image.get_height() / 3))
+
+    topleft = image.subsurface((0, 0), bsize)
+    top = pygame.transform.scale(image.subsurface((bsize[0], 0), bsize),
+                                 (size[0] - bsize[0] * 2, bsize[1]))
+    topright = image.subsurface((bsize[0] * 2, 0), bsize)
+
+    left = pygame.transform.scale(image.subsurface((0, bsize[1]), bsize),
+                                  (bsize[0], size[1] - bsize[1] * 2))
+    middle = pygame.transform.scale(image.subsurface((bsize[0], bsize[1]), bsize),
+                                    (size[0] - bsize[0] * 2,
+                                     size[1] - bsize[1] * 2))
+    right = pygame.transform.scale(image.subsurface((bsize[0] * 2, bsize[1]), bsize),
+                                   (bsize[0], size[1] - bsize[1] * 2))
+
+    botleft = image.subsurface((0, bsize[1] * 2), bsize)
+    bottom = pygame.transform.scale(image.subsurface((bsize[0], bsize[1] * 2), bsize),
+                                    (size[0] - bsize[0] * 2, bsize[1]))
+    botright = image.subsurface((bsize[0] * 2, bsize[1] * 2), bsize)
+
+    new = pygame.Surface(size).convert()
+    new.blit(topleft, (0, 0))
+    new.blit(top, (bsize[0], 0))
+    new.blit(topright, (size[0] - bsize[0], 0))
+
+    new.blit(left, (0, bsize[1]))
+    new.blit(middle, bsize)
+    new.blit(right, (size[0] - bsize[0], bsize[1]))
+
+    new.blit(botleft, (0, size[1] - bsize[1]))
+    new.blit(bottom, (bsize[0], size[1] - bsize[1]))
+    new.blit(botright, (size[0] - bsize[0], size[1] - bsize[1]))
+    return Image(new.convert_alpha(), pos, rotation, scale, colorize), bsize

@@ -239,12 +239,29 @@ class Widget(object):
         self.visible = True
         self.app.new_widget(self)
         self.image = None
+        self.background = None #background image!
+        self.tsize = (0,0)
+        self.tshift = (0,0)
 
         self._mhold = False
         self._mhover = False
         self.key_active = False
         self.key_hold_lengths = {}
         self.khl = 150 #milliseconds to hold keys for repeat!
+
+    def set_background(self, filename):
+        x, y = pygame.image.load(filename).get_size()
+        x = int(x/3)
+        y = int(y/3)
+        new, tsize = image.load_and_tile_resize_image(filename, (self.size[0]+x*2, self.size[1]+y*2))
+
+        self.tsize = tsize
+        self.background = new
+
+        x = self.background.get_width()/2 - self.size[0]/2
+        y = self.background.get_height()/2 - self.size[1]/2
+        self.tshift = (x, y)
+        self.size = self.background.get_size()
 
     def pack(self):
         self.app.packer.pack()
@@ -316,24 +333,37 @@ class Widget(object):
     def handle_uncaught_event(self, event):
         pass
 
+    def get_clip(self):
+        x, y = self.pos
+        w, h = self.size
+        x += self.tsize[0]
+        y += self.tsize[1]
+        w -= self.tsize[0]*2
+        h -= self.tsize[1]*2
+        return (x, y), (w, h)
+
     def force_pos_update(self, pos):
         self.pos = pos
 
     def render(self, offset=(0,0)):
+        x, y = self.pos
+        x += offset[0]
+        y += offset[1]
+        if self.background:
+            self.background.pos = (x, y)
+            self.background.render()
+            self.background.pos = self.pos
         if self.image:
-            x, y = self.pos
-            x += offset[0]
-            y += offset[1]
-            self.image.pos = (x, y)
+            self.image.pos = (x+self.tshift[0], y+self.tshift[1])
             self.image.render()
-            self.image.pos = self.pos #need to reset!
+            self.image.pos = (self.pos[0]+self.tshift[0], self.pos[1]+self.tshift[1]) #need to reset!
 
     def unfocus(self):
         self.key_active=False
         self.key_hold_lengths = {}
 
 class Frame(App, Widget):
-    def __init__(self, app, pos=None, size=(10,10)):
+    def __init__(self, app, pos=None, size=(10,10), background=None):
         Widget.__init__(self, app, pos)
         self.size = size
 
@@ -342,13 +372,23 @@ class Frame(App, Widget):
         self.mefont = self.app.mefont
         self.regfont = self.app.regfont
 
+        if background:
+            self.set_background(background)
         self.packer = Packer(self, size=self.size)
         self.pack()
 
+    def _collidem_c(self):
+        x, y = self.app.get_mouse_pos()
+        a, b = self.pos
+        w, h = self.size
+        c, d = self.tshift
+        f, g = self.tsize
+        return (a+c <= x <= a+w-f) and (b+d <= y <= b+h-g)
+
     def get_mouse_pos(self):
         x, y = self.app.get_mouse_pos()
-        x -= self.pos[0]
-        y -= self.pos[1]
+        x -= self.pos[0] + self.tshift[0]
+        y -= self.pos[1] + self.tshift[1]
         return x, y
 
     def handle_mousedown(self, button, name):
@@ -368,19 +408,20 @@ class Frame(App, Widget):
 
     def handle_mousemotion(self, change):
         Widget.handle_mousemotion(self, change)
-        if self._mhover:
+        if self._collidem_c():
             return App.handle_mousemotion(self, change)
         for i in self.widgets:
             i._mhover = False
 
     def render(self, offset=(0,0)):
-        view.screen.push_clip2d(self.pos, self.size)
+        Widget.render(self, offset)
+        view.screen.push_clip2d(*self.get_clip())
         self.widgets.reverse()
 
         x, y = self.pos
         x += offset[0]
         y += offset[1]
-        offset = (x, y)
+        offset = (x+self.tshift[0], y+self.tshift[1])
         for i in self.widgets:
             if i.visible: i.render(offset)
         self.widgets.reverse()
@@ -393,16 +434,18 @@ class NewLine(Widget):
         self.pack()
 
 class Label(Widget):
-    def __init__(self, app, start_text="", pos=None):
+    def __init__(self, app, start_text="", pos=None, background=None):
         Widget.__init__(self, app, pos)
 
         self.text = start_text
         self.image = self.app.mefont.make_text_image(self.text)
         self.size = self.image.get_size()
+        if background:
+            self.set_background(background)
         self.pack()
 
 class Button(Widget):
-    def __init__(self, app, text, pos=None, callbacks=[]):
+    def __init__(self, app, text, pos=None, callbacks=[], background=None):
         Widget.__init__(self, app, pos)
         self.text = text
         self.ireg = self.app.mefont.make_text_image(self.text)
@@ -413,6 +456,9 @@ class Button(Widget):
 
         for i in callbacks:
             self.dispatch.bind("click", i)
+
+        if background:
+            self.set_background(background)
 
         self.pack()
 
@@ -429,7 +475,7 @@ class Button(Widget):
         Widget.render(self, offset)
 
 class Checkbox(Widget):
-    def __init__(self, app, pos=None):
+    def __init__(self, app, pos=None, background=None):
         Widget.__init__(self, app, pos)
 
         self.off = self.app.regfont.make_text_image("( )")
@@ -441,6 +487,9 @@ class Checkbox(Widget):
         self.size = self.off.get_size()
 
         self.dispatch.bind("click", self._change_state)
+        if background:
+            self.set_background(background)
+        self.pack()
 
     def _change_state(self):
         self.state = abs(self.state-1)
@@ -453,7 +502,7 @@ class Checkbox(Widget):
         Widget.render(self, offset)
 
 class Radio(Frame):
-    def __init__(self, app, pos=None, options=[]):
+    def __init__(self, app, pos=None, options=[], background=None):
         Frame.__init__(self, app, pos)
         self.packer.packtype = None
 
@@ -478,6 +527,8 @@ class Radio(Frame):
                  l.pos[1]+l.size[1]))
 
         self.size = (w, h)
+        if background:
+            self.set_background(background)
         self.pack()
 
     def check_click(self):
@@ -497,8 +548,8 @@ class Radio(Frame):
             self.states[name] = state
 
 class MultiChoiceRadio(Radio):
-    def __init__(self, app, pos=None, options=[]):
-        Radio.__init__(self, app, pos, options)
+    def __init__(self, app, pos=None, options=[], background=None):
+        Radio.__init__(self, app, pos, options, background)
 
     def check_click(self):
         for i in self.options:
@@ -508,7 +559,7 @@ class MultiChoiceRadio(Radio):
             self.states[name] = state
 
 class Input(Widget):
-    def __init__(self, app, start_text="", width=100, pos=None):
+    def __init__(self, app, start_text="", width=100, pos=None, background=None):
         Widget.__init__(self, app, pos)
 
         self.text = start_text
@@ -521,6 +572,8 @@ class Input(Widget):
                                              (self.app.regfont.make_text_image("|",color=(0,0,0,0)), .5)))
         self.cwidth = int(self.cursor_image.get_width()/2)
         self.xwidth = self.size[0] - self.cwidth*2
+        if background:
+            self.set_background(background)
         self.pack()
 
     def can_handle_key(self, key, string):
@@ -588,15 +641,15 @@ class Input(Widget):
             for i in g2:
                 w2 += i.get_width()
 
-            tp = tx + self.xwidth - w1
+            tp = tx + self.xwidth - w1 + self.tshift[0]
             if tp > self.pos[0]:
                 tp = self.pos[0]
 
-            cp = tp + w1 - self.cwidth
+            cp = tp + w1
 
-            return (cp+self.cwidth, ty), (tp+self.cwidth, ty)
+            return (cp+self.cwidth, ty+self.tshift[1]), (tp+self.cwidth*2, ty+self.tshift[1])
 
-        return (tx, ty), (tx+self.cwidth, ty)
+        return (tx+self.tshift[0]-self.cwidth, ty+self.tshift[1]), (tx+self.cwidth*2, ty+self.tshift[1])
 
     def render(self, offset=(0,0)):
         """Render the Input widget."""
@@ -605,9 +658,17 @@ class Input(Widget):
         tpx += offset[0]
         tpy += offset[1]
         self.image.pos = (tpx, tpy)
-        view.screen.push_clip2d(self.pos, self.size)
+        if self.background:
+            bx, by = self.pos
+            bx += offset[0]
+            by += offset[1]
+            self.background.pos = (bx, by)
+            self.background.render()
+            self.background.pos = self.pos
+        view.screen.push_clip2d(*self.get_clip())
         self.image.render()
         self.image.pos = tpos
+        view.screen.pop_clip()
         if self.key_active:
             wpx, wpy = wpos
             wpx += offset[0]
@@ -615,4 +676,3 @@ class Input(Widget):
             self.cursor_image.pos = (wpx, wpy)
             self.cursor_image.render()
             self.cursor_image.pos = wpos
-        view.screen.pop_clip()
