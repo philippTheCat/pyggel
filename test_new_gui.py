@@ -48,6 +48,8 @@ def main():
     pyggel.Newgui.NewLine(app)
     pyggel.Newgui.Input(app, "test me...", image="data/gui/base.png")
 
+    pyggel.Newgui.MoveBar(app, "TestWindow", image="data/gui/base.png", child=frame)
+
     clock = pygame.time.Clock()
 
     while 1:

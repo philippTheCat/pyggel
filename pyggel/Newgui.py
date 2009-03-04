@@ -532,13 +532,14 @@ class Checkbox(Widget):
         Widget.render(self, offset)
 
 class Radio(Frame):
-    def __init__(self, app, pos=None, options=[], images=[None,None,None], compile_text=True):
+    def __init__(self, app, pos=None, options=[], images=[None,None,None], font_color=(1,1,1,1), compile_text=True):
         Frame.__init__(self, app, pos)
         self.packer.packtype = None
 
         self.options = []
         self.states = {}
         ct = compile_text
+        fc = font_color
 
         image = images[0]
         check_images = images[1::]
@@ -549,7 +550,7 @@ class Radio(Frame):
             if not self.options:
                 c.state = 1
             c.dispatch.bind("click", self.check_click)
-            l = Label(self, i, compile_text=ct)
+            l = Label(self, i, compile_text=ct, font_color=fc)
             NewLine(self)
             self.options.append([i, c, l, c.state])
             self.states[i] = c.state
@@ -582,8 +583,8 @@ class Radio(Frame):
             self.states[name] = state
 
 class MultiChoiceRadio(Radio):
-    def __init__(self, app, pos=None, options=[], images=[None,None,None], compile_text=True):
-        Radio.__init__(self, app, pos, options, images, compile_text)
+    def __init__(self, app, pos=None, options=[], images=[None,None,None], font_color=(1,1,1,1), compile_text=True):
+        Radio.__init__(self, app, pos, options, images, font_color, compile_text)
 
     def check_click(self):
         for i in self.options:
@@ -593,17 +594,20 @@ class MultiChoiceRadio(Radio):
             self.states[name] = state
 
 class Input(Widget):
-    def __init__(self, app, start_text="", width=100, pos=None, image=None, compile_text=False):
+    def __init__(self, app, start_text="", width=100, pos=None, image=None,
+                 font_colors=[(1,1,1,1), (.5,.5,.5,1)], compile_text=False):
         Widget.__init__(self, app, pos, False)
 
         self.text = start_text
         self.image = self.app.mefont.make_text_image(self.text)
 
+        self.font_colors = font_colors
+
         self.size = (width, self.app.mefont.pygame_font.get_height())
 
         self.cursor_pos = len(self.text)
         self.cursor_image = _image.Animation(((self.app.regfont.make_text_image("|"), .5),
-                                             (self.app.regfont.make_text_image("|",color=(0,0,0,0)), .5)))
+                                              (self.app.regfont.make_text_image("|",color=(0,0,0,0)), .5)))
         self.cwidth = int(self.cursor_image.get_width()/2)
         self.xwidth = self.size[0] - self.cwidth*2
         if image:
@@ -696,6 +700,10 @@ class Input(Widget):
         tpx, tpy = self.tpos
         tpx += offset[0]
         tpy += offset[1]
+        if self.key_active:
+            self.image.colorize = self.font_colors[0]
+        else:
+            self.image.colorize = self.font_colors[1]
         self.image.pos = (tpx, tpy)
         if self.background:
             bx, by = self.pos
@@ -715,3 +723,54 @@ class Input(Widget):
             self.cursor_image.pos = (wpx, wpy)
             self.cursor_image.render()
             self.cursor_image.pos = self.wpos
+
+class MoveBar(Widget):
+    def __init__(self, app, title="", pos=(0,0), width=100, image=None, compile_text=True,
+                 child=None):
+        Widget.__init__(self, app, pos, compile_text)
+        self.override_pos = True #window is always overridden,sorry :P
+
+        self.title = title
+
+        self.child = child
+        if self.child:
+            self.child.override_pos = True
+            self.size = (self.child.size[0]-self.child.tsize[0]*2, self.app.mefont.pygame_font.get_height())
+            self.child.pos = (self.pos[0], self.pos[1]+self.size[1])
+        else:
+            self.size = (width, self.app.mefont.pygame_font.get_height())
+
+        if image:
+            self.background, self.size, self.tsize, self.tshift = self.load_background(image)
+        if self.child:
+            x, y = self.child.pos
+            y += self.tsize[1]*2-1
+            self.child.pos = (x, y)
+
+        i = self.font.make_text_image(title)
+        if i.get_width() > self.size[0] - self.tsize[0]*2:
+            while title and self.font.make_text_image(title+"...").get_width() > self.size[0] - self.tsize[0]*2:
+                title = title[0:-1]
+            i = self.font.make_text_image(title+"...")
+        self.image = i
+
+    def handle_mousemotion(self, change):
+        _retval = Widget.handle_mousemotion(self, change)
+        if self._mhold:
+            x, y = self.pos
+            x += change[0]
+            y += change[1]
+            self.pos = (x, y)
+            self._mhover = self._collidem()
+            if self.child:
+                x, y = self.child.pos
+                x += change[0]
+                y += change[1]
+                self.child.pos = (x, y)
+            return True
+        return _retval
+
+    def focus(self):
+        if self.child:
+            self.child.focus()
+        Widget.focus(self)

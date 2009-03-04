@@ -146,9 +146,8 @@ class MEFontImage(object):
         return self._colorize
     def set_col(self, col):
         self._colorize = col
-        for line in self.glyphs:
-            for glyph in line:
-                glyph.colorize = self._colorize
+        for glyph in self._comp_glyphs:
+            glyph.colorize = self._colorize
     colorize = property(get_col, set_col)
 
     def make_list_of_glyphs_and_smileys(self, text):
