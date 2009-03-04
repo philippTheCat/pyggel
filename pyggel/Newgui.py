@@ -532,7 +532,7 @@ class Checkbox(Widget):
         Widget.render(self, offset)
 
 class Radio(Frame):
-    def __init__(self, app, pos=None, options=[], image=None, compile_text=True):
+    def __init__(self, app, pos=None, options=[], images=[None,None,None], compile_text=True):
         Frame.__init__(self, app, pos)
         self.packer.packtype = None
 
@@ -540,9 +540,12 @@ class Radio(Frame):
         self.states = {}
         ct = compile_text
 
+        image = images[0]
+        check_images = images[1::]
+
         w = 0
         for i in options:
-            c = Checkbox(self)
+            c = Checkbox(self, images=check_images)
             if not self.options:
                 c.state = 1
             c.dispatch.bind("click", self.check_click)
@@ -579,8 +582,8 @@ class Radio(Frame):
             self.states[name] = state
 
 class MultiChoiceRadio(Radio):
-    def __init__(self, app, pos=None, options=[], image=None, compile_text=True):
-        Radio.__init__(self, app, pos, options, image, compile_text)
+    def __init__(self, app, pos=None, options=[], images=[None,None,None], compile_text=True):
+        Radio.__init__(self, app, pos, options, images, compile_text)
 
     def check_click(self):
         for i in self.options:

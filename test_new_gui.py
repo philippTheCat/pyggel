@@ -39,8 +39,12 @@ def main():
         pyggel.Newgui.NewLine(app, random.choice([0, 15]))
 
     pyggel.Newgui.Label(app, "Hey!", (0, 0), image="data/gui/base.png")
-    pyggel.Newgui.Radio(app, options=["test", "34", "56"], image="data/gui/base.png")
-    pyggel.Newgui.MultiChoiceRadio(app, options=["mc1", "mc2"], image="data/gui/base.png")
+    pyggel.Newgui.Radio(app, options=["test", "34", "56"], images=["data/gui/base.png",
+                                                                   "data/gui/check_open.png",
+                                                                   "data/gui/check_closed.png"])
+    pyggel.Newgui.MultiChoiceRadio(app, options=["mc1", "mc2"], images=["data/gui/base.png",
+                                                                        "data/gui/check_open.png",
+                                                                        "data/gui/check_closed.png"])
     pyggel.Newgui.NewLine(app)
     pyggel.Newgui.Input(app, "test me...", image="data/gui/base.png")
 
