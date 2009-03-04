@@ -226,7 +226,7 @@ class App(object):
         self.widgets.reverse()
 
 class Widget(object):
-    def __init__(self, app, pos=None):
+    def __init__(self, app, pos=None, compile_text=True):
         self.app = app
         self.pos = pos
         self.size = (0,0)
@@ -234,6 +234,11 @@ class Widget(object):
             self.override_pos = True
         else:
             self.override_pos = False
+
+        if compile_text:
+            self.font = self.app.regfont
+        else:
+            self.font = self.app.mefont
 
         self.dispatch = event.Dispatcher()
 
@@ -435,11 +440,11 @@ class NewLine(Widget):
         self.pack()
 
 class Label(Widget):
-    def __init__(self, app, start_text="", pos=None, image=None, font_color=(1,1,1,1)):
-        Widget.__init__(self, app, pos)
+    def __init__(self, app, start_text="", pos=None, image=None, font_color=(1,1,1,1), compile_text=True):
+        Widget.__init__(self, app, pos, compile_text)
 
         self.text = start_text
-        self.image = self.app.mefont.make_text_image(self.text, font_color)
+        self.image = self.font.make_text_image(self.text, font_color)
         self.size = self.image.get_size()
         if image:
             self.background, self.size, self.tsize, self.tshift = self.load_background(image)
@@ -447,12 +452,13 @@ class Label(Widget):
 
 class Button(Widget):
     def __init__(self, app, text, pos=None, callbacks=[],
-                 images=[None, None, None], font_colors=[(1,1,1,1), (1,0,0,1), (0,1,0,1)]):
-        Widget.__init__(self, app, pos)
+                 images=[None, None, None], font_colors=[(1,1,1,1), (1,0,0,1), (0,1,0,1)],
+                 compile_text=True):
+        Widget.__init__(self, app, pos, compile_text)
         self.text = text
-        self.ireg = self.app.mefont.make_text_image(self.text, font_colors[0])
-        self.ihov = self.app.mefont.make_text_image(self.text, font_colors[1])
-        self.icli = self.app.mefont.make_text_image(self.text, font_colors[2])
+        self.ireg = self.font.make_text_image(self.text, font_colors[0])
+        self.ihov = self.font.make_text_image(self.text, font_colors[1])
+        self.icli = self.font.make_text_image(self.text, font_colors[2])
         self.image = self.ireg
         self.size = self.image.get_size()
 
@@ -493,8 +499,8 @@ class Button(Widget):
         Widget.render(self, offset)
 
 class Checkbox(Widget):
-    def __init__(self, app, pos=None, images=[None, None]):
-        Widget.__init__(self, app, pos)
+    def __init__(self, app, pos=None, images=[None, None], compile_text=True):
+        Widget.__init__(self, app, pos, compile_text)
 
         off, on = images
 
@@ -526,12 +532,13 @@ class Checkbox(Widget):
         Widget.render(self, offset)
 
 class Radio(Frame):
-    def __init__(self, app, pos=None, options=[], image=None):
+    def __init__(self, app, pos=None, options=[], image=None, compile_text=True):
         Frame.__init__(self, app, pos)
         self.packer.packtype = None
 
         self.options = []
         self.states = {}
+        ct = compile_text
 
         w = 0
         for i in options:
@@ -539,7 +546,7 @@ class Radio(Frame):
             if not self.options:
                 c.state = 1
             c.dispatch.bind("click", self.check_click)
-            l = Label(self, i)
+            l = Label(self, i, compile_text=ct)
             NewLine(self)
             self.options.append([i, c, l, c.state])
             self.states[i] = c.state
@@ -572,8 +579,8 @@ class Radio(Frame):
             self.states[name] = state
 
 class MultiChoiceRadio(Radio):
-    def __init__(self, app, pos=None, options=[], image=None):
-        Radio.__init__(self, app, pos, options, image)
+    def __init__(self, app, pos=None, options=[], image=None, compile_text=True):
+        Radio.__init__(self, app, pos, options, image, compile_text)
 
     def check_click(self):
         for i in self.options:
@@ -583,8 +590,8 @@ class MultiChoiceRadio(Radio):
             self.states[name] = state
 
 class Input(Widget):
-    def __init__(self, app, start_text="", width=100, pos=None, image=None):
-        Widget.__init__(self, app, pos)
+    def __init__(self, app, start_text="", width=100, pos=None, image=None, compile_text=False):
+        Widget.__init__(self, app, pos, False)
 
         self.text = start_text
         self.image = self.app.mefont.make_text_image(self.text)
@@ -600,6 +607,8 @@ class Input(Widget):
             self.background, self.size, self.tsize, self.tshift = self.load_background(image)
         self.pack()
 
+        self.calc_working_pos()
+
     def can_handle_key(self, key, string):
         if string and string in self.app.mefont.acceptable:
             return True
@@ -614,6 +623,7 @@ class Input(Widget):
         self.text = ""
         self.image.text = ""
         self.working = 0
+        self.calc_working_pos()
 
     def move_cursor(self, x):
         """Move the cursor position."""
@@ -623,6 +633,7 @@ class Input(Widget):
             self.cursor_pos = 0
         if self.cursor_pos > len(self.text):
             self.cursor_pos = len(self.text)
+        self.calc_working_pos()
 
     def handle_keydown(self, key, string):
         if self.can_handle_key(key, string):
@@ -635,9 +646,11 @@ class Input(Widget):
                     self.cursor = 0
                 elif key == K_END:
                     self.cursor = len(self.text)
+                    self.calc_working_pos()
                 elif key == K_DELETE:
                     self.text = self.text[0:self.cursor_pos]+self.text[self.cursor_pos+1::]
                     self.image.text = self.text
+                    self.calc_working_pos()
                 elif key == K_BACKSPACE:
                     if self.cursor_pos:
                         self.text = self.text[0:self.cursor_pos-1]+self.text[self.cursor_pos::]
@@ -671,14 +684,13 @@ class Input(Widget):
 
             cp = tp + w1
 
-            return (cp+self.cwidth, ty+self.tshift[1]), (tp+self.cwidth*2, ty+self.tshift[1])
-
-        return (tx+self.tshift[0]-self.cwidth, ty+self.tshift[1]), (tx+self.cwidth*2, ty+self.tshift[1])
+            self.wpos, self.tpos = (cp+self.cwidth, ty+self.tshift[1]), (tp+self.cwidth*2, ty+self.tshift[1])
+        else:
+            self.wpos, self.tpos = (tx+self.tshift[0]-self.cwidth, ty+self.tshift[1]), (tx+self.cwidth*2, ty+self.tshift[1])
 
     def render(self, offset=(0,0)):
         """Render the Input widget."""
-        wpos, tpos = self.calc_working_pos()
-        tpx, tpy = tpos
+        tpx, tpy = self.tpos
         tpx += offset[0]
         tpy += offset[1]
         self.image.pos = (tpx, tpy)
@@ -691,12 +703,12 @@ class Input(Widget):
             self.background.pos = self.pos
         view.screen.push_clip2d(*self.get_clip())
         self.image.render()
-        self.image.pos = tpos
+        self.image.pos = self.tpos
         view.screen.pop_clip()
         if self.key_active:
-            wpx, wpy = wpos
+            wpx, wpy = self.wpos
             wpx += offset[0]
             wpy += offset[1]
             self.cursor_image.pos = (wpx, wpy)
             self.cursor_image.render()
-            self.cursor_image.pos = wpos
+            self.cursor_image.pos = self.wpos

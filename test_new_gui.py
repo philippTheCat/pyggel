@@ -34,7 +34,7 @@ def main():
     pyggel.Newgui.NewLine(app)
 
     for i in xrange(5):
-        for i in xrange(random.randint(1, 3)):
+        for i in xrange(random.randint(1, 1)):
             pyggel.Newgui.Label(app, "testing!123", image="data/gui/base.png")
         pyggel.Newgui.NewLine(app, random.choice([0, 15]))
 
@@ -44,7 +44,11 @@ def main():
     pyggel.Newgui.NewLine(app)
     pyggel.Newgui.Input(app, "test me...", image="data/gui/base.png")
 
+    clock = pygame.time.Clock()
+
     while 1:
+        clock.tick(999)
+        pyggel.view.set_title("FPS: %s"%clock.get_fps())
         eh.update()
         if eh.quit:
             pyggel.quit()

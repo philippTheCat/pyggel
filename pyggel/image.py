@@ -42,8 +42,8 @@ class Image(object):
 
     def copy(self):
         """Return a copy of the image - sharing the same data.DisplayList"""
-        new = Image(self.filename, self.pos, self.rotation, self.scale,
-                    self.colorize, True)
+        new = Image(self._pimage, self.pos, self.rotation, self.scale,
+                    self.colorize)
         new._pimage = self._pimage
         new._pimage2 = self._pimage2
         new._image_size = self._image_size
@@ -298,7 +298,7 @@ class Image3D(Image):
     def copy(self):
         """Return a copy og the Image - sharing the same data.DisplayList"""
         new = Image3D(self.filename, self.pos, self.rotation, self.scale,
-                      self.colorize, True)
+                      self.colorize)
         new._pimage = self._pimage
         new._pimage2 = self._pimage2
         new._image_size = self._image_size

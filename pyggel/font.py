@@ -89,12 +89,17 @@ class MEFontImage(object):
            text is the text string to render
            colorize is the color (0-1 RGBA) of the text"""
         self.fontobj = fontobj
-        self.colorize = colorize
-        self.pos = (0,0)
         self.rotation = (0,0,0)
         self.scale = 1
         self.visible = True
 
+        self._pos = (0,0)
+        self._colorize = (1,1,1,1)
+        self.glyphs = []
+        self._comp_glyphs = []
+
+        self.colorize = colorize
+        self.pos = (0,0)
         self.text = text
 
     def get_text(self):
@@ -115,7 +120,36 @@ class MEFontImage(object):
                     height = i.get_height()
         n[-1] = [n[-1], height]
         self.glyphs = n
+        self.compile_glyphs()
     text = property(get_text, set_text)
+    def compile_glyphs(self):
+        self._comp_glyphs = []
+        downdent = 0
+        for line in self.glyphs:
+            line, height = line
+            indent = 0
+            for glyph in line:
+                x, y = self.pos
+                x += indent
+                y += downdent
+                glyph.pos = (x, y)
+                indent += glyph.get_width()
+                self._comp_glyphs.append(glyph)
+            downdent += height
+    def get_pos(self):
+        return self._pos
+    def set_pos(self, pos):
+        self._pos = pos
+        self.compile_glyphs()
+    pos = property(get_pos, set_pos)
+    def get_col(self):
+        return self._colorize
+    def set_col(self, col):
+        self._colorize = col
+        for line in self.glyphs:
+            for glyph in line:
+                glyph.colorize = self._colorize
+    colorize = property(get_col, set_col)
 
     def make_list_of_glyphs_and_smileys(self, text):
         g = []
@@ -137,12 +171,12 @@ class MEFontImage(object):
                 skip -= 1
             elif num in smiley_positions:
                 a = smiley_positions[num]
-                g.append(self.fontobj.smileys[a])
+                g.append(self.fontobj.smileys[a].copy())
                 skip = len(a)-1
             elif i == "\n":
                 g.append(i)
             else:
-                g.append(self.fontobj.glyphs[i])
+                g.append(self.fontobj.glyphs[i].copy())
             num += 1
         return g
 
@@ -161,18 +195,8 @@ class MEFontImage(object):
         except:
             glScalef(self.scale, self.scale, 1)
         downdent = 0
-        for line in self.glyphs:
-            line, height = line
-            indent = 0
-            for glyph in line:
-                x, y = self.pos
-                x += indent
-                y += downdent
-                glyph.pos = (x, y)
-                glyph.colorize = self.colorize
-                glyph.render()
-                indent += glyph.get_width()
-            downdent += height
+        for glyph in self._comp_glyphs:
+            glyph.render()
         glPopMatrix()
 
     def copy(self):
