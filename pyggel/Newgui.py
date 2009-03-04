@@ -249,19 +249,19 @@ class Widget(object):
         self.key_hold_lengths = {}
         self.khl = 150 #milliseconds to hold keys for repeat!
 
-    def set_background(self, filename):
+    def load_background(self, filename):
         x, y = pygame.image.load(filename).get_size()
         x = int(x/3)
         y = int(y/3)
         new, tsize = image.load_and_tile_resize_image(filename, (self.size[0]+x*2, self.size[1]+y*2))
 
-        self.tsize = tsize
-        self.background = new
 
-        x = self.background.get_width()/2 - self.size[0]/2
-        y = self.background.get_height()/2 - self.size[1]/2
-        self.tshift = (x, y)
-        self.size = self.background.get_size()
+        x = new.get_width()/2 - self.size[0]/2
+        y = new.get_height()/2 - self.size[1]/2
+        tshift = (x, y)
+        size = new.get_size()
+
+        return new, size, tsize, tshift
 
     def pack(self):
         self.app.packer.pack()
@@ -373,7 +373,7 @@ class Frame(App, Widget):
         self.regfont = self.app.regfont
 
         if background:
-            self.set_background(background)
+            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
         self.packer = Packer(self, size=self.size)
         self.pack()
 
@@ -441,7 +441,7 @@ class Label(Widget):
         self.image = self.app.mefont.make_text_image(self.text)
         self.size = self.image.get_size()
         if background:
-            self.set_background(background)
+            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
         self.pack()
 
 class Button(Widget):
@@ -458,7 +458,7 @@ class Button(Widget):
             self.dispatch.bind("click", i)
 
         if background:
-            self.set_background(background)
+            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
 
         self.pack()
 
@@ -488,7 +488,7 @@ class Checkbox(Widget):
 
         self.dispatch.bind("click", self._change_state)
         if background:
-            self.set_background(background)
+            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
         self.pack()
 
     def _change_state(self):
@@ -528,7 +528,7 @@ class Radio(Frame):
 
         self.size = (w, h)
         if background:
-            self.set_background(background)
+            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
         self.pack()
 
     def check_click(self):
@@ -573,7 +573,7 @@ class Input(Widget):
         self.cwidth = int(self.cursor_image.get_width()/2)
         self.xwidth = self.size[0] - self.cwidth*2
         if background:
-            self.set_background(background)
+            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
         self.pack()
 
     def can_handle_key(self, key, string):
