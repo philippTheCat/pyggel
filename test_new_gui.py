@@ -13,6 +13,7 @@ def main():
 
     eh = pyggel.event.Handler()
     app = pyggel.Newgui.App(eh)
+    app.mefont.add_smiley(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
     app.packer.packtype="center"
     scene.add_2d(app)
 
