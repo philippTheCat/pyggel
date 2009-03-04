@@ -369,8 +369,8 @@ class Widget(object):
         self.key_hold_lengths = {}
 
 class Frame(App, Widget):
-    def __init__(self, app, pos=None, size=(10,10), image=None):
-        Widget.__init__(self, app, pos)
+    def __init__(self, app, pos=None, size=(10,10), image=None, compile_text=True):
+        Widget.__init__(self, app, pos, compile_text)
         self.size = size
 
         self.widgets = []
@@ -400,24 +400,29 @@ class Frame(App, Widget):
     def handle_mousedown(self, button, name):
         Widget.handle_mousedown(self, button, name)
         if self._mhover:
-            return App.handle_mousedown(self, button, name)
+            App.handle_mousedown(self, button, name)
+        return self._collidem()
 
     def handle_mouseup(self, button, name):
         if self._mhold:
             Widget.handle_mouseup(self, button, name)
-            return App.handle_mouseup(self, button, name)
+            App.handle_mouseup(self, button, name)
+            return True
 
     def handle_mousehold(self, button, name):
         Widget.handle_mousehold(self, button, name)
         if self._mhold:
-            return App.handle_mousehold(self, button, name)
+            App.handle_mousehold(self, button, name)
+            return True
 
     def handle_mousemotion(self, change):
         Widget.handle_mousemotion(self, change)
         if self._collidem_c():
-            return App.handle_mousemotion(self, change)
+            App.handle_mousemotion(self, change)
+            return True
         for i in self.widgets:
             i._mhover = False
+        return self._collidem()
 
     def render(self, offset=(0,0)):
         Widget.render(self, offset)
@@ -774,3 +779,17 @@ class MoveBar(Widget):
         if self.child:
             self.child.focus()
         Widget.focus(self)
+
+class Window(MoveBar):
+    def __init__(self, app, title="", pos=(0,0), size=(10,10), images=[None, None],
+                 compile_text=True):
+        child = Frame(app, pos, size, images[1], compile_text)
+        MoveBar.__init__(self, app, title, pos, size[0], images[0], compile_text, child)
+
+        self.packer = self.child.packer
+        self.mefont = self.child.mefont
+        self.regfont = self.child.regfont
+
+    def new_widget(self, widg):
+        widg.app = self.child
+        self.child.new_widget(widg)

@@ -49,6 +49,9 @@ def main():
     pyggel.Newgui.Input(app, "test me...", image="data/gui/base.png")
 
     pyggel.Newgui.MoveBar(app, "TestWindow", image="data/gui/base.png", child=frame)
+    window = pyggel.Newgui.Window(app, "P Window-take2!!!", (100,100), (100,100),
+                                  images=["data/gui/base.png", "data/gui/base.png"])
+    pyggel.Newgui.Label(window, "Woot!:P", compile_text=False)
 
     clock = pygame.time.Clock()
 
