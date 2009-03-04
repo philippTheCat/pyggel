@@ -916,7 +916,7 @@ def load_and_tile_resize_image(filename, size, pos=(0,0),
        colorize is the color of the image
        Returns Image, tile_size"""
     view.require_init()
-    image = pygame.image.load(filename)
+    image = pygame.image.load(filename).convert_alpha()
     x, y = size
     if x < image.get_width(): x = image.get_width()
     if y < image.get_height(): y = image.get_height()
@@ -942,7 +942,8 @@ def load_and_tile_resize_image(filename, size, pos=(0,0),
                                     (size[0] - bsize[0] * 2, bsize[1]))
     botright = image.subsurface((bsize[0] * 2, bsize[1] * 2), bsize)
 
-    new = pygame.Surface(size).convert()
+    new = pygame.Surface(size).convert_alpha()
+    new.fill((0,0,0,0))
     new.blit(topleft, (0, 0))
     new.blit(top, (bsize[0], 0))
     new.blit(topright, (size[0] - bsize[0], 0))

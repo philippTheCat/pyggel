@@ -6,8 +6,9 @@ The gui module contains classes to create and use a simple Graphical User Interf
 """
 
 from include import *
-import image, view, font, event
+import view, font, event
 import time
+import image as _image
 
 class Packer(object):
     def __init__(self, app=None, packtype="wrap", size=(10,10)):
@@ -253,7 +254,7 @@ class Widget(object):
         x, y = pygame.image.load(filename).get_size()
         x = int(x/3)
         y = int(y/3)
-        new, tsize = image.load_and_tile_resize_image(filename, (self.size[0]+x*2, self.size[1]+y*2))
+        new, tsize = _image.load_and_tile_resize_image(filename, (self.size[0]+x*2, self.size[1]+y*2))
 
 
         x = new.get_width()/2 - self.size[0]/2
@@ -363,7 +364,7 @@ class Widget(object):
         self.key_hold_lengths = {}
 
 class Frame(App, Widget):
-    def __init__(self, app, pos=None, size=(10,10), background=None):
+    def __init__(self, app, pos=None, size=(10,10), image=None):
         Widget.__init__(self, app, pos)
         self.size = size
 
@@ -372,8 +373,8 @@ class Frame(App, Widget):
         self.mefont = self.app.mefont
         self.regfont = self.app.regfont
 
-        if background:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
+        if image:
+            self.background, self.size, self.tsize, self.tshift = self.load_background(image)
         self.packer = Packer(self, size=self.size)
         self.pack()
 
@@ -434,31 +435,45 @@ class NewLine(Widget):
         self.pack()
 
 class Label(Widget):
-    def __init__(self, app, start_text="", pos=None, background=None):
+    def __init__(self, app, start_text="", pos=None, image=None, font_color=(1,1,1,1)):
         Widget.__init__(self, app, pos)
 
         self.text = start_text
-        self.image = self.app.mefont.make_text_image(self.text)
+        self.image = self.app.mefont.make_text_image(self.text, font_color)
         self.size = self.image.get_size()
-        if background:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
+        if image:
+            self.background, self.size, self.tsize, self.tshift = self.load_background(image)
         self.pack()
 
 class Button(Widget):
-    def __init__(self, app, text, pos=None, callbacks=[], background=None):
+    def __init__(self, app, text, pos=None, callbacks=[],
+                 images=[None, None, None], font_colors=[(1,1,1,1), (1,0,0,1), (0,1,0,1)]):
         Widget.__init__(self, app, pos)
         self.text = text
-        self.ireg = self.app.mefont.make_text_image(self.text)
-        self.ihov = self.app.mefont.make_text_image(self.text, (1, 0, 0, 1))
-        self.icli = self.app.mefont.make_text_image(self.text, (0, 1, 0, 1))
+        self.ireg = self.app.mefont.make_text_image(self.text, font_colors[0])
+        self.ihov = self.app.mefont.make_text_image(self.text, font_colors[1])
+        self.icli = self.app.mefont.make_text_image(self.text, font_colors[2])
         self.image = self.ireg
         self.size = self.image.get_size()
 
         for i in callbacks:
             self.dispatch.bind("click", i)
 
-        if background:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
+        breg, bhov, bcli = images
+        if breg:
+            self.breg, size, tsize, tshift = self.load_background(breg)
+        else:
+            self.breg, size, tsize, tshift = None, self.size, self.tsize, self.tshift
+        if bhov:
+            self.bhov, a, b, c = self.load_background(bhov)
+        else:
+            self.bhov = None
+        if bcli:
+            self.bcli, a, b, c = self.load_background(bcli)
+        else:
+            self.bcli = None
+        self.size, self.tsize, self.tshift = size, tsize, tshift
+        self.background = self.breg
 
         self.pack()
 
@@ -468,18 +483,29 @@ class Button(Widget):
         if self._mhover:
             if self._mhold:
                 self.image = self.icli
+                self.background = self.bcli
             else:
                 self.image = self.ihov
+                self.background = self.bhov
         else:
             self.image = self.ireg
+            self.background = self.breg
         Widget.render(self, offset)
 
 class Checkbox(Widget):
-    def __init__(self, app, pos=None, background=None):
+    def __init__(self, app, pos=None, images=[None, None]):
         Widget.__init__(self, app, pos)
 
-        self.off = self.app.regfont.make_text_image("( )")
-        self.on = self.app.regfont.make_text_image("(!)")
+        off, on = images
+
+        if off:
+            self.off = _image.Image(off)
+        else:
+            self.off = self.app.regfont.make_text_image("( )")
+        if on:
+            self.on = _image.Image(on)
+        else:
+            self.on = self.app.regfont.make_text_image("(!)")
         self.image = self.off
 
         self.state = 0
@@ -487,8 +513,6 @@ class Checkbox(Widget):
         self.size = self.off.get_size()
 
         self.dispatch.bind("click", self._change_state)
-        if background:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
         self.pack()
 
     def _change_state(self):
@@ -502,7 +526,7 @@ class Checkbox(Widget):
         Widget.render(self, offset)
 
 class Radio(Frame):
-    def __init__(self, app, pos=None, options=[], background=None):
+    def __init__(self, app, pos=None, options=[], image=None):
         Frame.__init__(self, app, pos)
         self.packer.packtype = None
 
@@ -527,8 +551,8 @@ class Radio(Frame):
                  l.pos[1]+l.size[1]))
 
         self.size = (w, h)
-        if background:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
+        if image:
+            self.background, self.size, self.tsize, self.tshift = self.load_background(image)
         self.pack()
 
     def check_click(self):
@@ -548,8 +572,8 @@ class Radio(Frame):
             self.states[name] = state
 
 class MultiChoiceRadio(Radio):
-    def __init__(self, app, pos=None, options=[], background=None):
-        Radio.__init__(self, app, pos, options, background)
+    def __init__(self, app, pos=None, options=[], image=None):
+        Radio.__init__(self, app, pos, options, image)
 
     def check_click(self):
         for i in self.options:
@@ -559,7 +583,7 @@ class MultiChoiceRadio(Radio):
             self.states[name] = state
 
 class Input(Widget):
-    def __init__(self, app, start_text="", width=100, pos=None, background=None):
+    def __init__(self, app, start_text="", width=100, pos=None, image=None):
         Widget.__init__(self, app, pos)
 
         self.text = start_text
@@ -568,12 +592,12 @@ class Input(Widget):
         self.size = (width, self.app.mefont.pygame_font.get_height())
 
         self.cursor_pos = len(self.text)
-        self.cursor_image = image.Animation(((self.app.regfont.make_text_image("|"), .5),
+        self.cursor_image = _image.Animation(((self.app.regfont.make_text_image("|"), .5),
                                              (self.app.regfont.make_text_image("|",color=(0,0,0,0)), .5)))
         self.cwidth = int(self.cursor_image.get_width()/2)
         self.xwidth = self.size[0] - self.cwidth*2
-        if background:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(background)
+        if image:
+            self.background, self.size, self.tsize, self.tshift = self.load_background(image)
         self.pack()
 
     def can_handle_key(self, key, string):
