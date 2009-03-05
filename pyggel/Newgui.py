@@ -130,6 +130,9 @@ class App(object):
 
         self.visible = True
 
+        self.pos = (0,0)
+        self.size = view.screen.screen_size_2d
+
     def get_mouse_pos(self):
         """Return mouse pos based on App position - always (0,0)"""
         return view.screen.get_mouse_pos()
@@ -168,8 +171,9 @@ class App(object):
     def handle_mousemotion(self, change):
         """Callback for mouse motion events from event_handler."""
         for i in self.widgets:
-            if i.handle_mousemotion(change):
-                return True
+            if i.visible:
+                if i.handle_mousemotion(change):
+                    return True
 
     def handle_uncaught_event(self, event):
         """Callback for uncaught_event events from event_handler."""
@@ -281,6 +285,7 @@ class Widget(object):
     def focus(self):
         self.app.set_top_widget(self)
         self.key_active = True
+        self.dispatch.fire("focus")
 
     def handle_mousedown(self, button, name):
         if name == "left":
@@ -367,6 +372,7 @@ class Widget(object):
     def unfocus(self):
         self.key_active=False
         self.key_hold_lengths = {}
+        self.dispatch.fire("unfocus")
 
 class Frame(App, Widget):
     def __init__(self, app, pos=None, size=(10,10), image=None, compile_text=True):
@@ -621,6 +627,10 @@ class Input(Widget):
 
         self.calc_working_pos()
 
+    def force_pos_update(self, pos):
+        Widget.force_pos_update(self, pos)
+        self.calc_working_pos()
+
     def can_handle_key(self, key, string):
         if string and string in self.app.mefont.acceptable:
             return True
@@ -758,6 +768,7 @@ class MoveBar(Widget):
                 title = title[0:-1]
             i = self.font.make_text_image(title+"...")
         self.image = i
+        self.pack()
 
     def handle_mousemotion(self, change):
         _retval = Widget.handle_mousemotion(self, change)
@@ -795,7 +806,80 @@ class Window(MoveBar):
         self.packer = self.child.packer
         self.mefont = self.child.mefont
         self.regfont = self.child.regfont
+        self.pack()
 
     def new_widget(self, widg):
         widg.app = self.child
         self.child.new_widget(widg)
+
+    
+class Menu(Button):
+    def __init__(self, app, name="", pos=None, options=[], images=[None,None,None,None],
+                 font_colors=[(1,1,1,1), (1,0,0,1), (0,1,0,1)], compile_text=True,
+                 callback=None):
+        Button.__init__(self, app, name, pos, [], images[1::], font_colors, compile_text)
+        self.dispatch.bind("click", self.do_visible)
+
+        self.frame = Frame(app, (self.pos[0], self.pos[1]+self.size[1]), image=images[0])
+        self.frame.packer.packtype = None
+        self.frame.visible = False
+        self.frame.dispatch.bind("unfocus", self.do_unfocus)
+
+        ct = compile_text
+        fc = font_colors
+
+        image = images[0]
+        bimages = images[1::]
+
+        w = 0
+        for i in options:
+            c = Button(self.frame, i, images=bimages, font_colors=fc)
+            NewLine(self.frame)
+            if c.size[0] > w:
+                w = c.size[0]
+            c.dispatch.bind("click", self.bind_to_event(i))
+            c.dispatch.bind("click", self.do_unfocus)
+        if options:
+            h = c.pos[1]+c.size[1]
+        else:
+            h = 1
+        for i in self.frame.widgets:
+            if isinstance(i, Button):
+                i.size = w-i.tsize[0]*2, i.size[1]-i.tsize[1]*2
+                if i.breg: i.breg, _size, a, i.tshift = i.load_background(bimages[0])
+                if i.bhov: i.bhov, c, a, b = i.load_background(bimages[1])
+                if i.bcli: i.bcli, c, a, b = i.load_background(bimages[2])
+                i.size = _size
+        i.pack()
+
+        self.frame.size = (w, h)
+        if image:
+            self.frame.background, self.frame.size, self.frame.tsize, self.frame.tshift = self.frame.load_background(image)
+
+        x, y = self.frame.pos
+
+        while x+self.frame.size[0] > self.app.size[0]:
+            x -= 1
+        while y+self.frame.size[1] > self.app.size[1]:
+            y -= 1
+        self.frame.pos = (x, y)
+
+        if callback:
+            self.dispatch.bind("menu-click", callback)
+
+    def do_visible(self):
+        self.frame.visible = True
+        self.frame.focus()
+
+    def bind_to_event(self, name):
+        def send():
+            self.dispatch.fire("menu-click", name)
+        return send
+
+    def do_unfocus(self):
+        self.frame.visible = False
+        self.unfocus()
+
+    def unfocus(self):
+        if not self.frame.visible:
+            Widget.unfocus(self)

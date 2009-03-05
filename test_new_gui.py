@@ -5,6 +5,8 @@ import random
 
 def test_callback():
     print "woo!"
+def test_menu(item):
+    print item
 
 def main():
     pyggel.init()
@@ -33,8 +35,8 @@ def main():
                          images=["data/gui/base.png", "data/gui/base.png", None])
     pyggel.Newgui.NewLine(app)
 
-    for i in xrange(5):
-        for i in xrange(random.randint(1, 1)):
+    for i in xrange(2):
+        for i in xrange(random.randint(1, 2)):
             pyggel.Newgui.Label(app, "testing!123", image="data/gui/base.png")
         pyggel.Newgui.NewLine(app, random.choice([0, 15]))
 
@@ -52,6 +54,8 @@ def main():
     window = pyggel.Newgui.Window(app, "P Window-take2!!!", (100,100), (100,100),
                                   images=["data/gui/base.png", "data/gui/base.png"])
     pyggel.Newgui.Label(window, "Woot!:P", compile_text=False)
+    pyggel.Newgui.Menu(app, "Menu", options=["help", "test", "quit","2","3","4","Snazzlemegapoof!!!!"],
+                       images=["data/gui/base.png"]*4, callback=test_menu)
 
     clock = pygame.time.Clock()
 
