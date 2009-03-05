@@ -54,7 +54,9 @@ def main():
     window = pyggel.Newgui.Window(app, "P Window-take2!!!", (100,100), (100,100),
                                   images=["data/gui/base.png", "data/gui/base.png"])
     pyggel.Newgui.Label(window, "Woot!:P", compile_text=False)
-    pyggel.Newgui.Menu(app, "Menu", options=["help", "test", "quit","2","3","4","Snazzlemegapoof!!!!"],
+    pyggel.Newgui.Menu(app, "Menu", options=["help", "test", "quit","2","3","4","Snazzlemegapoof!!!!",
+                                             ["please work!", "1", "2", "3", "asfkjhsakfh",
+                                              ["subagain!", "1", "2", "3"*10]]],
                        images=["data/gui/base.png"]*4, callback=test_menu)
 
     clock = pygame.time.Clock()

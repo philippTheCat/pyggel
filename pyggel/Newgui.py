@@ -219,8 +219,9 @@ class App(object):
             self.widgets.remove(widg)
         self.widgets.insert(0, widg)
         for i in self.widgets:
-            if not i == widg:
-                i.unfocus()
+            if i.visible:
+                if not i == widg:
+                    i.unfocus()
 
     def render(self, camera=None):
         """Renders all widgets, camera can be None or the camera object used to render the scene."""
@@ -258,6 +259,12 @@ class Widget(object):
         self.key_active = False
         self.key_hold_lengths = {}
         self.khl = 150 #milliseconds to hold keys for repeat!
+
+    def get_root_app(self):
+        app = self.app
+        while hasattr(app, "app") and app.app:
+            app = app.app
+        return app
 
     def load_background(self, filename):
         x, y = pygame.image.load(filename).get_size()
@@ -820,31 +827,62 @@ class Menu(Button):
         Button.__init__(self, app, name, pos, [], images[1::], font_colors, compile_text)
         self.dispatch.bind("click", self.do_visible)
 
-        self.frame = Frame(app, (self.pos[0], self.pos[1]+self.size[1]), image=images[0])
-        self.frame.packer.packtype = None
-        self.frame.visible = False
-        self.frame.dispatch.bind("unfocus", self.do_unfocus)
+        self.frames = []
+        self.cur_frame = 0
 
-        ct = compile_text
-        fc = font_colors
+        self.add_frame("", options, images, font_colors, compile_text)
 
-        image = images[0]
+        if callback:
+            self.dispatch.bind("menu-click", callback)
+
+    def add_frame(self, name, options, images, fc, ct):
+        goback = int(self.cur_frame)
+        frame = Frame(self.get_root_app(), (self.pos[0], self.pos[1]+self.size[1]), image=images[0])
+        frame.packer.packtype = None
+        frame.visible = False
+        frame.dispatch.bind("unfocus", self.do_unfocus)
+        self.frames.append(frame)
+
+        self.cur_frame = len(self.frames)-1
+
         bimages = images[1::]
 
         w = 0
+        if not frame == self.frames[0]:
+            c = Button(frame, "../", images=bimages, font_colors=fc, compile_text=ct)
+            NewLine(frame)
+            w = c.size[0]
+            c.dispatch.bind("click", self.swap_frame(goback))
+
         for i in options:
-            c = Button(self.frame, i, images=bimages, font_colors=fc)
-            NewLine(self.frame)
-            if c.size[0] > w:
-                w = c.size[0]
-            c.dispatch.bind("click", self.bind_to_event(i))
-            c.dispatch.bind("click", self.do_unfocus)
+            if type(i) is type(""):
+                c = Button(frame, i, images=bimages, font_colors=fc, compile_text=ct)
+                NewLine(frame)
+                if c.size[0] > w:
+                    w = c.size[0]
+                if name:
+                    ni = name+"."+i
+                else:
+                    ni = i
+                c.dispatch.bind("click", self.bind_to_event(ni))
+                c.dispatch.bind("click", self.do_unfocus)
+            else:
+                c = Button(frame, i[0], images=bimages, font_colors=fc, compile_text=ct)
+                NewLine(frame)
+                if c.size[0] > w:
+                    w = c.size[0]
+                c.dispatch.bind("click", self.swap_frame(self.cur_frame+1))
+                if name:
+                    ni = name+"."+i[0]
+                else:
+                    ni = i[0]
+                self.add_frame(ni, i[1::], images, fc, ct)
         if options:
             h = c.pos[1]+c.size[1]
         else:
             h = 1
-        for i in self.frame.widgets:
-            if isinstance(i, Button):
+        for i in frame.widgets:
+            if not isinstance(i, NewLine):
                 i.size = w-i.tsize[0]*2, i.size[1]-i.tsize[1]*2
                 if i.breg: i.breg, _size, a, i.tshift = i.load_background(bimages[0])
                 if i.bhov: i.bhov, c, a, b = i.load_background(bimages[1])
@@ -852,24 +890,32 @@ class Menu(Button):
                 i.size = _size
         i.pack()
 
-        self.frame.size = (w, h)
-        if image:
-            self.frame.background, self.frame.size, self.frame.tsize, self.frame.tshift = self.frame.load_background(image)
+        frame.size = (w, h)
+        if images[0]:
+            frame.background, frame.size, frame.tsize, frame.tshift = frame.load_background(images[0])
 
-        x, y = self.frame.pos
-
-        while x+self.frame.size[0] > self.app.size[0]:
+        x, y = frame.pos
+        while x + frame.size[0] > frame.app.size[0]:
             x -= 1
-        while y+self.frame.size[1] > self.app.size[1]:
+        while y + frame.size[1] > frame.app.size[1]:
             y -= 1
-        self.frame.pos = (x, y)
+        frame.pos = (x, y)
+        self.cur_frame = goback
 
-        if callback:
-            self.dispatch.bind("menu-click", callback)
+    def do_swap_frame(self, num):
+        self.cur_frame = num
+        for i in self.frames:
+            i.visible = False
+        self.frames[num].visible = True
+        self.frames[num].focus()
+
+    def swap_frame(self, num):
+        def do():
+            self.do_swap_frame(num)
+        return do
 
     def do_visible(self):
-        self.frame.visible = True
-        self.frame.focus()
+        self.do_swap_frame(0)
 
     def bind_to_event(self, name):
         def send():
@@ -877,9 +923,10 @@ class Menu(Button):
         return send
 
     def do_unfocus(self):
-        self.frame.visible = False
+        for i in self.frames:
+            i.visible = False
         self.unfocus()
 
     def unfocus(self):
-        if not self.frame.visible:
+        if not self.frames[self.cur_frame].visible:
             Widget.unfocus(self)
