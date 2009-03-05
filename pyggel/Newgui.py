@@ -780,6 +780,12 @@ class MoveBar(Widget):
             self.child.focus()
         Widget.focus(self)
 
+    def unfocus(self):
+        if self.child == self.app.widgets[0] and not self == self.app.widgets[1]:
+            Widget.focus(self)
+        else:
+            Widget.unfocus(self)
+
 class Window(MoveBar):
     def __init__(self, app, title="", pos=(0,0), size=(10,10), images=[None, None],
                  compile_text=True):
