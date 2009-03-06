@@ -123,7 +123,7 @@ class Game(object):
         self.scene.add_2d(self.hudmask)
         self.targeter = pyggel.image.Image("data/target.png", pos=[400-32, 300-32])
         self.scene.add_2d(self.targeter)
-        self.font = pyggel.font.MEFont("data/DS-DIGI.ttf", 32)
+        self.font = pyggel.font.Font("data/DS-DIGI.ttf", 32)
         self.text1 = self.font.make_text_image("", (0, 255, 0))
         self.text1.pos = (50, 10)
         self.scene.add_2d(self.text1)
@@ -181,7 +181,12 @@ class Game(object):
 
         s = "AMMO: %s\nScore: %s\nLives: %s\nFPS: %s"%(self.player.ammo, self.player.score,
                                                        self.player.lives, int(self.clock.get_fps()))
-        self.text1.text = s
+##        self.text1.text = s
+        p = self.text1.pos
+        self.scene.remove_2d(self.text1)
+        self.text1 = self.font.make_text_image(s, (0, 255, 0))
+        self.text1.pos = p
+        self.scene.add_2d(self.text1)
         
         self.update_camera_pos()
         for o in self.objects:

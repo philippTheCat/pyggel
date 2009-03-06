@@ -82,7 +82,8 @@ class Font(object):
 
 class MEFontImage(object):
     """A font image that renders more slowly,
-       but allows faster and more efficient changing of text, as well as imbedded image 'smilies'"""
+       but supports changing of text on the fly (very slowly though)
+       among other features (like smilies)"""
     def __init__(self, fontobj, text="", colorize=(1,1,1,1)):
         """Create the text
            fontobj is the MEFont object that created this text
