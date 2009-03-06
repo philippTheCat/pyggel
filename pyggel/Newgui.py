@@ -717,6 +717,10 @@ class Input(Widget):
         else:
             self.wpos, self.tpos = (tx+self.tshift[0]-self.cwidth, ty+self.tshift[1]), (tx+self.cwidth*2, ty+self.tshift[1])
 
+    def focus(self):
+        Widget.focus(self)
+        self.cursor_image.reset()
+
     def render(self, offset=(0,0)):
         """Render the Input widget."""
         tpx, tpy = self.tpos
