@@ -30,6 +30,16 @@ class Image(object):
 
         if type(filename) is type(""):
             self._load_file()
+        elif isinstance(filename, type(self)):
+            self._pimage = filename._pimage
+            self._pimage2 = filename._pimage2
+            self._image_size = filename._image_size
+            self._altered_image_size = filename._altered_image_size
+            self.rect = self._pimage.get_rect()
+            self.to_be_blitted = list(filename.to_be_blitted)
+            self.display_list = filename.display_list
+            self.texture = filename.texture
+            self.offset = filename.offset
         else:
             self.compile_from_surface(filename)
             self.filename = None
@@ -42,18 +52,7 @@ class Image(object):
 
     def copy(self):
         """Return a copy of the image - sharing the same data.DisplayList"""
-        new = Image(self._pimage, self.pos, self.rotation, self.scale,
-                    self.colorize)
-        new._pimage = self._pimage
-        new._pimage2 = self._pimage2
-        new._image_size = self._image_size
-        new._altered_image_size = self._altered_image_size
-        new.rect = new._pimage.get_rect()
-        new.to_be_blitted = list(self.to_be_blitted)
-        new.display_list = self.display_list
-        new.texture = self.texture
-        new.offset = self.offset
-        return new
+        return Image(self, self.pos, self.rotation, self.scale, self.colorize)
 
     def _get_next_biggest(self, x, y):
         """Return next largest power of 2 size for an image"""
@@ -297,17 +296,7 @@ class Image3D(Image):
 
     def copy(self):
         """Return a copy og the Image - sharing the same data.DisplayList"""
-        new = Image3D(self.filename, self.pos, self.rotation, self.scale,
-                      self.colorize)
-        new._pimage = self._pimage
-        new._pimage2 = self._pimage2
-        new._image_size = self._image_size
-        new._altered_image_size = self._altered_image_size
-        new.rect = new._pimage.get_rect()
-        new.display_list = self.display_list
-        new.texture = self.texture
-        new.offset = self.offset
-        return new
+        return Image3D(self, self.pos, self.rotation, self.scale, self.colorize)
 
     def _load_file(self):
         """Load an image file"""
@@ -436,7 +425,6 @@ class Animation(object):
 
         self.visible = True
         self.filename = None
-        self.debug=False
 
     def render(self, camera=None):
         """Render the animation - this also keeps track of swapping frames when they have run for their duration.
@@ -551,6 +539,7 @@ class Animation(object):
         new.cur = self.cur
         new.ptime = self.ptime
         new.reversed = self.reversed
+        new.looping = self.looping
         return new
 
     def current(self):
@@ -627,6 +616,17 @@ class Animation3D(Animation):
         """Return the scale of the object."""
         try: return self.scale[0], self.scale[1], self.scale[2]
         except: return self.scale, self.scale, self.scale
+
+    def copy(self):
+        """Return a copy of this Animation. Frames are shared..."""
+        new = Animation3D(self.frames, self.pos, self.rotation, self.scale, self.colorize)
+        new.running = self.running
+        new.breakpoint = self.breakpoint
+        new.startpoint = self.startpoint
+        new.cur = self.cur
+        new.ptime = self.ptime
+        new.reversed = self.reversed
+        return new
 
 def GIFImage(filename, pos=(0,0),
              rotation=(0,0,0), scale=1,

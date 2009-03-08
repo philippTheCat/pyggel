@@ -123,7 +123,7 @@ class Game(object):
         self.scene.add_2d(self.hudmask)
         self.targeter = pyggel.image.Image("data/target.png", pos=[400-32, 300-32])
         self.scene.add_2d(self.targeter)
-        self.font = pyggel.font.MEFont2("data/DS-DIGI.ttf", 32)
+        self.font = pyggel.font.MEFont("data/DS-DIGI.ttf", 32)
         self.text1 = self.font.make_text_image("", (0, 255, 0))
         self.text1.pos = (50, 10)
         self.scene.add_2d(self.text1)

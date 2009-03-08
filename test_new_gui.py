@@ -17,7 +17,7 @@ def main():
     app = pyggel.Newgui.App(eh)
     app.mefont.add_smiley(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
     app.packer.packtype="center"
-##    scene.add_2d(app)
+    scene.add_2d(app)
 
     frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300), image="data/gui/base.png")
     frame.packer.packtype = "wrap"

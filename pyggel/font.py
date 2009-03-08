@@ -94,7 +94,7 @@ class MEFontImage(object):
         self.scale = 1
         self.visible = True
 
-        self._pos = (0,0)
+        self.pos = (0,0)
         self._colorize = (1,1,1,1)
         self.glyphs = []
         self._comp_glyphs = []
@@ -130,19 +130,10 @@ class MEFontImage(object):
             line, height = line
             indent = 0
             for glyph in line:
-                x, y = self.pos
-                x += indent
-                y += downdent
-                glyph.pos = (x, y)
+                glyph.pos = (indent, downdent)
                 indent += glyph.get_width()
                 self._comp_glyphs.append(glyph)
             downdent += height
-    def get_pos(self):
-        return self._pos
-    def set_pos(self, pos):
-        self._pos = pos
-        self.compile_glyphs()
-    pos = property(get_pos, set_pos)
     def get_col(self):
         return self._colorize
     def set_col(self, col):
@@ -328,6 +319,8 @@ class MEFont2Image(object):
         space = int(self.font.size / 3)
         linewrap = self.linewrap
 
+        px, py = self.pos
+
         _w = 0
         for line in self.text.split("\n"):
             for word in line.split(" "):
@@ -377,6 +370,7 @@ class MEFont2Image(object):
     def render(self, camera=None):
 
         glPushMatrix()
+        glTranslatef(self.pos[0], self.pos[1], 0)
         a, b, c = self.rotation
         glRotatef(a, 1, 0, 0)
         glRotatef(b, 0, 1, 0)
