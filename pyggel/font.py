@@ -186,6 +186,7 @@ class MEFontImage(object):
                Only here to maintain compatability with other 2d gfx"""
         fo = self.fontobj
         glPushMatrix()
+        glTranslatef(self.pos[0], self.pos[1], 0)
         a, b, c = self.rotation
         glRotatef(a, 1, 0, 0)
         glRotatef(b, 0, 1, 0)
@@ -278,3 +279,145 @@ class MEFont(object):
            text is the text to render
            color = the color of the text (0-1 RGBA)"""
         return MEFontImage(self, text, color)
+
+class MEFont2Image(object):
+    def __init__(self, font, text, color, linewrap=None):
+        self._font = font
+        self._text = text
+        self._color = color
+        self._linewrap = linewrap
+
+        self.pos = (0,0)
+        self.rotation = (0,0,0)
+
+        self.size = (0,0)
+        self.scale = 1
+        self.visible = True
+        self.rebuild_glyphs()
+
+    def getfont(self):
+        return self._font
+    def setfont(self, font):
+        self._font = font
+        self.rebuild_glyphs()
+    def gettext(self):
+        return self._text
+    def settext(self, text):
+        self._text = text
+        self.rebuild_glyphs()
+    def getcolor(self):
+        return self._color
+    def setcolor(self, color):
+        self._color = color
+        self.rebuild_glyphs()
+    def getlinewrap(self):
+        return self._linewrap
+    def setlinewrap(self, linewrap):
+        self._linewrap = linewrap
+        self.rebuild_glyphs()
+    font = property(getfont, setfont)
+    text = property(gettext, settext)
+    color = property(getcolor, setcolor)
+    linewrap = property(getlinewrap, setlinewrap)
+
+    def rebuild_glyphs(self):
+        glyphs = []
+        indent = 0
+        downdent = 0
+        newh = self.font.fontobj.get_height()
+        space = int(self.font.size / 3)
+        linewrap = self.linewrap
+
+        _w = 0
+        for line in self.text.split("\n"):
+            for word in line.split(" "):
+                if word in self.font.images:
+                    i = self.font.images[word].copy()
+                else:
+                    i = image.Image(self.font.fontobj.render(word, True, (255,255,255)))
+                glyphs.append(i)
+                w, h = i.get_size()
+                if linewrap and indent and indent+w > linewrap:
+                    if indent - space > _w:
+                        _w = indent - space
+                    indent = 0
+                    downdent += newh
+                    newh = 0
+                i.pos = (indent, downdent)
+                i.colorize = self.color
+                indent += w + space
+                if h > newh:
+                    newh = h
+            if indent - space > _w:
+                _w = indent - space
+            indent = 0
+            downdent += newh
+            newh = 0
+
+        self.glyphs = glyphs
+        self.size = (_w, downdent)
+
+    def get_width(self):
+        return self.size[0]
+    def get_height(self):
+        return self.size[1]
+    def get_size(self):
+        return self.size
+    def get_rect(self):
+        return pygame.rect.Rect(self.pos, self.size)
+
+    def copy(self):
+        new = MEFont2Image(self.font, self.text, self.color, self.linewrap)
+        new.visible = self.visible
+        new.scale = self.scale
+        new.pos = self.pos
+        new.rotation = self.rotation
+        new.size = self.size
+
+    def render(self, camera=None):
+
+        glPushMatrix()
+        a, b, c = self.rotation
+        glRotatef(a, 1, 0, 0)
+        glRotatef(b, 0, 1, 0)
+        glRotatef(c, 0, 0, 1)
+        try:
+            glScalef(self.scale[0], self.scale[1], 1)
+        except:
+            glScalef(self.scale, self.scale, 1)
+        for glyph in self.glyphs:
+            glyph.render()
+        glPopMatrix()
+
+class MEFont2(object):
+    def __init__(self, filename=None, size=32):
+        view.require_init()
+        self._filename = filename
+        self._size = size
+
+        self.rebuild_font()
+
+        self.images = {}
+
+    def getf(self):
+        return self._filename
+    def setf(self, filename):
+        self._filename = filename
+        self.rebuild_font()
+    filename = property(getf, setf)
+
+    def gets(self):
+        return self._size
+    def sets(self, size):
+        self._size = size
+        self.rebuild_font()
+    size = property(gets, sets)
+
+    def rebuild_font(self):
+        self.fontobj = pygame.font.Font(self.filename, self.size)
+
+    def make_text_image(self, text="", color=(1,1,1,1)):
+        return MEFont2Image(self, text, color)
+
+    def add_image(self, name, image):
+        self.images[name] = image

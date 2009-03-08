@@ -17,7 +17,7 @@ def main():
     app = pyggel.Newgui.App(eh)
     app.mefont.add_smiley(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
     app.packer.packtype="center"
-    scene.add_2d(app)
+##    scene.add_2d(app)
 
     frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300), image="data/gui/base.png")
     frame.packer.packtype = "wrap"
@@ -58,6 +58,11 @@ def main():
                                              ["please work!", "1", "2", "3", "asfkjhsakfh",
                                               ["subagain!", "1", "2", "3"*10]]],
                        images=["data/gui/base.png"]*4, callback=test_menu)
+
+    tf = pyggel.font.MEFont2()
+    tf.add_image(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
+    text = tf.make_text_image("Hello World?:P")
+    scene.add_2d(text)
 
     clock = pygame.time.Clock()
 
