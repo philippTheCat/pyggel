@@ -23,7 +23,7 @@ def main():
     frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300), image="data/gui/base.png")
     frame.packer.packtype = "wrap"
 
-    pyggel.Newgui.Button(frame, "click!", callbacks=[test_callback], images=["data/gui/base.png", "data/gui/base.png", None])
+    pyggel.Newgui.Button(frame, "click!:P", callbacks=[test_callback], images=["data/gui/base.png", "data/gui/base.png", None])
     pyggel.Newgui.Button(frame, "click!124675326745327645762354",
                          callbacks=[test_callback], images=["data/gui/base.png", "data/gui/base.png", None])
     pyggel.Newgui.Label(frame, "test:", image="data/gui/base.png")
@@ -54,7 +54,7 @@ def main():
     pyggel.Newgui.MoveBar(app, "TestWindow", image="data/gui/base.png", child=frame)
     window = pyggel.Newgui.Window(app, "P Window-take2!!!", (100,100), (100,100),
                                   images=["data/gui/base.png", "data/gui/base.png"])
-    pyggel.Newgui.Label(window, "Woot!:P", compile_text=False)
+    pyggel.Newgui.Label(window, "Woot!:P")
     pyggel.Newgui.Menu(app, "Menu", options=["help", "test", "quit","2","3","4","Snazzlemegapoof!!!!",
                                              ["please work!", "1", "2", "3", "asfkjhsakfh",
                                               ["subagain!", "1", "2", "3"*10]]],

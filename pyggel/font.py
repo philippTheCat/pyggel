@@ -6,7 +6,7 @@ The font module contains classes to display text images.
 """
 
 from include import *
-import image, view
+import image, view, data
 
 class Font3D(object):
     """A font object used for rendering text to images"""
@@ -66,6 +66,11 @@ class FontImage(object):
         self.size = (0,0)
         self.scale = 1
         self.visible = True
+
+        self._compiled = False
+        self._compiled_list = None
+        self._compiled_glyphs = []
+
         self.rebuild_glyphs()
 
     def getfont(self):
@@ -92,6 +97,29 @@ class FontImage(object):
     text = property(gettext, settext)
     color = property(getcolor, setcolor)
     linewrap = property(getlinewrap, setlinewrap)
+
+    def compile(self):
+        self._compiled = True
+        li = self._compiled_list
+        gl = []
+        if not li:
+            li = data.DisplayList()
+
+        li.begin()
+        for i in self.glyphs:
+            if isinstance(i, image.Image):
+                i.render()
+            else:
+                gl.append(i)
+        li.end()
+        gl.append(li)
+        self._compiled_glyphs = gl
+        self._compiled_list = li
+
+    def uncompile(self):
+        self._compiled = False
+        self._compiled_list = None
+        self._compiled_glyphs = []
 
     def rebuild_glyphs(self):
         glyphs = []
@@ -135,10 +163,9 @@ class FontImage(object):
                                 _w = indent
                             indent = 0
                             downdent += newh
-                            newh = 0
-                        i.pos = (indent, downdent)
-                        if h > newh:
                             newh = h
+                        newh = max((newh, h))
+                        i.pos = (indent, downdent)
                         indent += w
                         word = ""
                         glyphs.append(i)
@@ -150,10 +177,9 @@ class FontImage(object):
                             _w = indent
                         indent = 0
                         downdent += newh
-                        newh = 0
-                    i.pos = (indent, downdent)
-                    if h > newh:
                         newh = h
+                    newh = max((newh, h))
+                    i.pos = (indent, downdent)
                     indent += w
                     glyphs.append(i)
                     skip = len(a)-1
@@ -185,13 +211,16 @@ class FontImage(object):
                         _w = indent
                     indent = 0
                     downdent += newh
-                    newh = 0
-                i.pos = (indent, downdent)
-                if h > newh:
                     newh = h
+                newh = max((newh, h))
+                i.pos = (indent, downdent)
                 indent += w
                 word = ""
                 glyphs.append(i)
+            if indent > _w:
+                _w = indent
+            if newh:
+                downdent += newh
 
         else:
             indent = 0
@@ -234,6 +263,9 @@ class FontImage(object):
         self.glyphs = glyphs
         self.size = (_w, downdent)
 
+        if self._compiled:
+            self.compile()
+
     def get_width(self):
         return self.size[0]
     def get_height(self):
@@ -263,7 +295,11 @@ class FontImage(object):
             glScalef(self.scale[0], self.scale[1], 1)
         except:
             glScalef(self.scale, self.scale, 1)
-        for glyph in self.glyphs:
+        if self._compiled:
+            g = self._compiled_glyphs
+        else:
+            g = self.glyphs
+        for glyph in g:
             glyph.render()
         glPopMatrix()
 

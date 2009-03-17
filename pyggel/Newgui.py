@@ -231,7 +231,7 @@ class App(object):
         self.widgets.reverse()
 
 class Widget(object):
-    def __init__(self, app, pos=None, compile_text=True):
+    def __init__(self, app, pos=None):
         self.app = app
         self.pos = pos
         self.size = (0,0)
@@ -240,10 +240,6 @@ class Widget(object):
         else:
             self.override_pos = False
 
-##        if compile_text:
-##            self.font = self.app.regfont
-##        else:
-##            self.font = self.app.mefont
         self.font = self.app.regfont
 
         self.dispatch = event.Dispatcher()
@@ -383,8 +379,8 @@ class Widget(object):
         self.dispatch.fire("unfocus")
 
 class Frame(App, Widget):
-    def __init__(self, app, pos=None, size=(10,10), image=None, compile_text=True):
-        Widget.__init__(self, app, pos, compile_text)
+    def __init__(self, app, pos=None, size=(10,10), image=None):
+        Widget.__init__(self, app, pos)
         self.size = size
 
         self.widgets = []
@@ -459,11 +455,12 @@ class NewLine(Widget):
         self.pack()
 
 class Label(Widget):
-    def __init__(self, app, start_text="", pos=None, image=None, font_color=(1,1,1,1), compile_text=True):
-        Widget.__init__(self, app, pos, compile_text)
+    def __init__(self, app, start_text="", pos=None, image=None, font_color=(1,1,1,1)):
+        Widget.__init__(self, app, pos)
 
         self.text = start_text
         self.image = self.font.make_text_image(self.text, font_color)
+        self.image.compile()
         self.size = self.image.get_size()
         if image:
             self.background, self.size, self.tsize, self.tshift = self.load_background(image)
@@ -471,13 +468,15 @@ class Label(Widget):
 
 class Button(Widget):
     def __init__(self, app, text, pos=None, callbacks=[],
-                 images=[None, None, None], font_colors=[(1,1,1,1), (1,0,0,1), (0,1,0,1)],
-                 compile_text=True):
-        Widget.__init__(self, app, pos, compile_text)
+                 images=[None, None, None], font_colors=[(1,1,1,1), (1,0,0,1), (0,1,0,1)]):
+        Widget.__init__(self, app, pos)
         self.text = text
         self.ireg = self.font.make_text_image(self.text, font_colors[0])
         self.ihov = self.font.make_text_image(self.text, font_colors[1])
         self.icli = self.font.make_text_image(self.text, font_colors[2])
+        self.ireg.compile()
+        self.ihov.compile()
+        self.icli.compile()
         self.image = self.ireg
         self.size = self.image.get_size()
 
@@ -518,8 +517,8 @@ class Button(Widget):
         Widget.render(self, offset)
 
 class Checkbox(Widget):
-    def __init__(self, app, pos=None, images=[None, None], compile_text=True):
-        Widget.__init__(self, app, pos, compile_text)
+    def __init__(self, app, pos=None, images=[None, None]):
+        Widget.__init__(self, app, pos)
 
         off, on = images
 
@@ -527,10 +526,12 @@ class Checkbox(Widget):
             self.off = _image.Image(off)
         else:
             self.off = self.app.regfont.make_text_image("( )")
+            self.off.compile()
         if on:
             self.on = _image.Image(on)
         else:
             self.on = self.app.regfont.make_text_image("(!)")
+            self.on.compile()
         self.image = self.off
 
         self.state = 0
@@ -551,13 +552,12 @@ class Checkbox(Widget):
         Widget.render(self, offset)
 
 class Radio(Frame):
-    def __init__(self, app, pos=None, options=[], images=[None,None,None], font_color=(1,1,1,1), compile_text=True):
+    def __init__(self, app, pos=None, options=[], images=[None,None,None], font_color=(1,1,1,1)):
         Frame.__init__(self, app, pos)
         self.packer.packtype = None
 
         self.options = []
         self.states = {}
-        ct = compile_text
         fc = font_color
 
         image = images[0]
@@ -569,7 +569,7 @@ class Radio(Frame):
             if not self.options:
                 c.state = 1
             c.dispatch.bind("click", self.check_click)
-            l = Label(self, i, compile_text=ct, font_color=fc)
+            l = Label(self, i, font_color=fc)
             NewLine(self)
             self.options.append([i, c, l, c.state])
             self.states[i] = c.state
@@ -602,8 +602,8 @@ class Radio(Frame):
             self.states[name] = state
 
 class MultiChoiceRadio(Radio):
-    def __init__(self, app, pos=None, options=[], images=[None,None,None], font_color=(1,1,1,1), compile_text=True):
-        Radio.__init__(self, app, pos, options, images, font_color, compile_text)
+    def __init__(self, app, pos=None, options=[], images=[None,None,None], font_color=(1,1,1,1)):
+        Radio.__init__(self, app, pos, options, images, font_color)
 
     def check_click(self):
         for i in self.options:
@@ -614,8 +614,8 @@ class MultiChoiceRadio(Radio):
 
 class Input(Widget):
     def __init__(self, app, start_text="", width=100, pos=None, image=None,
-                 font_colors=[(1,1,1,1), (.5,.5,.5,1)], compile_text=False):
-        Widget.__init__(self, app, pos, False)
+                 font_colors=[(1,1,1,1), (.5,.5,.5,1)]):
+        Widget.__init__(self, app, pos)
 
         self.text = start_text
         self.image = self.app.mefont.make_text_image(self.text)
@@ -627,6 +627,8 @@ class Input(Widget):
         self.cursor_pos = len(self.text)
         self.cursor_image = _image.Animation(((self.font.make_text_image("|",color=font_colors[0]), .5),
                                               (self.font.make_text_image("|",color=font_colors[1]), .5)))
+        for i in self.cursor_image.frames:
+            i[0].compile()
         self.cwidth = int(self.cursor_image.get_width()/2)
         self.xwidth = self.size[0] - self.cwidth*2
         if image:
@@ -752,9 +754,8 @@ class Input(Widget):
             self.cursor_image.pos = self.wpos
 
 class MoveBar(Widget):
-    def __init__(self, app, title="", pos=(0,0), width=100, image=None, compile_text=True,
-                 child=None):
-        Widget.__init__(self, app, pos, compile_text)
+    def __init__(self, app, title="", pos=(0,0), width=100, image=None, child=None):
+        Widget.__init__(self, app, pos)
         self.override_pos = True #window is always overridden,sorry :P
 
         self.title = title
@@ -780,6 +781,7 @@ class MoveBar(Widget):
                 title = title[0:-1]
             i = self.font.make_text_image(title+"...")
         self.image = i
+        self.image.compile()
         self.pack()
 
     def handle_mousemotion(self, change):
@@ -810,10 +812,9 @@ class MoveBar(Widget):
             Widget.unfocus(self)
 
 class Window(MoveBar):
-    def __init__(self, app, title="", pos=(0,0), size=(10,10), images=[None, None],
-                 compile_text=True):
-        child = Frame(app, pos, size, images[1], compile_text)
-        MoveBar.__init__(self, app, title, pos, size[0], images[0], compile_text, child)
+    def __init__(self, app, title="", pos=(0,0), size=(10,10), images=[None, None]):
+        child = Frame(app, pos, size, images[1])
+        MoveBar.__init__(self, app, title, pos, size[0], images[0], child)
 
         self.packer = self.child.packer
         self.mefont = self.child.mefont
@@ -827,20 +828,19 @@ class Window(MoveBar):
     
 class Menu(Button):
     def __init__(self, app, name="", pos=None, options=[], images=[None,None,None,None],
-                 font_colors=[(1,1,1,1), (1,0,0,1), (0,1,0,1)], compile_text=True,
-                 callback=None):
-        Button.__init__(self, app, name, pos, [], images[1::], font_colors, compile_text)
+                 font_colors=[(1,1,1,1), (1,0,0,1), (0,1,0,1)], callback=None):
+        Button.__init__(self, app, name, pos, [], images[1::], font_colors)
         self.dispatch.bind("click", self.do_visible)
 
         self.frames = []
         self.cur_frame = 0
 
-        self.add_frame("", options, images, font_colors, compile_text)
+        self.add_frame("", options, images, font_colors)
 
         if callback:
             self.dispatch.bind("menu-click", callback)
 
-    def add_frame(self, name, options, images, fc, ct):
+    def add_frame(self, name, options, images, fc):
         goback = int(self.cur_frame)
         frame = Frame(self.get_root_app(), (self.pos[0], self.pos[1]+self.size[1]), image=images[0])
         frame.packer.packtype = None
@@ -854,14 +854,14 @@ class Menu(Button):
 
         w = 0
         if not frame == self.frames[0]:
-            c = Button(frame, "../", images=bimages, font_colors=fc, compile_text=ct)
+            c = Button(frame, "../", images=bimages, font_colors=fc)
             NewLine(frame)
             w = c.size[0]
             c.dispatch.bind("click", self.swap_frame(goback))
 
         for i in options:
             if type(i) is type(""):
-                c = Button(frame, i, images=bimages, font_colors=fc, compile_text=ct)
+                c = Button(frame, i, images=bimages, font_colors=fc)
                 NewLine(frame)
                 if c.size[0] > w:
                     w = c.size[0]
@@ -872,7 +872,7 @@ class Menu(Button):
                 c.dispatch.bind("click", self.bind_to_event(ni))
                 c.dispatch.bind("click", self.do_unfocus)
             else:
-                c = Button(frame, i[0], images=bimages, font_colors=fc, compile_text=ct)
+                c = Button(frame, i[0], images=bimages, font_colors=fc)
                 NewLine(frame)
                 if c.size[0] > w:
                     w = c.size[0]
@@ -881,7 +881,7 @@ class Menu(Button):
                     ni = name+"."+i[0]
                 else:
                     ni = i[0]
-                self.add_frame(ni, i[1::], images, fc, ct)
+                self.add_frame(ni, i[1::], images, fc)
         if options:
             h = c.pos[1]+c.size[1]
         else:
