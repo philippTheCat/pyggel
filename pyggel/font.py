@@ -366,12 +366,13 @@ class MEFontImage(object):
         return self._text
     def set_text(self, text):
         self._text = text
-        self.glyphs = self.make_list_of_glyphs_and_images(text)
+        gg = self.make_list_of_glyphs_and_images(text)
+        g = []
         indent = 0
         downdent = 0
         newh = 0
         self._width = 0
-        for i in self.glyphs:
+        for i in gg:
             if i =="\n":
                 if indent > self._width:
                     self._width = indent
@@ -385,10 +386,13 @@ class MEFontImage(object):
                     indent = 0
                     downdent += max((newh, i.get_height()))
                     newh = 0
+                newh = max((newh, i.get_height()))
                 i.pos = (indent, downdent)
+                g.append(i)
                 indent += i.get_width()
         self._height = downdent
-        self.set_col(self.colorize)
+        self.glyphs = g
+        self.set_col(self._colorize)
     text = property(get_text, set_text)
 
     def get_col(self):
