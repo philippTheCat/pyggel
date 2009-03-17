@@ -625,8 +625,8 @@ class Input(Widget):
         self.size = (width, self.app.mefont.pygame_font.get_height())
 
         self.cursor_pos = len(self.text)
-        self.cursor_image = _image.Animation(((self.app.regfont.make_text_image("|",color=font_colors[0]), .5),
-                                              (self.app.regfont.make_text_image("|",color=font_colors[1]), .5)))
+        self.cursor_image = _image.Animation(((self.font.make_text_image("|",color=font_colors[0]), .5),
+                                              (self.font.make_text_image("|",color=font_colors[1]), .5)))
         self.cwidth = int(self.cursor_image.get_width()/2)
         self.xwidth = self.size[0] - self.cwidth*2
         if image:

@@ -201,7 +201,7 @@ class FontImage(object):
             for line in text.split("\n"):
                 _l = ""
                 for word in line.split(" "):
-                    if linewrap and (indent+self.font.fontobj.size(_l + " " + word)[0]  > linewrap):
+                    if linewrap and indent and (indent+self.font.fontobj.size(_l + " " + word)[0]  > linewrap):
                         i = image.Image(self.font.fontobj.render(_l, True, (255,255,255)))
                         i.colorize = self.color
                         x, y = i.get_size()
@@ -304,7 +304,7 @@ class MEFontImage(object):
     """A font image that renders more slowly,
        but supports changing of text on the fly (very slowly though)
        among other features (like smilies)"""
-    def __init__(self, fontobj, text="", colorize=(1,1,1,1)):
+    def __init__(self, fontobj, text="", colorize=(1,1,1,1), linewrap=None):
         """Create the text
            fontobj is the MEFont object that created this text
            text is the text string to render
@@ -313,6 +313,8 @@ class MEFontImage(object):
         self.rotation = (0,0,0)
         self.scale = 1
         self.visible = True
+
+        self.linewrap = linewrap
 
         self.pos = (0,0)
         self._colorize = (1,1,1,1)
@@ -341,9 +343,16 @@ class MEFontImage(object):
                 downdent += newh
                 newh = 0
             else:
+                if self.linewrap and indent and indent + i.get_width() > self.linewrap:
+                    if indent > self._width:
+                        self._width = indent
+                    indent = 0
+                    downdent += max((newh, i.get_height()))
+                    newh = 0
                 i.pos = (indent, downdent)
                 indent += i.get_width()
         self._height = downdent
+        self.set_col(self.colorize)
     text = property(get_text, set_text)
 
     def get_col(self):
@@ -467,8 +476,8 @@ class MEFont(object):
 
         self.glyphs = L
 
-    def make_text_image(self, text="", color=(1,1,1,1)):
+    def make_text_image(self, text="", color=(1,1,1,1), linewrap=None):
         """Return a MEFontImage that holds the text
            text is the text to render
            color = the color of the text (0-1 RGBA)"""
-        return MEFontImage(self, text, color)
+        return MEFontImage(self, text, color, linewrap)
