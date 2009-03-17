@@ -240,10 +240,11 @@ class Widget(object):
         else:
             self.override_pos = False
 
-        if compile_text:
-            self.font = self.app.regfont
-        else:
-            self.font = self.app.mefont
+##        if compile_text:
+##            self.font = self.app.regfont
+##        else:
+##            self.font = self.app.mefont
+        self.font = self.app.regfont
 
         self.dispatch = event.Dispatcher()
 
@@ -697,8 +698,8 @@ class Input(Widget):
         """Calculate the position of the text cursor - ie, where in the text are we typing... and the text offset."""
         tx, ty = self.pos
         if self.text and self.cursor_pos:
-            g1 = self.image.glyphs[0][0][0:self.cursor_pos]
-            g2 = self.image.glyphs[0][0][self.cursor_pos+1::]
+            g1 = self.image.glyphs[0:self.cursor_pos]
+            g2 = self.image.glyphs[self.cursor_pos+1::]
 
             w1 = 0
             w2 = 0

@@ -15,7 +15,8 @@ def main():
 
     eh = pyggel.event.Handler()
     app = pyggel.Newgui.App(eh)
-    app.mefont.add_smiley(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
+    app.regfont.add_image(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
+    app.mefont.add_image(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
     app.packer.packtype="center"
     scene.add_2d(app)
 
@@ -37,7 +38,7 @@ def main():
 
     for i in xrange(2):
         for i in xrange(random.randint(1, 2)):
-            pyggel.Newgui.Label(app, "testing!123", image="data/gui/base.png")
+            pyggel.Newgui.Label(app, "testing! 123", image="data/gui/base.png")
         pyggel.Newgui.NewLine(app, random.choice([0, 15]))
 
     pyggel.Newgui.Label(app, "Hey!", (0, 0), image="data/gui/base.png")
@@ -58,11 +59,6 @@ def main():
                                              ["please work!", "1", "2", "3", "asfkjhsakfh",
                                               ["subagain!", "1", "2", "3"*10]]],
                        images=["data/gui/base.png"]*4, callback=test_menu)
-
-    tf = pyggel.font.MEFont2()
-    tf.add_image(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
-    text = tf.make_text_image("Hello World?:P")
-    scene.add_2d(text)
 
     clock = pygame.time.Clock()
 
