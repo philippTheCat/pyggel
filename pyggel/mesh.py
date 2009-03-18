@@ -78,16 +78,23 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
 
     gl_list = data.DisplayList()
     gl_list.begin()
+    current_tex = None
     for face in sfaces:
         vertices, normals, texture_coords, material = face
         if smtl:
             mtl = smtl[material]
             try:
-                mtl.bind()
+                if not current_tex == mtl:
+                    mtl.bind()
+                    current_tex = mtl
             except:
-                blank_texture.bind()
+                if not current_tex == blank_texture:
+                    blank_texture.bind()
+                    current_tex = blank_texure
         else:
-            blank_texture.bind()
+            if not current_tex == blank_texutre:
+                blank_texture.bind()
+                current_tex = blank_texture
         glBegin(GL_POLYGON)
         for i in xrange(len(vertices)):
             if normals[i] > 0:
