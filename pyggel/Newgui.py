@@ -63,6 +63,9 @@ class Theme(object):
             "NewLine":{
                 "font":"default"
                  },
+            "Icon":{
+                "font":"default"
+                },
             "Frame":{
                 "font":"default",
                 "size":(100,100),
@@ -178,6 +181,7 @@ class Theme(object):
                 "sub-background-image":None,
                 "sub-background-image-hover":None,
                 "sub-background-image-click":None,
+                "sub-icon":None,
                 "sub-font-color":(0,0,1,1),
                 "sub-font-color-hover":(0,1,1,1),
                 "sub-font-color-click":(1,1,0,1),
@@ -736,6 +740,23 @@ class NewLine(Widget):
         self.size = (0, height)
         self.pack()
 
+class Icon(Widget):
+    widget_name = "Icon"
+    def __init__(self, app, pos=None, image=None):
+        Widget.__init__(self, app, pos, tdef, None)
+        if image:
+            if isinstance(image, _image.Animation) or\
+               isinstance(image, _image.Image):
+                self.image = image
+            else:
+                if image.split(".")[-1] in ("gif", "GIF"):
+                    self.image = _image.GIFImage(image)
+                else:
+                    self.image = _image.Image(image)
+
+            self.size = self.image.get_size()
+        self.pack()
+
 class Label(Widget):
     widget_name = "Label"
     def __init__(self, app, start_text=tdef, pos=None, background_image=tdef, font_color=tdef,
@@ -959,7 +980,7 @@ class Radio(Frame):
             if not self.options:
                 c.state = 1
             c.dispatch.bind("click", self.check_click)
-            l = Label(self, i, font_color=fc, font_color_inactive=fc2, font_underline=fu,
+            l = Label(self, i, background_image=None, font_color=fc, font_color_inactive=fc2, font_underline=fu,
                       font_italic=fi, font_bold=fb)
             l.dispatch.bind("click", self.check_click_label)
             NewLine(self)
@@ -1264,7 +1285,7 @@ class MoveBar(Widget):
 
     def unfocus(self):
         self.image.colorize = self.font_color_inactive
-        if self.child == self.app.widgets[0] and not self == self.app.widgets[1]:
+        if self.child == self.app.widgets[0]:
             Widget.focus(self)
         else:
             Widget.unfocus(self)
@@ -1336,6 +1357,7 @@ class Menu(Button):
                  sub_font_underline=tdef, sub_font_italic=tdef, sub_font_bold=tdef,
                  sub_font_underline_hover=tdef, sub_font_italic_hover=tdef, sub_font_bold_hover=tdef,
                  sub_font_underline_click=tdef, sub_font_italic_click=tdef, sub_font_bold_click=tdef,
+                 sub_icon=tdef,
                  callback=None, special_name=None):
         if name == tdef:
             name = app.theme.get(self, "name")
@@ -1377,6 +1399,8 @@ class Menu(Button):
             sub_font_color_hover = app.theme.get(self, "sub-font-color-hover")
         if sub_font_color_click == tdef:
             sub_font_color_click = app.theme.get(self, "sub-font-color-click")
+        if sub_icon == tdef:
+            sub_icon = app.theme.get(self, "sub-icon")
 
         if font_underline == tdef:
             font_underline = app.theme.get(self, "font-underline")
@@ -1447,6 +1471,8 @@ class Menu(Button):
         self.frames = []
         self.cur_frame = 0
 
+        self.sub_icon = sub_icon
+
         images = (menu_background_image,
                   option_background_image,
                   option_background_image_hover,
@@ -1490,6 +1516,7 @@ class Menu(Button):
         sfu, sfi, sfb, sfuh, sfih, sfbh, sfuc, sfic, sfbc = sfs
 
         w = 0
+        incw = 0
         if not frame == self.frames[0]:
             c = Button(frame, "../", background_image=bimages[0],
                        background_image_hover=bimages[1],
@@ -1531,9 +1558,16 @@ class Menu(Button):
                            font_underline=sfu, font_italic=sfi, font_bold=sfb,
                            font_underline_hover=sfuh, font_italic_hover=sfih, font_bold_hover=sfbh,
                            font_underline_click=sfuc, font_italic_click=sfic, font_bold_click=sfbc)
+                if self.sub_icon:
+                    ic = self.sub_icon
+                else:
+                    ic = self.mefont.glyphs[""][">"].copy()
+                x = Icon(frame, image=ic)
                 NewLine(frame)
                 if c.size[0] > w:
                     w = c.size[0]
+                if x.size[0] > incw:
+                    incw = x.size[0]
                 c.dispatch.bind("click", self.swap_frame(self.cur_frame+1))
                 if name:
                     ni = name+"."+i[0]
@@ -1545,7 +1579,8 @@ class Menu(Button):
         else:
             h = 1
         for i in frame.widgets:
-            if not isinstance(i, NewLine):
+            if not (isinstance(i, NewLine) or\
+                    isinstance(i, Icon)):
                 i.size = w-i.tsize[0]*2, i.size[1]-i.tsize[1]*2
                 _size = 0
                 if i.breg: i.breg, _size, a, i.tshift = i.load_background(bimages[0])
@@ -1554,8 +1589,15 @@ class Menu(Button):
                 if _size:
                     i.size = _size
         i.pack()
+        for i in frame.widgets:
+            if isinstance(i, Icon):
+                _x, _y = i.pos
+                _h = i.size[1]
+                _b = i.font.pygame_font.get_height()
+                _y += int(_b/2)-int(_h/4)+frame.widgets[0].tsize[1]
+                i.pos = (_x, _y)
 
-        frame.size = (w, h)
+        frame.size = (w+incw, h)
         if images[0]:
             frame.background, frame.size, frame.tsize, frame.tshift = frame.load_background(images[0])
 

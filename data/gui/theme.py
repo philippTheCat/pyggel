@@ -11,12 +11,12 @@
 "Widget":{},
 "Frame":{
     "size":(100,100),
-    "background-image":None
+    "background-image":"base.png"
     },
 "Label":{
     "font":"default",
     "text":"label...",
-    "background-image":None,
+    "background-image":"base.png",
     "font-color":(1,1,1,1),
     "font-color-inactive":(1,1,1,.5),
     "font-underline":False,
@@ -26,8 +26,8 @@
 "Button":{
     "font":"default",
     "text":"button...",
-    "background-image":None,
-    "background-image-hover":None,
+    "background-image":"base.png",
+    "background-image-hover":"base.png",
     "background-image-click":"base.png",
     "font-color":(1,1,1,1),
     "font-color-hover":(0,1,0,1),
@@ -43,14 +43,14 @@
     "font-bold-click":False
     },
 "Checkbox":{
-    "background-image":None,
-    "check-image":None
+    "background-image":"check_open.png",
+    "check-image":"check_closed.png"
     },
 "Radio":{
     "font":"default",
-    "background-image":None,
-    "option-background-image":None,
-    "option-check-image":None,
+    "background-image":"base.png",
+    "option-background-image":"check_open.png",
+    "option-check-image":"check_closed.png",
     "font-color":(1,1,1,1),
     "font-color-inactive":(1,1,1,.5),
     "font-underline":False,
@@ -59,9 +59,9 @@
     },
 "MultiChoiceRadio":{
     "font":"default",
-    "background-image":None,
-    "option-background-image":None,
-    "option-check-image":None,
+    "background-image":"base.png",
+    "option-background-image":"check_open.png",
+    "option-check-image":"check_closed.png",
     "font-color":(1,1,1,1),
     "font-color-inactive":(1,1,1,.5),
     "font-underline":False,
@@ -72,7 +72,7 @@
     "font":"default",
     "text":"input...",
     "width":100,
-    "background-image":None,
+    "background-image":"base.png",
     "font-color":(1,1,1,1),
     "font-color-inactive":(1,1,1,.5),
     "font-underline":False,
@@ -88,7 +88,7 @@
     "font-bold":False,
     "title":"Window...",
     "width":100,
-    "background-image":None
+    "background-image":"base.png"
     },
 "Window":{
     "font":"default",
@@ -98,8 +98,8 @@
     "font-italic":False,
     "font-bold":False,
     "size":(100,100),
-    "background-image":None,
-    "movebar-background-image":None
+    "background-image":"base.png",
+    "movebar-background-image":"base.png"
     },
 "Menu":{
     "name":"menu...",
@@ -107,19 +107,20 @@
     "font-color":(1,1,1,1),
     "font-color-hover":(0,1,0,1),
     "font-color-click":(1,0,0,1),
-    "background-image":None,
-    "background-image-hover":None,
-    "background-image-click":None,
-    "menu-background-image":None,
-    "option-background-image":None,
-    "option-background-image-hover":None,
-    "option-background-image-click":None,
+    "background-image":"base.png",
+    "background-image-hover":"base.png",
+    "background-image-click":"base.png",
+    "menu-background-image":"base.png",
+    "option-background-image":"base.png",
+    "option-background-image-hover":"base.png",
+    "option-background-image-click":"base.png",
     "option-font-color":(1,1,1,1),
     "option-font-color-hover":(0,1,0,1),
     "option-font-color-click":(1,0,0,1),
-    "sub-background-image":None,
-    "sub-background-image-hover":None,
-    "sub-background-image-click":None,
+    "sub-background-image":"base.png",
+    "sub-background-image-hover":"base.png",
+    "sub-background-image-click":"base.png",
+    "sub-icon":None,
     "sub-font-color":(0,0,1,1),
     "sub-font-color-hover":(0,1,1,1),
     "sub-font-color-click":(1,1,0,1),

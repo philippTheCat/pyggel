@@ -158,9 +158,9 @@ class FontImage(object):
 
         px, py = self.pos
 
-        self.font.fontobj.set_underline(self._underline)
-        self.font.fontobj.set_italic(self._italic)
-        self.font.fontobj.set_bold(self._bold)
+        self.font.pygame_font.set_underline(self._underline)
+        self.font.pygame_font.set_italic(self._italic)
+        self.font.pygame_font.set_bold(self._bold)
 
         skip = 0
         num = 0
@@ -189,7 +189,7 @@ class FontImage(object):
                     continue
                 elif num in image_positions:
                     if word:
-                        i = image.Image(self.font.fontobj.render(word, True, (255,255,255)))
+                        i = image.Image(self.font.pygame_font.render(word, True, (255,255,255)))
                         i.colorize = self.color
                         w, h = i.get_size()
                         if linewrap and indent and indent+w > linewrap:
@@ -223,8 +223,8 @@ class FontImage(object):
                     indent = 0
                     downdent += newh
                     newh = 0
-                elif i == " " and linewrap and indent and (indent + self.font.fontobj.get_size(word+" ")[0] > linewrap):
-                    i = image.image(self.font.fontobj.render(word, True, (255,255,255)))
+                elif i == " " and linewrap and indent and (indent + self.font.pygame_font.get_size(word+" ")[0] > linewrap):
+                    i = image.image(self.font.pygame_font.render(word, True, (255,255,255)))
                     i.colorize = self.color
                     i.pos = (indent, downdent)
                     w, h = i.get_size()
@@ -237,7 +237,7 @@ class FontImage(object):
                 num += 1
 
             if word:
-                i = image.Image(self.font.fontobj.render(word, True, (255,255,255)))
+                i = image.Image(self.font.pygame_font.render(word, True, (255,255,255)))
                 i.colorize = self.color
                 w, h = i.get_size()
                 if linewrap and indent and indent+w > linewrap:
@@ -264,8 +264,8 @@ class FontImage(object):
             for line in text.split("\n"):
                 _l = ""
                 for word in line.split(" "):
-                    if linewrap and indent and (indent+self.font.fontobj.size(_l + " " + word)[0]  > linewrap):
-                        i = image.Image(self.font.fontobj.render(_l, True, (255,255,255)))
+                    if linewrap and indent and (indent+self.font.pygame_font.size(_l + " " + word)[0]  > linewrap):
+                        i = image.Image(self.font.pygame_font.render(_l, True, (255,255,255)))
                         i.colorize = self.color
                         x, y = i.get_size()
                         i.pos = (indent, downdent)
@@ -282,7 +282,7 @@ class FontImage(object):
                             _l += " " + word
                         else:
                             _l += word
-                i = image.Image(self.font.fontobj.render(_l, True, (255,255,255)))
+                i = image.Image(self.font.pygame_font.render(_l, True, (255,255,255)))
                 i.colorize = self.color
                 x, y = i.get_size()
                 i.pos = (indent, downdent)
@@ -300,9 +300,9 @@ class FontImage(object):
         if self._compiled:
             self.compile()
 
-        self.font.fontobj.set_underline(False)
-        self.font.fontobj.set_italic(False)
-        self.font.fontobj.set_bold(False)
+        self.font.pygame_font.set_underline(False)
+        self.font.pygame_font.set_italic(False)
+        self.font.pygame_font.set_bold(False)
 
     def get_width(self):
         return self.size[0]
@@ -366,7 +366,7 @@ class Font(object):
     size = property(gets, sets)
 
     def rebuild_font(self):
-        self.fontobj = pygame.font.Font(self.filename, self.size)
+        self.pygame_font = pygame.font.Font(self.filename, self.size)
 
     def make_text_image(self, text="", color=(1,1,1,1), linewrap=None, underline=False, italic=False, bold=False):
         return FontImage(self, text, color, linewrap, underline, italic, bold)
@@ -385,13 +385,13 @@ class MEFontImage(object):
     """A font image that renders more slowly,
        but supports changing of text on the fly (very slowly though)
        among other features (like smilies)"""
-    def __init__(self, fontobj, text="", colorize=(1,1,1,1), linewrap=None,
+    def __init__(self, font, text="", colorize=(1,1,1,1), linewrap=None,
                  underline=False, italic=False, bold=False):
         """Create the text
-           fontobj is the MEFont object that created this text
+           font is the MEFont object that created this text
            text is the text string to render
            colorize is the color (0-1 RGBA) of the text"""
-        self.fontobj = fontobj
+        self.font = font
         self.rotation = (0,0,0)
         self.scale = 1
         self.visible = True
@@ -477,7 +477,7 @@ class MEFontImage(object):
         skip = 0
         num = 0
         image_positions = {}
-        ss = self.fontobj.images
+        ss = self.font.images
         cols = ""
         if self._underline:
             cols += "u"
@@ -486,7 +486,7 @@ class MEFontImage(object):
         if self.bold:
             cols += "b"
 
-        sg = self.fontobj.glyphs[cols]
+        sg = self.font.glyphs[cols]
 
         for s in ss:
             last = 0
@@ -517,7 +517,7 @@ class MEFontImage(object):
         """Render the object
            camera can be None or the camera object used in the scene to render this
                Only here to maintain compatability with other 2d gfx"""
-        fo = self.fontobj
+        fo = self.font
         glPushMatrix()
         glTranslatef(self.pos[0], self.pos[1], 0)
         a, b, c = self.rotation
@@ -535,7 +535,7 @@ class MEFontImage(object):
 
     def copy(self):
         """Copy the text image"""
-        n = MEFontImage(self.fontobj, self.text, self.colorize)
+        n = MEFontImage(self.font, self.text, self.colorize)
         n.pos = self.pos
         n.rotation = self.rotation
         n.scale = self.scale

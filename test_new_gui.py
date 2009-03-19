@@ -29,72 +29,47 @@ def main():
     scene.add_2d(app)
     scene.add_2d(newapp)
 
-    frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300), background_image="data/gui/base.png")
+    frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300))
     frame.packer.packtype = "wrap"
 
     pyggel.Newgui.Button(frame, "click!:P", callbacks=[test_callback],
-                         background_image="data/gui/base.png",
-                         background_image_hover="data/gui/base.png",
                          font_underline=True)
     pyggel.Newgui.Button(frame, "click!124675326745327645762354",
                          callbacks=[test_callback],
-                         background_image="data/gui/base.png",
-                         background_image_hover="data/gui/base.png",
                          background_image_click=None)
-    pyggel.Newgui.Label(frame, "test:", background_image="data/gui/base.png", font_underline=True)
-    pyggel.Newgui.Checkbox(frame, background_image="data/gui/check_open.png",
-                           check_image="data/gui/check_closed.png")
+    pyggel.Newgui.Label(frame, "test:", font_underline=True)
+    pyggel.Newgui.Checkbox(frame)
 
     for i in xrange(10):
-        pyggel.Newgui.Label(frame, "testing456", background_image="data/gui/base.png")
+        pyggel.Newgui.Label(frame, "testing456")
 
     pyggel.Newgui.Button(app, "Click me!:PXD", callbacks=[test_callback],
-                         background_image="data/gui/base.png",
-                         background_image_hover="data/gui/base.png",
                          background_image_click=None)
     pyggel.Newgui.Button(app, "Swap Apps!", callbacks=[lambda: swap_apps(newapp)],
-                         background_image="data/gui/base.png",
-                         background_image_hover="data/gui/base.png",
                          background_image_click=None)
     pyggel.Newgui.NewLine(app)
 
     for i in xrange(2):
         for i in xrange(random.randint(1, 2)):
-            pyggel.Newgui.Label(app, "testing! 123", background_image="data/gui/base.png")
+            pyggel.Newgui.Label(app, "testing! 123")
         pyggel.Newgui.NewLine(app, random.choice([0, 15]))
 
-    pyggel.Newgui.Label(app, "Hey!", (0, 0), background_image="data/gui/base.png")
-    pyggel.Newgui.Radio(app, options=["test", "34", "56"],
-                        background_image="data/gui/base.png",
-                        option_background_image="data/gui/check_open.png",
-                        option_check_image="data/gui/check_closed.png")
-    pyggel.Newgui.MultiChoiceRadio(app, options=["mc1", "mc2"],
-                                    background_image="data/gui/base.png",
-                                    option_background_image="data/gui/check_open.png",
-                                    option_check_image="data/gui/check_closed.png")
+    pyggel.Newgui.Label(app, "Hey!", (0, 0))
+    pyggel.Newgui.Radio(app, options=["test", "34", "56"])
+    pyggel.Newgui.MultiChoiceRadio(app, options=["mc1", "mc2"])
     pyggel.Newgui.NewLine(app)
-    pyggel.Newgui.Input(app, "test me...", background_image="data/gui/base.png")
+    pyggel.Newgui.Input(app, "test me...")
 
-    pyggel.Newgui.MoveBar(app, "TestWindow", background_image="data/gui/base.png", child=frame)
-    window = pyggel.Newgui.Window(app, "P Window-take2!!!", (100,100), (100,100),
-                                  background_image="data/gui/base.png",
-                                  movebar_background_image="data/gui/base.png")
+    pyggel.Newgui.MoveBar(app, "TestWindow", child=frame)
+    window = pyggel.Newgui.Window(app, "P Window-take2!!!", (100,100), (100,100))
     pyggel.Newgui.Label(window, "Woot!:P")
     pyggel.Newgui.Menu(newapp, "Menu", options=["help", "test", "quit","2","3","4","Snazzlemegapoof!!!!",
                                              ["please work!", "1", "2", "3", "asfkjhsakfh",
                                               ["subagain!", "1", "2", "3"*10]]],
-                       menu_background_image="data/gui/base.png",
-                       background_image="data/gui/base.png",
-                       background_image_hover="data/gui/base.png",
-                       background_image_click="data/gui/base.png",
-                       option_background_image="data/gui/base.png",
-                       option_background_image_hover="data/gui/base.png",
-                       option_background_image_click="data/gui/base.png",
                        callback=test_menu)
     pyggel.Newgui.Button(newapp, "Swap Back!", callbacks=[lambda: swap_apps(app)],
-                         background_image="data/gui/base.png",
-                         background_image_hover="data/gui/base.png",
                          background_image_click=None)
+    pyggel.Newgui.Icon(newapp, image="data/gui/football.gif")
 
     clock = pygame.time.Clock()
 
