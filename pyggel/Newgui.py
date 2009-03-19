@@ -426,7 +426,7 @@ class Widget(object):
         self._mhover = False
         self.key_active = False
         self.key_hold_lengths = {}
-        self.khl = 150 #milliseconds to hold keys for repeat!
+        self.khl = 200 #milliseconds to hold keys for repeat!
 
     def get_root_app(self):
         app = self.app
