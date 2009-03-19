@@ -1401,6 +1401,8 @@ class Menu(Button):
             sub_font_color_click = app.theme.get(self, "sub-font-color-click")
         if sub_icon == tdef:
             sub_icon = app.theme.get(self, "sub-icon")
+            if sub_icon:
+                sub_icon = app.theme.data(sub_icon)
 
         if font_underline == tdef:
             font_underline = app.theme.get(self, "font-underline")
@@ -1518,7 +1520,7 @@ class Menu(Button):
         w = 0
         incw = 0
         if not frame == self.frames[0]:
-            c = Button(frame, "../", background_image=bimages[0],
+            c = Button(frame, "../"+name.split(".")[-1], background_image=bimages[0],
                        background_image_hover=bimages[1],
                        background_image_click=bimages[2],
                        font_color=fc[0], font_color_hover=fc[1],
@@ -1593,11 +1595,11 @@ class Menu(Button):
             if isinstance(i, Icon):
                 _x, _y = i.pos
                 _h = i.size[1]
-                _b = i.font.pygame_font.get_height()
-                _y += int(_b/2)-int(_h/4)+frame.widgets[0].tsize[1]
-                i.pos = (_x, _y)
+                _b = frame.widgets[-1].size[1]
+                _y += int((_b-_h)/2)
+                i.pos = (_x+1, _y)
 
-        frame.size = (w+incw, h)
+        frame.size = (w+incw+1, h)
         if images[0]:
             frame.background, frame.size, frame.tsize, frame.tshift = frame.load_background(images[0])
 

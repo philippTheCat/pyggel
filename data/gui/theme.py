@@ -120,7 +120,7 @@
     "sub-background-image":"base.png",
     "sub-background-image-hover":"base.png",
     "sub-background-image-click":"base.png",
-    "sub-icon":None,
+    "sub-icon":"menu_icon.png",
     "sub-font-color":(0,0,1,1),
     "sub-font-color-hover":(0,1,1,1),
     "sub-font-color-click":(1,1,0,1),
