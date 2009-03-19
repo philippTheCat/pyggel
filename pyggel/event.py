@@ -127,6 +127,7 @@ class Handler(object):
 
         self.uncaught_events = []
 
+        self.all_guis = []
         self.gui = None
         self.gui_keyboard = Keyboard()
         self.gui_mouse = Mouse()

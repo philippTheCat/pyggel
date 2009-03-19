@@ -267,6 +267,7 @@ class App(object):
            and each event handler may only have on App attached to it."""
         self.event_handler = event_handler
         self.event_handler.gui = self
+        self.event_handler.all_guis.append(self)
 
         self.widgets = []
 
@@ -281,6 +282,18 @@ class App(object):
 
         self.pos = (0,0)
         self.size = view.screen.screen_size_2d
+
+    def activate(self):
+        self.event_handler.gui = self
+        self.visible=True
+        for i in self.event_handler.all_guis:
+            if not i == self:
+                i.visible = False
+                for x in i.widgets:
+                    x.unfocus()
+    def kill(self):
+        if self in self.event_handler.all_guis:
+            self.event_handler.all_guis.remove(self)
 
     def get_font(self, name):
         return self.fonts[name]
@@ -310,6 +323,8 @@ class App(object):
 
     def handle_mousedown(self, button, name):
         """Callback for mouse click events from the event_handler."""
+        if not self.visible:
+            return False
         for i in self.widgets:
             if i.visible:
                 if i.handle_mousedown(button, name):
@@ -318,6 +333,8 @@ class App(object):
 
     def handle_mouseup(self, button, name):
         """Callback for mouse release events from the event_handler."""
+        if not self.visible:
+            return False
         for i in self.widgets:
             if i.visible:
                 if i.handle_mouseup(button, name):
@@ -326,6 +343,8 @@ class App(object):
 
     def handle_mousehold(self, button, name):
         """Callback for mouse hold events from the event_handler."""
+        if not self.visible:
+            return False
         for i in self.widgets:
             if i.visible:
                 if i.handle_mousehold(button, name):
@@ -334,6 +353,8 @@ class App(object):
 
     def handle_mousemotion(self, change):
         """Callback for mouse motion events from event_handler."""
+        if not self.visible:
+            return False
         for i in self.widgets:
             if i.visible:
                 if i.handle_mousemotion(change):
@@ -341,6 +362,8 @@ class App(object):
 
     def handle_uncaught_event(self, event):
         """Callback for uncaught_event events from event_handler."""
+        if not self.visible:
+            return False
         for i in self.widgets:
             if i.visible:
                 if i.handle_uncaught_event(event):
@@ -349,6 +372,8 @@ class App(object):
 
     def handle_keydown(self, key, string):
         """Callback for key press events from event_handler."""
+        if not self.visible:
+            return False
         for i in self.widgets:
             if i.visible:
                 if i.handle_keydown(key, string):
@@ -357,6 +382,8 @@ class App(object):
 
     def handle_keyup(self, key, string):
         """Callback for key release events from event_handler."""
+        if not self.visible:
+            return False
         for i in self.widgets:
             if i.visible:
                 if i.handle_keyup(key, string):
@@ -365,6 +392,8 @@ class App(object):
 
     def handle_keyhold(self, key, string):
         """Callback for key hold events from event_handler."""
+        if not self.visible:
+            return False
         for i in self.widgets:
             if i.visible:
                 if i.handle_keyhold(key, string):
@@ -389,6 +418,8 @@ class App(object):
 
     def render(self, camera=None):
         """Renders all widgets, camera can be None or the camera object used to render the scene."""
+        if not self.visible:
+            return False
         self.widgets.reverse()
         for i in self.widgets:
             if i.visible: i.render()
@@ -553,6 +584,8 @@ class Widget(object):
         self.key_active=False
         self.key_hold_lengths = {}
         self.dispatch.fire("unfocus")
+        self._mhold=False
+        self._mhover=False
 
 class Frame(App, Widget):
     widget_name = "Frame"
@@ -853,6 +886,7 @@ class Radio(Frame):
                     state = 1
                 else:
                     check.state = 1
+                label.focus()
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
 
@@ -875,6 +909,8 @@ class MultiChoiceRadio(Radio):
     def check_click(self):
         for i in self.options:
             name, check, label, state = i
+            if check.state != state:
+                label.focus()
             state = check.state
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
