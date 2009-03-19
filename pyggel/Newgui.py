@@ -39,8 +39,11 @@ class Theme(object):
             if not i in ("self", "filename"):
                 exec "%s = None"%i
 
-        exec compile("g={%s}"%open(filename, "r").read(),
-                     "ThemeFile", "exec")
+        n = "g={%s}"%open(filename, "rU").read()
+        n.replace("\n", "")
+        n.replace("\r", "")
+        n.replace("\r\n", "")
+        exec n
         for widget in g:
             for val in g[widget]:
                 self.theme[widget][val] = g[widget][val]
