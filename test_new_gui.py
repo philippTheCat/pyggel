@@ -16,7 +16,8 @@ def main():
     eh = pyggel.event.Handler()
     app = pyggel.Newgui.App(eh)
     app.theme.load("data/gui/theme.py")
-    regfont, mefont = app.fonts["default"]
+    regfont = app.get_regfont("default")
+    mefont = app.get_mefont("default")
     regfont.add_image(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
     mefont.add_image(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
     app.packer.packtype="center"
@@ -25,7 +26,7 @@ def main():
     frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300), background_image="data/gui/base.png")
     frame.packer.packtype = "wrap"
 
-    pyggel.Newgui.Button(frame, "click!:P", callbacks=[test_callback],
+    pyggel.Newgui.Button(frame, "click!:PXD", callbacks=[test_callback],
                          background_image="data/gui/base.png",
                          background_image_hover="data/gui/base.png")
     pyggel.Newgui.Button(frame, "click!124675326745327645762354",

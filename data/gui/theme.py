@@ -3,7 +3,7 @@
         "default":{
             "fontfile":None,
             "fontsize":32,
-            "images":[]
+            "images":{"XD":"football.gif"}
             }
         },
     "App":{

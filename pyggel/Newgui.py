@@ -282,6 +282,15 @@ class App(object):
         self.pos = (0,0)
         self.size = view.screen.screen_size_2d
 
+    def get_font(self, name):
+        return self.fonts[name]
+
+    def get_regfont(self, name):
+        return self.fonts[name][0]
+
+    def get_mefont(self, name):
+        return self.fonts[name][1]
+
     def update_fonts(self, fonts):
         self.fonts = fonts
         for i in self.widgets:
