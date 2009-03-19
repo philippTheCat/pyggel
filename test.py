@@ -29,7 +29,7 @@ def main():
 
     font = pyggel.font.Font()
     font3d = pyggel.font.Font3D()
-    img4 = font.make_text_image("Hello World: 2D", (1, 1, 0))
+    img4 = font.make_text_image("Hello World: 2D", (1, 1, 0), underline=True, italic=True, bold=True)
     img4.pos = (50,50)
     img5 = font3d.make_text_image("Hello World: 3D", (0, 1, 1))
     img5.scale = 2

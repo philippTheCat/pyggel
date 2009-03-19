@@ -25,10 +25,13 @@ class Font3D(object):
         """Load the font"""
         self.pygame_font = pygame.font.Font(self.filename, self.fsize)
 
-    def make_text_image(self, text="", color=(1,1,1,1)):
+    def make_text_image(self, text="", color=(1,1,1,1), underline=False, italic=False, bold=False):
         """Create an image.Image3D object with the text rendered to it.
            text is the text to render
            color is the color of the text (0-1 RGBA)"""
+        self.pygame_font.set_underline(underline)
+        self.pygame_font.set_italic(italic)
+        self.pygame_font.set_bold(bold)
         if "\n" in text:
             text = text.split("\n")
             n = []
@@ -47,18 +50,27 @@ class Font3D(object):
             for i in n:
                 new.blit(i, (0, tot*h))
                 tot += 1
+            self.pygame_font.set_underline(False)
+            self.pygame_font.set_italic(False)
+            self.pygame_font.set_bold(False)
             return image.Image3D(new, colorize=color)
         else:
-            return image.Image3D(self.pygame_font.render(text, True, (255,255,255)),
-                                 colorize=color)
+            a = self.pygame_font.render(text, True, (255,255,255))
+            self.pygame_font.set_underline(False)
+            self.pygame_font.set_italic(False)
+            self.pygame_font.set_bold(False)
+            return image.Image3D(a, colorize=color)
 
 
 class FontImage(object):
-    def __init__(self, font, text, color, linewrap=None):
+    def __init__(self, font, text, color, linewrap=None, underline=False, italic=False, bold=False):
         self._font = font
         self._text = text
         self._color = color
         self._linewrap = linewrap
+        self._underline = underline
+        self._italic = italic
+        self._bold = bold
 
         self.pos = (0,0)
         self.rotation = (0,0,0)
@@ -93,6 +105,24 @@ class FontImage(object):
     def setlinewrap(self, linewrap):
         self._linewrap = linewrap
         self.rebuild_glyphs()
+    def getunderline(self):
+        return self._underline
+    def setunderline(self, underline):
+        self._underline = underline
+        self.rebuild_glyphs()
+    def getitalic(self):
+        return self._italic
+    def setitalic(self, italic):
+        self._italic = italic
+        self.rebuild_glyphs()
+    def getbold(self):
+        return self._bold
+    def setbold(self, bold):
+        self._bold = bold
+        self.rebuild_glyphs()
+    underline = property(getunderline, setunderline)
+    italic = property(getitalic, setitalic)
+    bold = property(getbold, setbold)
     font = property(getfont, setfont)
     text = property(gettext, settext)
     color = property(getcolor, setcolor)
@@ -127,6 +157,10 @@ class FontImage(object):
         linewrap = self.linewrap
 
         px, py = self.pos
+
+        self.font.fontobj.set_underline(self._underline)
+        self.font.fontobj.set_italic(self._italic)
+        self.font.fontobj.set_bold(self._bold)
 
         skip = 0
         num = 0
@@ -266,6 +300,10 @@ class FontImage(object):
         if self._compiled:
             self.compile()
 
+        self.font.fontobj.set_underline(False)
+        self.font.fontobj.set_italic(False)
+        self.font.fontobj.set_bold(False)
+
     def get_width(self):
         return self.size[0]
     def get_height(self):
@@ -330,8 +368,8 @@ class Font(object):
     def rebuild_font(self):
         self.fontobj = pygame.font.Font(self.filename, self.size)
 
-    def make_text_image(self, text="", color=(1,1,1,1), linewrap=None):
-        return FontImage(self, text, color, linewrap)
+    def make_text_image(self, text="", color=(1,1,1,1), linewrap=None, underline=False, italic=False, bold=False):
+        return FontImage(self, text, color, linewrap, underline, italic, bold)
 
     def add_image(self, name, img):
         if isinstance(img, image.Image) or\
@@ -347,7 +385,8 @@ class MEFontImage(object):
     """A font image that renders more slowly,
        but supports changing of text on the fly (very slowly though)
        among other features (like smilies)"""
-    def __init__(self, fontobj, text="", colorize=(1,1,1,1), linewrap=None):
+    def __init__(self, fontobj, text="", colorize=(1,1,1,1), linewrap=None,
+                 underline=False, italic=False, bold=False):
         """Create the text
            fontobj is the MEFont object that created this text
            text is the text string to render
@@ -356,6 +395,10 @@ class MEFontImage(object):
         self.rotation = (0,0,0)
         self.scale = 1
         self.visible = True
+
+        self._underline = underline
+        self._italic = italic
+        self._bold = bold
 
         self.linewrap = linewrap
 
@@ -402,6 +445,25 @@ class MEFontImage(object):
         self.set_col(self._colorize)
     text = property(get_text, set_text)
 
+    def getunderline(self):
+        return self._underline
+    def setunderline(self, underline):
+        self._underline = underline
+        self.set_text(self._text)
+    def getitalic(self):
+        return self._italic
+    def setitalic(self, italic):
+        self._italic = italic
+        self.set_text(self._text)
+    def getbold(self):
+        return self._bold
+    def setbold(self, bold):
+        self._bold = bold
+        self.set_text(self._text)
+    underline = property(getunderline, setunderline)
+    italic = property(getitalic, setitalic)
+    bold = property(getbold, setbold)
+
     def get_col(self):
         return self._colorize
     def set_col(self, col):
@@ -416,7 +478,16 @@ class MEFontImage(object):
         num = 0
         image_positions = {}
         ss = self.fontobj.images
-        sg = self.fontobj.glyphs
+        cols = ""
+        if self._underline:
+            cols += "u"
+        if self.italic:
+            cols += "i"
+        if self.bold:
+            cols += "b"
+
+        sg = self.fontobj.glyphs[cols]
+
         for s in ss:
             last = 0
             sl = len(s)
@@ -521,13 +592,49 @@ class MEFont(object):
         self.pygame_font = pygame.font.Font(self.filename, self.fsize)
 
         L = {}
+        Lu = {}
+        Lui = {}
+        Luib = {}
+        Lub = {}
+        Lb = {}
+        Lib = {}
+        Li = {}
         for i in self.acceptable:
             L[i] = image.Image(self.pygame_font.render(i, True, (255,255,255)))
+        self.pygame_font.set_underline(True)
+        for i in self.acceptable:
+            Lu[i] = image.Image(self.pygame_font.render(i, True, (255,255,255)))
+        self.pygame_font.set_italic(True)
+        for i in self.acceptable:
+            Lui[i] = image.Image(self.pygame_font.render(i, True, (255,255,255)))
+        self.pygame_font.set_bold(True)
+        for i in self.acceptable:
+            Luib[i] = image.Image(self.pygame_font.render(i, True, (255,255,255)))
+        self.pygame_font.set_italic(False)
+        for i in self.acceptable:
+            Lub[i] = image.Image(self.pygame_font.render(i, True, (255,255,255)))
+        self.pygame_font.set_underline(False)
+        for i in self.acceptable:
+            Lb[i] = image.Image(self.pygame_font.render(i, True, (255,255,255)))
+        self.pygame_font.set_italic(True)
+        for i in self.acceptable:
+            Lib[i] = image.Image(self.pygame_font.render(i, True, (255,255,255)))
+        self.pygame_font.set_bold(False)
+        for i in self.acceptable:
+            Li[i] = image.Image(self.pygame_font.render(i, True, (255,255,255)))
+        self.pygame_font.set_italic(False)
 
-        self.glyphs = L
+        self.glyphs = {"": L,
+                       "u":Lu,
+                       "ui":Lui,
+                       "uib":Luib,
+                       "ub":Lub,
+                       "b":Lb,
+                       "i":Li,
+                       "ib":Lib}
 
-    def make_text_image(self, text="", color=(1,1,1,1), linewrap=None):
+    def make_text_image(self, text="", color=(1,1,1,1), linewrap=None, underline=False, italic=False, bold=False):
         """Return a MEFontImage that holds the text
            text is the text to render
            color = the color of the text (0-1 RGBA)"""
-        return MEFontImage(self, text, color, linewrap)
+        return MEFontImage(self, text, color, linewrap, underline, italic, bold)
