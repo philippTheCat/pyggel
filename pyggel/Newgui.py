@@ -39,10 +39,6 @@ class Theme(object):
             if not i in ("self", "filename"):
                 exec "%s = None"%i
 
-##        n = "g={%s}"%open(filename, "rU").read()
-##        n.replace("\n", "")
-##        n.replace("\r", "")
-##        n.replace("\r\n", "")
         exec "g={%s}"%open(filename, "rU").read()
         for widget in g:
             for val in g[widget]:
