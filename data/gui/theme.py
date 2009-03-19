@@ -2,7 +2,8 @@
     "Fonts":{
         "default":{
             "fontfile":None,
-            "fontsize":32
+            "fontsize":32,
+            "images":[]
             }
         },
     "App":{
@@ -25,10 +26,10 @@
         "text":"button...",
         "background-image":None,
         "background-image-hover":None,
-        "background-image-click":None,
+        "background-image-click":"base.png",
         "font-color":(1,1,1,1),
         "font-color-hover":(0,1,0,1),
-        "font-color-click":(1,1,1,.5)
+        "font-color-click":(1,0,0,1)
         },
     "Checkbox":{
         "background-image":None,
