@@ -87,6 +87,7 @@ class Cube(object):
 
         ox = .25
         oy = .33
+        last_tex = None
         for i in self.sides:
             ix = 0
             x, y = self.split_coords[i[5]]
@@ -96,7 +97,10 @@ class Cube(object):
                 coords = ((x, y), (x, y+oy), (x+ox, y+oy), (x+ox, y))
             else:
                 coords = ((0,0), (0,1), (1,1), (1,0))
-                self.texture[i[4]].bind()
+                tex = self.texture[i[4]]
+                if not tex == last_tex:
+                    tex.bind()
+                    last_tex = tex
 
             glBegin(GL_QUADS)
 
