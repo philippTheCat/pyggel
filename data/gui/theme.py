@@ -18,7 +18,10 @@
     "text":"label...",
     "background-image":None,
     "font-color":(1,1,1,1),
-    "font-color-inactive":(1,1,1,.5)
+    "font-color-inactive":(1,1,1,.5),
+    "font-underline":False,
+    "font-italic":False,
+    "font-bold":False
     },
 "Button":{
     "font":"default",
@@ -28,7 +31,16 @@
     "background-image-click":"base.png",
     "font-color":(1,1,1,1),
     "font-color-hover":(0,1,0,1),
-    "font-color-click":(1,0,0,1)
+    "font-color-click":(1,0,0,1),
+    "font-underline":False,
+    "font-italic":False,
+    "font-bold":False,
+    "font-underline-hover":False,
+    "font-italic-hover":False,
+    "font-bold-hover":False,
+    "font-underline-click":False,
+    "font-italic-click":False,
+    "font-bold-click":False
     },
 "Checkbox":{
     "background-image":None,
@@ -40,7 +52,10 @@
     "option-background-image":None,
     "option-check-image":None,
     "font-color":(1,1,1,1),
-    "font-color-inactive":(1,1,1,.5)
+    "font-color-inactive":(1,1,1,.5),
+    "font-underline":False,
+    "font-italic":False,
+    "font-bold":False
     },
 "MultiChoiceRadio":{
     "font":"default",
@@ -48,7 +63,10 @@
     "option-background-image":None,
     "option-check-image":None,
     "font-color":(1,1,1,1),
-    "font-color-inactive":(1,1,1,.5)
+    "font-color-inactive":(1,1,1,.5),
+    "font-underline":False,
+    "font-italic":False,
+    "font-bold":False
     },
 "Input":{
     "font":"default",
@@ -56,12 +74,18 @@
     "width":100,
     "background-image":None,
     "font-color":(1,1,1,1),
-    "font-color-inactive":(1,1,1,.5)
+    "font-color-inactive":(1,1,1,.5),
+    "font-underline":False,
+    "font-italic":False,
+    "font-bold":False
     },
 "MoveBar":{
     "font":"default",
     "font-color":(1,1,1,1),
     "font-color-inactive":(1,1,1,.5),
+    "font-underline":False,
+    "font-italic":False,
+    "font-bold":False,
     "title":"Window...",
     "width":100,
     "background-image":None
@@ -70,6 +94,9 @@
     "font":"default",
     "font-color":(1,1,1,1),
     "font-color-inactive":(1,1,1,.5),
+    "font-underline":False,
+    "font-italic":False,
+    "font-bold":False,
     "size":(100,100),
     "background-image":None,
     "movebar-background-image":None
@@ -80,7 +107,6 @@
     "font-color":(1,1,1,1),
     "font-color-hover":(0,1,0,1),
     "font-color-click":(1,0,0,1),
-    "font-color-inactive":(1,1,1,.5),
     "background-image":None,
     "background-image-hover":None,
     "background-image-click":None,
@@ -90,5 +116,38 @@
     "option-background-image-click":None,
     "option-font-color":(1,1,1,1),
     "option-font-color-hover":(0,1,0,1),
-    "option-font-color-click":(1,0,0,1)
+    "option-font-color-click":(1,0,0,1),
+    "sub-background-image":None,
+    "sub-background-image-hover":None,
+    "sub-background-image-click":None,
+    "sub-font-color":(0,0,1,1),
+    "sub-font-color-hover":(0,1,1,1),
+    "sub-font-color-click":(1,1,0,1),
+    "font-underline":False,
+    "font-italic":False,
+    "font-bold":False,
+    "font-underline-hover":False,
+    "font-italic-hover":False,
+    "font-bold-hover":False,
+    "font-underline-click":False,
+    "font-italic-click":False,
+    "font-bold-click":False,
+    "option-font-underline":False,
+    "option-font-italic":False,
+    "option-font-bold":False,
+    "option-font-underline-hover":False,
+    "option-font-italic-hover":False,
+    "option-font-bold-hover":False,
+    "option-font-underline-click":False,
+    "option-font-italic-click":False,
+    "option-font-bold-click":False,
+    "sub-font-underline":True,
+    "sub-font-italic":False,
+    "sub-font-bold":False,
+    "sub-font-underline-hover":False,
+    "sub-font-italic-hover":False,
+    "sub-font-bold-hover":False,
+    "sub-font-underline-click":False,
+    "sub-font-italic-click":False,
+    "sub-font-bold-click":False
     }

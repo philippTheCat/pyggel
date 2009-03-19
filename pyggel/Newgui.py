@@ -47,108 +47,170 @@ class Theme(object):
         self.make_fonts(filename)
 
     def make_default_theme(self):
-        g = {
-                "Fonts":{
-                    "default":{
-                        "fontfile":None,
-                        "fontsize":32,
-                        "images":{}
-                        }
-                    },
-                "App":{},
-                "Widget":{
-                    "font":"default"
-                    },
-                "NewLine":{
-                    "font":"default"
-                    },
-                "Frame":{
-                    "font":"default",
-                    "size":(100,100),
-                    "background-image":None
-                    },
-                "Label":{
-                    "font":"default",
-                    "text":"label...",
-                    "background-image":None,
-                    "font-color":(1,1,1,1),
-                    "font-color-inactive":(1,1,1,.5)
-                    },
-                "Button":{
-                    "font":"default",
-                    "text":"button...",
-                    "background-image":None,
-                    "background-image-hover":None,
-                    "background-image-click":None,
-                    "font-color":(1,1,1,1),
-                    "font-color-hover":(0,1,0,1),
-                    "font-color-click":(1,0,0,1)
-                    },
-                "Checkbox":{
-                    "font":"default",
-                    "background-image":None,
-                    "check-image":None
-                    },
-                "Radio":{
-                    "size":(100,100),
-                    "font":"default",
-                    "background-image":None,
-                    "option-background-image":None,
-                    "option-check-image":None,
-                    "font-color":(1,1,1,1),
-                    "font-color-inactive":(1,1,1,.5)
-                    },
-                "MultiChoiceRadio":{
-                    "size":(100,100),
-                    "font":"default",
-                    "background-image":None,
-                    "option-background-image":None,
-                    "option-check-image":None,
-                    "font-color":(1,1,1,1),
-                    "font-color-inactive":(1,1,1,.5)
-                    },
-                "Input":{
-                    "font":"default",
-                    "width":100,
-                    "background-image":None,
-                    "font-color":(1,1,1,1),
-                    "font-color-inactive":(1,1,1,.5)
-                    },
-                "MoveBar":{
-                    "font":"default",
-                    "font-color":(1,1,1,1),
-                    "font-color-inactive":(1,1,1,.5),
-                    "title":"Window...",
-                    "width":100,
-                    "background-image":None
-                    },
-                "Window":{
-                    "font":"default",
-                    "font-color":(1,1,1,1),
-                    "font-color-inactive":(1,1,1,.5),
-                    "size":(100,100),
-                    "background-image":None,
-                    "movebar-background-image":None
-                    },
-                "Menu":{
-                    "name":"menu...",
-                    "font":"default",
-                    "font-color":(1,1,1,1),
-                    "font-color-hover":(0,1,0,1),
-                    "font-color-click":(1,0,0,1),
-                    "font-color-inactive":(1,1,1,.5),
-                    "background-image":None,
-                    "background-image-hover":None,
-                    "background-image-click":None,
-                    "menu-background-image":None,
-                    "option-background-image":None,
-                    "option-background-image-hover":None,
-                    "option-background-image-click":None,
-                    "option-font-color":(1,1,1,1),
-                    "option-font-color-hover":(0,1,0,1),
-                    "option-font-color-click":(1,0,0,1)
+        g = {"Fonts":{
+                "default":{
+                    "fontfile":None,
+                    "fontsize":32,
+                    "images":{}
                     }
+                },
+            "App":{
+                "font":"default"
+                },
+            "Widget":{
+                "font":"default"
+                },
+            "NewLine":{
+                "font":"default"
+                 },
+            "Frame":{
+                "font":"default",
+                "size":(100,100),
+                "background-image":None
+                },
+            "Label":{
+                "font":"default",
+                "text":"label...",
+                "background-image":None,
+                "font-color":(1,1,1,1),
+                "font-color-inactive":(1,1,1,.5),
+                "font-underline":False,
+                "font-italic":False,
+                "font-bold":False
+                },
+            "Button":{
+                "font":"default",
+                "text":"button...",
+                "background-image":None,
+                "background-image-hover":None,
+                "background-image-click":None,
+                "font-color":(1,1,1,1),
+                "font-color-hover":(0,1,0,1),
+                "font-color-click":(1,0,0,1),
+                "font-underline":False,
+                "font-italic":False,
+                "font-bold":False,
+                "font-underline-hover":False,
+                "font-italic-hover":False,
+                "font-bold-hover":False,
+                "font-underline-click":False,
+                "font-italic-click":False,
+                "font-bold-click":False
+                },
+            "Checkbox":{
+                "font":"default",
+                "background-image":None,
+                "check-image":None
+                },
+            "Radio":{
+                "size":(100,100),
+                "font":"default",
+                "background-image":None,
+                "option-background-image":None,
+                "option-check-image":None,
+                "font-color":(1,1,1,1),
+                "font-color-inactive":(1,1,1,.5),
+                "font-underline":False,
+                "font-italic":False,
+                "font-bold":False
+                },
+            "MultiChoiceRadio":{
+                "size":(100,100),
+                "font":"default",
+                "background-image":None,
+                "option-background-image":None,
+                "option-check-image":None,
+                "font-color":(1,1,1,1),
+                "font-color-inactive":(1,1,1,.5),
+                "font-underline":False,
+                "font-italic":False,
+                "font-bold":False
+                },
+            "Input":{
+                "font":"default",
+                "text":"input...",
+                "width":100,
+                "background-image":None,
+                "font-color":(1,1,1,1),
+                "font-color-inactive":(1,1,1,.5),
+                "font-underline":False,
+                "font-italic":False,
+                "font-bold":False
+                },
+            "MoveBar":{
+                "font":"default",
+                "font-color":(1,1,1,1),
+                "font-color-inactive":(1,1,1,.5),
+                "font-underline":False,
+                "font-italic":False,
+                "font-bold":False,
+                "title":"Window...",
+                "width":100,
+                "background-image":None
+                },
+            "Window":{
+                "font":"default",
+                "font-color":(1,1,1,1),
+                "font-color-inactive":(1,1,1,.5),
+                "font-underline":False,
+                "font-italic":False,
+                "font-bold":False,
+                "size":(100,100),
+                "background-image":None,
+                "movebar-background-image":None
+                },
+            "Menu":{
+                "name":"menu...",
+                "font":"default",
+                "font-color":(1,1,1,1),
+                "font-color-hover":(0,1,0,1),
+                "font-color-click":(1,0,0,1),
+                "background-image":None,
+                "background-image-hover":None,
+                "background-image-click":None,
+                "menu-background-image":None,
+                "option-background-image":None,
+                "option-background-image-hover":None,
+                "option-background-image-click":None,
+                "option-font-color":(1,1,1,1),
+                "option-font-color-hover":(0,1,0,1),
+                "option-font-color-click":(1,0,0,1),
+                "sub-background-image":None,
+                "sub-background-image-hover":None,
+                "sub-background-image-click":None,
+                "sub-font-color":(0,0,1,1),
+                "sub-font-color-hover":(0,1,1,1),
+                "sub-font-color-click":(1,1,0,1),
+                "font-underline":False,
+                "font-italic":False,
+                "font-bold":False,
+                "font-underline-hover":False,
+                "font-italic-hover":False,
+                "font-bold-hover":False,
+                "font-underline-click":False,
+                "font-italic-click":False,
+                "font-bold-click":False,
+                "option-font-underline":False,
+                "option-font-italic":False,
+                "option-font-bold":False,
+                "option-font-underline-hover":False,
+                "option-font-italic-hover":False,
+                "option-font-bold-hover":False,
+                "option-font-underline-click":False,
+                "option-font-italic-click":False,
+                "option-font-bold-click":False,
+                "sub-font-underline":False,
+                "sub-font-italic":False,
+                "sub-font-bold":False,
+                "sub-font-underline-hover":False,
+                "sub-font-italic-hover":False,
+                "sub-font-bold-hover":False,
+                "sub-font-underline-click":False,
+                "sub-font-italic-click":False,
+                "sub-font-bold-click":False
                 }
+
+            }
         return g
 
     def get(self, widget, val):
@@ -677,7 +739,9 @@ class NewLine(Widget):
 class Label(Widget):
     widget_name = "Label"
     def __init__(self, app, start_text=tdef, pos=None, background_image=tdef, font_color=tdef,
-                 font_color_inactive=tdef, font=tdef, special_name=None):
+                 font_color_inactive=tdef, font=tdef,
+                 font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 special_name=None):
         Widget.__init__(self, app, pos, font, special_name)
 
         if start_text == tdef:
@@ -688,12 +752,18 @@ class Label(Widget):
             font_color = self.theme.get(self, "font-color")
         if font_color_inactive == tdef:
             font_color_inactive = self.theme.get(self, "font-color-inactive")
+        if font_underline == tdef:
+            font_underline = self.theme.get(self, "font-underline")
+        if font_italic == tdef:
+            font_italic = self.theme.get(self, "font-italic")
+        if font_bold == tdef:
+            font_bold = self.theme.get(self, "font-bold")
 
         self.font_color = font_color
         self.font_color_inactive = font_color_inactive
 
         self.text = start_text
-        self.image = self.font.make_text_image(self.text, font_color)
+        self.image = self.font.make_text_image(self.text, font_color, None, font_underline, font_italic, font_bold)
         self.image.color = self.font_color_inactive
         self.image.compile()
         self.size = self.image.get_size()
@@ -715,7 +785,11 @@ class Button(Widget):
     widget_name = "Button"
     def __init__(self, app, text=tdef, pos=None, callbacks=[],
                  background_image=tdef, background_image_hover=tdef, background_image_click=tdef,
-                 font_color=tdef, font_color_hover=tdef, font_color_click=tdef, font=tdef, special_name=None):
+                 font_color=tdef, font_color_hover=tdef, font_color_click=tdef, font=tdef,
+                 font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 font_underline_hover=tdef, font_italic_hover=tdef, font_bold_hover=tdef,
+                 font_underline_click=tdef, font_italic_click=tdef, font_bold_click=tdef,
+                 special_name=None):
         Widget.__init__(self, app, pos, font, special_name)
 
         if text == tdef:
@@ -732,10 +806,29 @@ class Button(Widget):
             font_color_hover = self.theme.get(self, "font-color-hover")
         if font_color_click == tdef:
             font_color_click = self.theme.get(self, "font-color-click")
+        if font_underline == tdef:
+            font_underline = self.theme.get(self, "font-underline")
+        if font_italic == tdef:
+            font_italic = self.theme.get(self, "font-italic")
+        if font_bold == tdef:
+            font_bold = self.theme.get(self, "font-bold")
+        if font_underline_hover == tdef:
+            font_underline_hover = self.theme.get(self, "font-underline-hover")
+        if font_italic_hover == tdef:
+            font_italic_hover = self.theme.get(self, "font-italic-hover")
+        if font_bold_hover == tdef:
+            font_bold_hover = self.theme.get(self, "font-bold-hover")
+        if font_underline_click == tdef:
+            font_underline_click = self.theme.get(self, "font-underline-click")
+        if font_italic_click == tdef:
+            font_italic_click = self.theme.get(self, "font-italic-click")
+        if font_bold_click == tdef:
+            font_bold_click = self.theme.get(self, "font-bold-click")
+
         self.text = text
-        self.ireg = self.font.make_text_image(self.text, font_color)
-        self.ihov = self.font.make_text_image(self.text, font_color_hover)
-        self.icli = self.font.make_text_image(self.text, font_color_click)
+        self.ireg = self.font.make_text_image(self.text, font_color, None, font_underline, font_italic, font_bold)
+        self.ihov = self.font.make_text_image(self.text, font_color_hover, None, font_underline_hover, font_italic_hover, font_bold_hover)
+        self.icli = self.font.make_text_image(self.text, font_color_click, None, font_underline_click, font_italic_click, font_bold_click)
         self.ireg.compile()
         self.ihov.compile()
         self.icli.compile()
@@ -829,7 +922,9 @@ class Radio(Frame):
     widget_name = "Radio"
     def __init__(self, app, pos=None, options=[],
                  background_image=tdef, option_background_image=tdef, option_check_image=tdef,
-                 font_color=tdef, font_color_inactive=tdef, font=tdef, special_name=None):
+                 font_color=tdef, font_color_inactive=tdef, font=tdef,
+                 font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 special_name=None):
         Frame.__init__(self, app, pos, tdef, None, font, special_name)
         self.packer.packtype = None
 
@@ -843,6 +938,14 @@ class Radio(Frame):
             font_color = self.theme.get(self, "font-color")
         if font_color_inactive == tdef:
             font_color_inactive = self.theme.get(self, "font-color-inactive")
+        if font_underline == tdef:
+            font_underline = self.theme.get(self, "font-underline")
+        if font_italic == tdef:
+            font_italic = self.theme.get(self, "font-italic")
+        if font_bold == tdef:
+            font_bold = self.theme.get(self, "font-bold")
+
+        fu, fi, fb = font_underline, font_italic, font_bold
 
         self.options = []
         self.states = {}
@@ -856,7 +959,8 @@ class Radio(Frame):
             if not self.options:
                 c.state = 1
             c.dispatch.bind("click", self.check_click)
-            l = Label(self, i, font_color=fc, font_color_inactive=fc2)
+            l = Label(self, i, font_color=fc, font_color_inactive=fc2, font_underline=fu,
+                      font_italic=fi, font_bold=fb)
             l.dispatch.bind("click", self.check_click_label)
             NewLine(self)
             self.options.append([i, c, l, c.state])
@@ -901,10 +1005,14 @@ class MultiChoiceRadio(Radio):
     widget_name = "MultiChoiceRadio"
     def __init__(self, app, pos=None, options=[],
                  background_image=tdef, option_background_image=tdef, option_check_image=tdef,
-                 font_color=tdef, font_color_inactive=tdef, font=tdef, special_name=None):
+                 font_color=tdef, font_color_inactive=tdef, font=tdef,
+                 font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 special_name=None):
         Radio.__init__(self, app, pos, options, background_image,
                        option_background_image, option_check_image,
-                       font_color, font_color_inactive, font, special_name)
+                       font_color, font_color_inactive, font,
+                       font_underline, font_italic, font_bold,
+                       special_name)
 
     def check_click(self):
         for i in self.options:
@@ -918,7 +1026,9 @@ class MultiChoiceRadio(Radio):
 class Input(Widget):
     widget_name = "Input"
     def __init__(self, app, start_text=tdef, width=tdef, pos=None, background_image=tdef,
-                 font_color=tdef, font_color_inactive=tdef, font=tdef, special_name=None):
+                 font_color=tdef, font_color_inactive=tdef, font=tdef,
+                 font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 special_name=None):
         Widget.__init__(self, app, pos, font, special_name)
 
         if start_text == tdef:
@@ -931,9 +1041,15 @@ class Input(Widget):
             font_color = self.theme.get(self, "font-color")
         if font_color_inactive == tdef:
             font_color_inactive = self.theme.get(self, "font-color-inactive")
+        if font_underline == tdef:
+            font_underline = self.theme.get(self, "font-underline")
+        if font_italic == tdef:
+            font_italic = self.theme.get(self, "font-italic")
+        if font_bold == tdef:
+            font_bold = self.theme.get(self, "font-bold")
 
         self.text = start_text
-        self.image = self.mefont.make_text_image(self.text)
+        self.image = self.mefont.make_text_image(self.text, font_color, font_underline, font_italic, font_bold)
 
         self.font_colors = (font_color, font_color_inactive)
 
@@ -1071,7 +1187,9 @@ class Input(Widget):
 class MoveBar(Widget):
     widget_name = "MoveBar"
     def __init__(self, app, title=tdef, pos=(0,0), width=tdef, background_image=tdef,
-                 font_color=tdef, font_color_inactive=tdef, font=tdef, child=None, special_name=None):
+                 font_color=tdef, font_color_inactive=tdef, font=tdef, child=None,
+                 font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 special_name=None):
         Widget.__init__(self, app, pos, font, special_name)
         self.override_pos = True #window is always overridden,sorry :P
 
@@ -1085,6 +1203,12 @@ class MoveBar(Widget):
             font_color = self.theme.get(self, "font-color")
         if font_color_inactive == tdef:
             font_color_inactive = self.theme.get(self, "font-color-inactive")
+        if font_underline == tdef:
+            font_underline = self.theme.get(self, "font-underline")
+        if font_italic == tdef:
+            font_italic = self.theme.get(self, "font-italic")
+        if font_bold == tdef:
+            font_bold = self.theme.get(self, "font-bold")
 
         self.font_color = font_color
         self.font_color_inactive = font_color_inactive
@@ -1106,11 +1230,12 @@ class MoveBar(Widget):
             y += self.tsize[1]*2-1
             self.child.pos = (x, y)
 
-        i = self.font.make_text_image(title)
+        i = self.font.make_text_image(title, font_color, font_underline, font_italic, font_bold)
         if i.get_width() > self.size[0] - self.tsize[0]*2:
-            while title and self.font.make_text_image(title+"...").get_width() > self.size[0] - self.tsize[0]*2:
+            while title and self.font.make_text_image(title+"...", font_color, font_underline, font_italic, font_bold).get_width() >\
+                  self.size[0] - self.tsize[0]*2:
                 title = title[0:-1]
-            i = self.font.make_text_image(title+"...")
+            i = self.font.make_text_image(title+"...", font_color, font_underline, font_italic, font_bold)
         self.image = i
         self.image.compile()
         self.pack()
@@ -1148,7 +1273,9 @@ class Window(MoveBar):
     widget_name = "Window"
     def __init__(self, app, title=tdef, pos=(0,0), size=tdef,
                  background_image=tdef, movebar_background_image=tdef,
-                 font_color=tdef, font_color_inactive=tdef, font=tdef, special_name=None):
+                 font_color=tdef, font_color_inactive=tdef, font=tdef,
+                 font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 special_name=None):
         
         if title == tdef:
             title = app.theme.get(self, "title")
@@ -1162,9 +1289,18 @@ class Window(MoveBar):
             font_color = app.theme.get(self, "font-color")
         if font_color_inactive == tdef:
             font_color_inactive = app.theme.get(self, "font-color-inactive")
+        if font_underline == tdef:
+            font_underline = app.theme.get(self, "font-underline")
+        if font_italic == tdef:
+            font_italic = app.theme.get(self, "font-italic")
+        if font_bold == tdef:
+            font_bold = app.theme.get(self, "font-bold")
+
         child = Frame(app, pos, size, background_image, font, special_name)
         MoveBar.__init__(self, app, title, pos, size[0], movebar_background_image,
-                         font_color, font_color_inactive, font, child, special_name)
+                         font_color, font_color_inactive, font, child,
+                         font_underline, font_italic, font_bold,
+                         special_name)
 
         self.packer = self.child.packer
         self.fonts = self.app.fonts
@@ -1184,9 +1320,22 @@ class Menu(Button):
                  background_image=tdef, background_image_hover=tdef,
                  background_image_click=tdef, menu_background_image=tdef,
                  option_background_image=tdef, option_background_image_hover=tdef,
-                 option_background_image_click=tdef, font_color=tdef,
-                 font_color_hover=tdef, font_color_click=tdef, option_font_color=tdef,
-                 option_font_color_hover=tdef, option_font_color_click=tdef, font=tdef,
+                 option_background_image_click=tdef,
+                 sub_background_image=tdef, sub_background_image_hover=tdef,
+                 sub_background_image_click=tdef,
+                 font_color=tdef, font_color_hover=tdef, font_color_click=tdef,
+                 option_font_color=tdef, option_font_color_hover=tdef, option_font_color_click=tdef,
+                 sub_font_color=tdef, sub_font_color_hover=tdef, sub_font_color_click=tdef,
+                 font=tdef,
+                 font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 font_underline_hover=tdef, font_italic_hover=tdef, font_bold_hover=tdef,
+                 font_underline_click=tdef, font_italic_click=tdef, font_bold_click=tdef,
+                 option_font_underline=tdef, option_font_italic=tdef, option_font_bold=tdef,
+                 option_font_underline_hover=tdef, option_font_italic_hover=tdef, option_font_bold_hover=tdef,
+                 option_font_underline_click=tdef, option_font_italic_click=tdef, option_font_bold_click=tdef,
+                 sub_font_underline=tdef, sub_font_italic=tdef, sub_font_bold=tdef,
+                 sub_font_underline_hover=tdef, sub_font_italic_hover=tdef, sub_font_bold_hover=tdef,
+                 sub_font_underline_click=tdef, sub_font_italic_click=tdef, sub_font_bold_click=tdef,
                  callback=None, special_name=None):
         if name == tdef:
             name = app.theme.get(self, "name")
@@ -1204,6 +1353,12 @@ class Menu(Button):
             option_background_image_hover = app.theme.get(self, "option-background-image-hover")
         if option_background_image_click == tdef:
             option_background_image_click = app.theme.get(self, "option-background-image-click")
+        if sub_background_image == tdef:
+            sub_background_image = app.theme.get(self, "sub-background-image")
+        if sub_background_image_hover == tdef:
+            sub_background_image_hover = app.theme.get(self, "sub-background-image-hover")
+        if sub_background_image_click == tdef:
+            sub_background_image_click = app.theme.get(self, "sub-background-image-click")
         if font_color == tdef:
             font_color = app.theme.get(self, "font-color")
         if font_color_hover == tdef:
@@ -1216,10 +1371,77 @@ class Menu(Button):
             option_font_color_hover = app.theme.get(self, "option-font-color-hover")
         if option_font_color_click == tdef:
             option_font_color_click = app.theme.get(self, "option-font-color-click")
+        if sub_font_color == tdef:
+            sub_font_color = app.theme.get(self, "sub-font-color")
+        if sub_font_color_hover == tdef:
+            sub_font_color_hover = app.theme.get(self, "sub-font-color-hover")
+        if sub_font_color_click == tdef:
+            sub_font_color_click = app.theme.get(self, "sub-font-color-click")
+
+        if font_underline == tdef:
+            font_underline = app.theme.get(self, "font-underline")
+        if font_italic == tdef:
+            font_italic = app.theme.get(self, "font-italic")
+        if font_bold == tdef:
+            font_bold = app.theme.get(self, "font-bold")
+        if font_underline_hover == tdef:
+            font_underline_hover = app.theme.get(self, "font-underline-hover")
+        if font_italic_hover == tdef:
+            font_italic_hover = app.theme.get(self, "font-italic-hover")
+        if font_bold_hover == tdef:
+            font_bold_hover = app.theme.get(self, "font-bold-hover")
+        if font_underline_click == tdef:
+            font_underline_click = app.theme.get(self, "font-underline-click")
+        if font_italic_click == tdef:
+            font_italic_click = app.theme.get(self, "font-italic-click")
+        if font_bold_click == tdef:
+            font_bold_click = app.theme.get(self, "font-bold-click")
+
+        if option_font_underline == tdef:
+            option_font_underline = app.theme.get(self, "option-font-underline")
+        if option_font_italic == tdef:
+            option_font_italic = app.theme.get(self, "option-font-italic")
+        if option_font_bold == tdef:
+            option_font_bold = app.theme.get(self, "option-font-bold")
+        if option_font_underline_hover == tdef:
+            option_font_underline_hover = app.theme.get(self, "option-font-underline-hover")
+        if option_font_italic_hover == tdef:
+            option_font_italic_hover = app.theme.get(self, "option-font-italic-hover")
+        if option_font_bold_hover == tdef:
+            option_font_bold_hover = app.theme.get(self, "option-font-bold-hover")
+        if option_font_underline_click == tdef:
+            option_font_underline_click = app.theme.get(self, "option-font-underline-click")
+        if option_font_italic_click == tdef:
+            option_font_italic_click = app.theme.get(self, "option-font-italic-click")
+        if option_font_bold_click == tdef:
+            option_font_bold_click = app.theme.get(self, "option-font-bold-click")
+
+        if sub_font_underline == tdef:
+            sub_font_underline = app.theme.get(self, "sub-font-underline")
+        if sub_font_italic == tdef:
+            sub_font_italic = app.theme.get(self, "sub-font-italic")
+        if sub_font_bold == tdef:
+            sub_font_bold = app.theme.get(self, "sub-font-bold")
+        if sub_font_underline_hover == tdef:
+            sub_font_underline_hover = app.theme.get(self, "sub-font-underline-hover")
+        if sub_font_italic_hover == tdef:
+            sub_font_italic_hover = app.theme.get(self, "sub-font-italic-hover")
+        if sub_font_bold_hover == tdef:
+            sub_font_bold_hover = app.theme.get(self, "sub-font-bold-hover")
+        if sub_font_underline_click == tdef:
+            sub_font_underline_click = app.theme.get(self, "sub-font-underline-click")
+        if sub_font_italic_click == tdef:
+            sub_font_italic_click = app.theme.get(self, "sub-font-italic-click")
+        if sub_font_bold_click == tdef:
+            sub_font_bold_click = app.theme.get(self, "sub-font-bold-click")
 
         Button.__init__(self, app, name, pos, [],
                         background_image, background_image_hover, background_image_click,
-                        font_color, font_color_hover, font_color_click, font, special_name)
+                        font_color, font_color_hover, font_color_click, font,
+                        font_underline, font_italic, font_bold,
+                        font_underline_hover, font_italic_hover, font_bold_hover,
+                        font_underline_click, font_italic_click, font_bold_click,
+                        special_name)
         self.dispatch.bind("click", self.do_visible)
 
         self.frames = []
@@ -1229,16 +1451,29 @@ class Menu(Button):
                   option_background_image,
                   option_background_image_hover,
                   option_background_image_click)
+        subimages = (sub_background_image,
+                     sub_background_image_hover,
+                     sub_background_image_click)
         font_colors = (option_font_color,
                        option_font_color_hover,
                        option_font_color_click)
+        sub_font_colors = (sub_font_color,
+                           sub_font_color_hover,
+                           sub_font_color_click)
+        font_states = (option_font_underline, option_font_italic, option_font_bold,
+                       option_font_underline_hover, option_font_italic_hover, option_font_bold_hover,
+                       option_font_underline_click, option_font_italic_click, option_font_bold_click)
 
-        self.add_frame("", options, images, font_colors, font)
+        sub_font_states = (sub_font_underline, sub_font_italic, sub_font_bold,
+                           sub_font_underline_hover, sub_font_italic_hover, sub_font_bold_hover,
+                           sub_font_underline_click, sub_font_italic_click, sub_font_bold_click)
+
+        self.add_frame("", options, images, font_colors, font, font_states, subimages, sub_font_colors, sub_font_states)
 
         if callback:
             self.dispatch.bind("menu-click", callback)
 
-    def add_frame(self, name, options, images, fc, ff):
+    def add_frame(self, name, options, images, fc, ff, fs, ssi, sfc, sfs):
         goback = int(self.cur_frame)
         frame = Frame(self.get_root_app(), (self.pos[0], self.pos[1]+self.size[1]), background_image=images[0], font=ff)
         frame.packer.packtype = None
@@ -1246,9 +1481,13 @@ class Menu(Button):
         frame.dispatch.bind("unfocus", self.do_unfocus)
         self.frames.append(frame)
 
+        fu, fi, fb, fuh, fih, fbh, fuc, fic, fbc = fs
+
         self.cur_frame = len(self.frames)-1
 
         bimages = images[1::]
+        simages = ssi
+        sfu, sfi, sfb, sfuh, sfih, sfbh, sfuc, sfic, sfbc = sfs
 
         w = 0
         if not frame == self.frames[0]:
@@ -1256,7 +1495,10 @@ class Menu(Button):
                        background_image_hover=bimages[1],
                        background_image_click=bimages[2],
                        font_color=fc[0], font_color_hover=fc[1],
-                       font_color_click=fc[2], font=ff)
+                       font_color_click=fc[2], font=ff,
+                       font_underline=fu, font_italic=fi, font_bold=fb,
+                       font_underline_hover=fuh, font_italic_hover=fih, font_bold_hover=fbh,
+                       font_underline_click=fuc, font_italic_click=fic, font_bold_click=fbc)
             NewLine(frame)
             w = c.size[0]
             c.dispatch.bind("click", self.swap_frame(goback))
@@ -1267,7 +1509,10 @@ class Menu(Button):
                            background_image_hover=bimages[1],
                            background_image_click=bimages[2],
                            font_color=fc[0], font_color_hover=fc[1],
-                           font_color_click=fc[2], font=ff)
+                           font_color_click=fc[2], font=ff,
+                           font_underline=fu, font_italic=fi, font_bold=fb,
+                           font_underline_hover=fuh, font_italic_hover=fih, font_bold_hover=fbh,
+                           font_underline_click=fuc, font_italic_click=fic, font_bold_click=fbc)
                 NewLine(frame)
                 if c.size[0] > w:
                     w = c.size[0]
@@ -1278,11 +1523,14 @@ class Menu(Button):
                 c.dispatch.bind("click", self.bind_to_event(ni))
                 c.dispatch.bind("click", self.do_unfocus)
             else:
-                c = Button(frame, i[0], background_image=bimages[0],
-                           background_image_hover=bimages[1],
-                           background_image_click=bimages[2],
-                           font_color=fc[0], font_color_hover=fc[1],
-                           font_color_click=fc[2], font=ff)
+                c = Button(frame, i[0], background_image=simages[0],
+                           background_image_hover=simages[1],
+                           background_image_click=simages[2],
+                           font_color=sfc[0], font_color_hover=sfc[1],
+                           font_color_click=sfc[2], font=ff,
+                           font_underline=sfu, font_italic=sfi, font_bold=sfb,
+                           font_underline_hover=sfuh, font_italic_hover=sfih, font_bold_hover=sfbh,
+                           font_underline_click=sfuc, font_italic_click=sfic, font_bold_click=sfbc)
                 NewLine(frame)
                 if c.size[0] > w:
                     w = c.size[0]
@@ -1291,7 +1539,7 @@ class Menu(Button):
                     ni = name+"."+i[0]
                 else:
                     ni = i[0]
-                self.add_frame(ni, i[1::], images, fc, ff)
+                self.add_frame(ni, i[1::], images, fc, ff, fs, ssi, sfc, sfs)
         if options:
             h = c.pos[1]+c.size[1]
         else:
@@ -1299,10 +1547,12 @@ class Menu(Button):
         for i in frame.widgets:
             if not isinstance(i, NewLine):
                 i.size = w-i.tsize[0]*2, i.size[1]-i.tsize[1]*2
+                _size = 0
                 if i.breg: i.breg, _size, a, i.tshift = i.load_background(bimages[0])
                 if i.bhov: i.bhov, c, a, b = i.load_background(bimages[1])
                 if i.bcli: i.bcli, c, a, b = i.load_background(bimages[2])
-                i.size = _size
+                if _size:
+                    i.size = _size
         i.pack()
 
         frame.size = (w, h)

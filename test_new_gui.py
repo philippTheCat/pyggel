@@ -34,13 +34,14 @@ def main():
 
     pyggel.Newgui.Button(frame, "click!:P", callbacks=[test_callback],
                          background_image="data/gui/base.png",
-                         background_image_hover="data/gui/base.png")
+                         background_image_hover="data/gui/base.png",
+                         font_underline=True)
     pyggel.Newgui.Button(frame, "click!124675326745327645762354",
                          callbacks=[test_callback],
                          background_image="data/gui/base.png",
                          background_image_hover="data/gui/base.png",
                          background_image_click=None)
-    pyggel.Newgui.Label(frame, "test:", background_image="data/gui/base.png")
+    pyggel.Newgui.Label(frame, "test:", background_image="data/gui/base.png", font_underline=True)
     pyggel.Newgui.Checkbox(frame, background_image="data/gui/check_open.png",
                            check_image="data/gui/check_closed.png")
 
@@ -82,6 +83,7 @@ def main():
     pyggel.Newgui.Menu(newapp, "Menu", options=["help", "test", "quit","2","3","4","Snazzlemegapoof!!!!",
                                              ["please work!", "1", "2", "3", "asfkjhsakfh",
                                               ["subagain!", "1", "2", "3"*10]]],
+                       menu_background_image="data/gui/base.png",
                        background_image="data/gui/base.png",
                        background_image_hover="data/gui/base.png",
                        background_image_click="data/gui/base.png",
