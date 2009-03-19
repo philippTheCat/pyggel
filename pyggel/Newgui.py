@@ -9,6 +9,151 @@ from include import *
 import view, font, event
 import time
 import image as _image
+import os
+
+class Theme(object):
+    def __init__(self, app):
+        self.theme = self.make_default_theme()
+        self.app = app
+        self.path = ""
+        self.make_fonts(None)
+
+    def make_fonts(self, filename):
+        g = {}
+        for a in self.theme["Fonts"]:
+            b = self.theme["Fonts"][i]
+            g[a] = (font.Font(b["fontfile"], b["fontsize"]),
+                    font.MEFont(b["fontfile"], b["fontsize"]))
+            for i in b["images"]:
+                g[a][0].add_image(i, self.data(b["images"][i]))
+                g[a][1].add_image(i, self.data(b["images"][i]))
+        self.app.update_fonts(g)
+
+    def load(self, filename):
+        if filename:
+            self.path = os.path.split(filename)[0]
+        else:
+            self.path = ""
+        for i in locals() + globals():
+            if not i in (self, filename):
+                i = None
+
+        exec "g="+open(filename, "rU").read()
+        for widget in g:
+            for val in g[widget]:
+                self.theme[widget][val] = g[widget][val]
+
+        self.make_fonts(filename)
+
+    def make_default_theme(self):
+        g = {
+                "Fonts":{
+                    "default":{
+                        "fontfile":None,
+                        "fontsize":32,
+                        "images":{}
+                        }
+                    },
+                "App":{
+                    "font":"default"
+                    },
+                "Widget":{
+                    "font":"default"},
+                "Frame":{
+                    "size":(100,100),
+                    "background-image":None
+                    },
+                "Label":{
+                    "font":"default",
+                    "text":"label...",
+                    "background-image":None,
+                    "font-color":(1,1,1,1),
+                    "font-color-inactive":(1,1,1,.5)
+                    },
+                "Button":{
+                    "font":"default",
+                    "text":"button...",
+                    "background-image":None,
+                    "background-image-hover":None,
+                    "background-image-click":None,
+                    "font-color":(1,1,1,1),
+                    "font-color-hover":(0,1,0,1),
+                    "font-color-click":(1,1,1,.5)
+                    },
+                "Checkbox":{
+                    "background-image":None,
+                    "check-image":None
+                    },
+                "Radio":{
+                    "font":"default",
+                    "background-image":None,
+                    "option-background-image":None,
+                    "option-check-image":None,
+                    "font-color":(1,1,1,1),
+                    "font-color-inactive":(1,1,1,.5)
+                    },
+                "MultiChoiceRadio":{
+                    "font":"default",
+                    "background-image":None,
+                    "option-background-image":None,
+                    "option-check-image":None,
+                    "font-color":(1,1,1,1),
+                    "font-color-inactive":(1,1,1,.5)
+                    },
+                "Input":{
+                    "font":"default",
+                    "width":100,
+                    "background-image":None,
+                    "font-color":(1,1,1,1),
+                    "font-color-inactive":(1,1,1,.5)
+                    },
+                "MoveBar":{
+                    "font":"default",
+                    "font-color":(1,1,1,1),
+                    "font-color-inactive":(1,1,1,.5),
+                    "title":"Window...",
+                    "width":100,
+                    "background-image":None
+                    },
+                "Window":{
+                    "font":"default",
+                    "font-color":(1,1,1,1),
+                    "font-color-inactive":(1,1,1,.5),
+                    "size":(100,100),
+                    "background-image":None,
+                    "movebar-background-image":None
+                    },
+                "Menu":{
+                    "name":"menu...",
+                    "font":"default",
+                    "font-color":(1,1,1,1),
+                    "font-color-hover":(0,1,0,1),
+                    "font-color-click":(1,0,0,1),
+                    "font-color-inactive":(1,1,1,.5),
+                    "background-image":None,
+                    "background-image-hover":None,
+                    "background-image-click":None,
+                    "menu-background-image":None,
+                    "option-background-image":None,
+                    "option-background-image-hover":None,
+                    "option-background-image-click":None,
+                    "option-font-color":(1,1,1,1),
+                    "option-font-color-hover":(0,1,0,1),
+                    "option-font-color-click":(1,0,0,1)
+                    }
+                }
+        return g
+
+    def get(self, widget, val):
+        return self.theme[widget.widget_name][val]
+
+    def data(self, name):
+        if self.path:
+            return os.path.join(self.path, name)
+        return name
+
+a = Theme(None)
+print a.theme
 
 class Packer(object):
     def __init__(self, app=None, packtype="wrap", size=(10,10)):
@@ -123,8 +268,8 @@ class App(object):
 
         self.dispatch = event.Dispatcher()
 
-        self.mefont = font.MEFont()
-        self.regfont = font.Font()
+        self.fonts = {"default":(font.Font(), font.MEFont())}
+        self.theme = Theme(None)
 
         self.packer = Packer(self, size=view.screen.screen_size)
 
@@ -132,6 +277,12 @@ class App(object):
 
         self.pos = (0,0)
         self.size = view.screen.screen_size_2d
+
+    def update_fonts(self, fonts):
+        self.fonts = fonts
+        for i in self.widgets:
+            if i.widget_name in ("Frame", "Window"):
+                i.update_fonts(fonts)
 
     def get_mouse_pos(self):
         """Return mouse pos based on App position - always (0,0)"""
@@ -231,6 +382,7 @@ class App(object):
         self.widgets.reverse()
 
 class Widget(object):
+    widget_name = "Widget"
     def __init__(self, app, pos=None):
         self.app = app
         self.pos = pos
@@ -240,7 +392,8 @@ class Widget(object):
         else:
             self.override_pos = False
 
-        self.font = self.app.regfont
+        self.theme = self.app.theme
+        self.font, self.mefont = self.app.fonts[self.theme.get(self, "font")]
 
         self.dispatch = event.Dispatcher()
 
@@ -379,17 +532,22 @@ class Widget(object):
         self.dispatch.fire("unfocus")
 
 class Frame(App, Widget):
-    def __init__(self, app, pos=None, size=(10,10), image=None):
+    widget_name = "Frame"
+    def __init__(self, app, pos=None, size=None, background_image=None):
         Widget.__init__(self, app, pos)
+
+        if size == None:
+            size = self.theme.get(self, "size")
+        if background_image == None:
+            background_image = self.theme.get(self, "background-image")
         self.size = size
 
         self.widgets = []
 
-        self.mefont = self.app.mefont
-        self.regfont = self.app.regfont
+        self.fonts = self.app.fonts
 
-        if image:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(image)
+        if background_image:
+            self.background, self.size, self.tsize, self.tshift = self.load_background(self.theme.data(background_image))
         self.packer = Packer(self, size=self.size)
         self.pack()
 
@@ -449,31 +607,70 @@ class Frame(App, Widget):
         view.screen.pop_clip()
 
 class NewLine(Widget):
+    widget_name = "NewLine"
     def __init__(self, app, height=0):
         Widget.__init__(self, app)
         self.size = (0, height)
         self.pack()
 
 class Label(Widget):
-    def __init__(self, app, start_text="", pos=None, image=None, font_color=(1,1,1,1)):
+    widget_name = "Label"
+    def __init__(self, app, start_text=None, pos=None, background_image=None, font_color=None,
+                 font_color_inactive=None):
         Widget.__init__(self, app, pos)
+
+        if start_text == None:
+            start_text = self.theme.get(self, "text")
+        if background_image == None:
+            background_image = self.theme.get(self, "background-image")
+        if font_color == None:
+            font_color = self.theme.get(self, "font-color")
+        if font_color_inactive == None:
+            font_color_inactive = self.theme.get(self, "font-color-inactive")
+
+        self.font_color = font_color
+        self.font_color_inactive = font_color_inactive
 
         self.text = start_text
         self.image = self.font.make_text_image(self.text, font_color)
         self.image.compile()
         self.size = self.image.get_size()
-        if image:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(image)
+        if background_image:
+            self.background, self.size, self.tsize, self.tshift = self.load_background(self.theme.data(background_image))
         self.pack()
 
+    def render(self, offset=(0,0)):
+        if self.key_active:
+            self.image.colorize = self.font_color
+        else:
+            self.image.colorize = self.font_color_inactive
+        Widget.render(self, offset)
+
 class Button(Widget):
-    def __init__(self, app, text, pos=None, callbacks=[],
-                 images=[None, None, None], font_colors=[(1,1,1,1), (1,0,0,1), (0,1,0,1)]):
+    widget_name = "Button"
+    def __init__(self, app, text=None, pos=None, callbacks=[],
+                 background_image=None, background_image_hover=None, background_image_click=None,
+                 font_color=None, font_color_hover=None, font_color_click=None):
         Widget.__init__(self, app, pos)
+
+        if text == None:
+            text = self.theme.get(self, "text")
+        if background_image == None:
+            background_image = self.theme.get(self, "background-image")
+        if background_image_hover == None:
+            background_image_hover = self.theme.get(self, "background-image-hover")
+        if background_image_click == None:
+            background_image_click = self.theme.get(self, "background-image-click")
+        if font_color == None:
+            font_color = self.theme.get(self, "font-color")
+        if font_color_hover == None:
+            font_color_hover = self.theme.get(self, "font-color-hover")
+        if font_color_click == None:
+            font_color_click = self.theme.get(self, "font-color-click")
         self.text = text
-        self.ireg = self.font.make_text_image(self.text, font_colors[0])
-        self.ihov = self.font.make_text_image(self.text, font_colors[1])
-        self.icli = self.font.make_text_image(self.text, font_colors[2])
+        self.ireg = self.font.make_text_image(self.text, font_color)
+        self.ihov = self.font.make_text_image(self.text, font_color_hover)
+        self.icli = self.font.make_text_image(self.text, font_color_click)
         self.ireg.compile()
         self.ihov.compile()
         self.icli.compile()
@@ -485,15 +682,15 @@ class Button(Widget):
 
         breg, bhov, bcli = images
         if breg:
-            self.breg, size, tsize, tshift = self.load_background(breg)
+            self.breg, size, tsize, tshift = self.load_background(self.theme.data(breg))
         else:
             self.breg, size, tsize, tshift = None, self.size, self.tsize, self.tshift
         if bhov:
-            self.bhov, a, b, c = self.load_background(bhov)
+            self.bhov, a, b, c = self.load_background(self.theme.data(bhov))
         else:
             self.bhov = None
         if bcli:
-            self.bcli, a, b, c = self.load_background(bcli)
+            self.bcli, a, b, c = self.load_background(self.theme.data(bcli))
         else:
             self.bcli = None
         self.size, self.tsize, self.tshift = size, tsize, tshift
@@ -517,18 +714,24 @@ class Button(Widget):
         Widget.render(self, offset)
 
 class Checkbox(Widget):
-    def __init__(self, app, pos=None, images=[None, None]):
+    widget_name = "Checkbox"
+    def __init__(self, app, pos=None, background_image=None, check_image=None):
         Widget.__init__(self, app, pos)
 
-        off, on = images
+        if background_image == None:
+            background_image = self.theme.get(self, "background-image")
+        if check_image == None:
+            check_image = self.theme.get(self, "check-image")
+
+        off, on = background_image, check_image
 
         if off:
-            self.off = _image.Image(off)
+            self.off = _image.Image(self.theme.data(off))
         else:
             self.off = self.app.regfont.make_text_image("( )")
             self.off.compile()
         if on:
-            self.on = _image.Image(on)
+            self.on = _image.Image(self.theme.data(on))
         else:
             self.on = self.app.regfont.make_text_image("(!)")
             self.on.compile()
@@ -552,24 +755,37 @@ class Checkbox(Widget):
         Widget.render(self, offset)
 
 class Radio(Frame):
-    def __init__(self, app, pos=None, options=[], images=[None,None,None], font_color=(1,1,1,1)):
+    widget_name = "Radio"
+    def __init__(self, app, pos=None, options=[],
+                 background_image=None, option_background_image=None, option_check_image=None,
+                 font_color=None, font_color_inactive=None):
         Frame.__init__(self, app, pos)
         self.packer.packtype = None
+
+        if background_image == None:
+            background_image = self.theme.get(self, "background-image")
+        if option_background_image == None:
+            option_background_image = self.theme.get(self, "option-background-image")
+        if option_click_image == None:
+            option_click_image = self.theme.get(self, "option-check-image")
+        if font_color == None:
+            font_color = self.theme.get(self, "font-color")
+        if font_color_inactive == None:
+            font_color_inactive = self.theme.get(self, "font-color-inactive")
 
         self.options = []
         self.states = {}
         fc = font_color
-
-        image = images[0]
-        check_images = images[1::]
+        fc2 = font_color_inactive
 
         w = 0
         for i in options:
-            c = Checkbox(self, images=check_images)
+            c = Checkbox(self, background_image=option_background_image,
+                         check_image=option_check_image)
             if not self.options:
                 c.state = 1
             c.dispatch.bind("click", self.check_click)
-            l = Label(self, i, font_color=fc)
+            l = Label(self, i, font_color=fc, font_color_inactive=fc2)
             NewLine(self)
             self.options.append([i, c, l, c.state])
             self.states[i] = c.state
@@ -581,8 +797,8 @@ class Radio(Frame):
                  l.pos[1]+l.size[1]))
 
         self.size = (w, h)
-        if image:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(image)
+        if background_image:
+            self.background, self.size, self.tsize, self.tshift = self.load_background(self.theme.data(background_image))
         self.pack()
 
     def check_click(self):
@@ -602,8 +818,10 @@ class Radio(Frame):
             self.states[name] = state
 
 class MultiChoiceRadio(Radio):
-    def __init__(self, app, pos=None, options=[], images=[None,None,None], font_color=(1,1,1,1)):
-        Radio.__init__(self, app, pos, options, images, font_color)
+    widget_name = "MultiChoiceRadio"
+    def __init__(self, app, pos=None, options=[],
+                 background_image=None, option_background_image=None, option_check_image=None,
+                 font_color=None, font_color_inactive=None)
 
     def check_click(self):
         for i in self.options:
@@ -613,26 +831,38 @@ class MultiChoiceRadio(Radio):
             self.states[name] = state
 
 class Input(Widget):
-    def __init__(self, app, start_text="", width=100, pos=None, image=None,
-                 font_colors=[(1,1,1,1), (.5,.5,.5,1)]):
+    widget_name = "Input"
+    def __init__(self, app, start_text=None, width=None, pos=None, background_image=None,
+                 font_color=None, font_color_inactive=None):
         Widget.__init__(self, app, pos)
+
+        if start_text == None:
+            start_text = self.theme.get(self, "text")
+        if width == None:
+            width = self.theme.get(self, "width")
+        if background_image == None:
+            background_image = self.theme.get(self, "background-image")
+        if font_color == None:
+            font_color = self.theme.get(self, "font-color")
+        if font_color_inactive == None:
+            font_color_inactive = self.theme.get(self, "font-color-inactive")
 
         self.text = start_text
         self.image = self.app.mefont.make_text_image(self.text)
 
-        self.font_colors = font_colors
+        self.font_colors = (font_color, font_color_inactive)
 
         self.size = (width, self.app.mefont.pygame_font.get_height())
 
         self.cursor_pos = len(self.text)
-        self.cursor_image = _image.Animation(((self.font.make_text_image("|",color=font_colors[0]), .5),
-                                              (self.font.make_text_image("|",color=font_colors[1]), .5)))
+        self.cursor_image = _image.Animation(((self.font.make_text_image("|",color=font_colors), .5),
+                                              (self.font.make_text_image("|",color=font_colors_inactive), .5)))
         for i in self.cursor_image.frames:
             i[0].compile()
         self.cwidth = int(self.cursor_image.get_width()/2)
         self.xwidth = self.size[0] - self.cwidth*2
-        if image:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(image)
+        if background_image:
+            self.background, self.size, self.tsize, self.tshift = self.load_background(self.theme.data(background_image))
         self.pack()
 
         self.calc_working_pos()
@@ -754,22 +984,38 @@ class Input(Widget):
             self.cursor_image.pos = self.wpos
 
 class MoveBar(Widget):
-    def __init__(self, app, title="", pos=(0,0), width=100, image=None, child=None):
+    widget_name = "MoveBar"
+    def __init__(self, app, title=None, pos=(0,0), width=None, background_image=None,
+                 font_color=None, font_color_inactive=None, child=None):
         Widget.__init__(self, app, pos)
         self.override_pos = True #window is always overridden,sorry :P
+
+        if title == None:
+            title = self.theme.get(self, "title")
+        if width == None:
+            width = self.theme.get(self, "width")
+        if background_image == None:
+            background_image = self.theme.get(self, "background-image")
+        if font_color == None:
+            font_color = self.theme.get(self, "font-color")
+        if font_color_inactive == None:
+            font_color_inactive = self.theme.get(self, "font-color-inactive")
+
+        self.font_color = font_color
+        self.font_color_inactive = font_color_inactive
 
         self.title = title
 
         self.child = child
         if self.child:
             self.child.override_pos = True
-            self.size = (self.child.size[0]-self.child.tsize[0]*2, self.app.mefont.pygame_font.get_height())
+            self.size = (self.child.size[0]-self.child.tsize[0]*2, self.mefont.pygame_font.get_height())
             self.child.pos = (self.pos[0], self.pos[1]+self.size[1])
         else:
-            self.size = (width, self.app.mefont.pygame_font.get_height())
+            self.size = (width, self.mefont.pygame_font.get_height())
 
-        if image:
-            self.background, self.size, self.tsize, self.tshift = self.load_background(image)
+        if background_image:
+            self.background, self.size, self.tsize, self.tshift = self.load_background(self.theme.data(background_image))
         if self.child:
             x, y = self.child.pos
             y += self.tsize[1]*2-1
@@ -801,35 +1047,92 @@ class MoveBar(Widget):
         return _retval
 
     def focus(self):
+        self.image.colorize = self.font_color
         if self.child:
             self.child.focus()
         Widget.focus(self)
 
     def unfocus(self):
+        self.image.colorize = self.font_color_inactive
         if self.child == self.app.widgets[0] and not self == self.app.widgets[1]:
             Widget.focus(self)
         else:
             Widget.unfocus(self)
 
 class Window(MoveBar):
-    def __init__(self, app, title="", pos=(0,0), size=(10,10), images=[None, None]):
-        child = Frame(app, pos, size, images[1])
-        MoveBar.__init__(self, app, title, pos, size[0], images[0], child)
+    widget_name = "Window"
+    def __init__(self, app, title=None, pos=(0,0), size=None,
+                 background_image=None, movebar_background_image=None,
+                 font_color=None, font_color_inactive=None):
+        
+        if title == None:
+            title = app.theme.get(self, "title")
+        if size == None:
+            size = app.theme.get(self, "size")
+        if background_image == None:
+            background_image = app.theme.get(self, "background-image")
+        if movebar_background_image == None:
+            movebar_background_image = app.theme.get(self, "movebar-background-image")
+        if font_color == None:
+            font_color = app.theme.get(self, "font-color")
+        if font_color_inactive == None:
+            font_color_inactive = app.theme.get(self, "font-color-inactive")
+        child = Frame(app, pos, size, background_image)
+        MoveBar.__init__(self, app, title, pos, size[0], movebar_background_image,
+                         font_color, font_color_inactive, child)
 
         self.packer = self.child.packer
-        self.mefont = self.child.mefont
-        self.regfont = self.child.regfont
+        self.fonts = self.app.fonts
         self.pack()
 
     def new_widget(self, widg):
         widg.app = self.child
         self.child.new_widget(widg)
 
+    def update_fonts(self, fonts):
+        self.fonts = fonts
+
     
 class Menu(Button):
-    def __init__(self, app, name="", pos=None, options=[], images=[None,None,None,None],
-                 font_colors=[(1,1,1,1), (1,0,0,1), (0,1,0,1)], callback=None):
-        Button.__init__(self, app, name, pos, [], images[1::], font_colors)
+    widget_name = "Menu"
+    def __init__(self, app, name=None, pos=None, options=[],
+                 background_image=None, nackground_image_hover=None,
+                 background_image_click=None, menu_background_image=None,
+                 option_background_image=None, option_background_image_hover=None,
+                 option_background_image_click=None,
+                 font_color=None, font_color_hover=None, font_color_click=None,
+                 option_font_color=None, option_font_color_hover=None, option_font_color_click=None,
+                 callback=None):
+        if name == None:
+            name = app.theme.get(self, "name")
+        if background_image == None:
+            background_image = app.theme.get(self, "background-image")
+        if background_image_hover == None:
+            background_image_hover = app.theme.get(self, "background-image-hover")
+        if background_image_click == None:
+            background_image_click = app.theme.get(self, "background-image-click")
+        if menu_background_image == None:
+            menu_background_image = app.theme.get(self, "menu-background-image")
+        if option_background_image == None:
+            option_background_image = app.theme.get(self, "option-background-image")
+        if option_background_image_hover == None:
+            option_background_image_hover = app.theme.get(self, "option-background-image-hover")
+        if option_background_image_click == None:
+            option_background_image_click = app.theme.get(self, "option-background-image-click")
+        if font_color == None:
+            font_color = app.theme.get(self, "font-color")
+        if font_color_hover == None:
+            font_color_hover = app.theme.get(self, "font-color-hover")
+        if font_color_click == None:
+            font_color_click = app.theme.get(self, "font-color-click")
+        if option_font_color == None:
+            option_font_color = app.theme.get(self, "option-font-color")
+        if option_font_color_hover == None:
+            option_font_color_hover = app.theme.get(self, "option-font-color-hover")
+        if option_font_color_click == None:
+            option_font_color_click = app.theme.get(self, "option-font-color-click")
+        bi
+        Button.__init__(self, app, name, pos, [], background_image, font_colors)
         self.dispatch.bind("click", self.do_visible)
 
         self.frames = []

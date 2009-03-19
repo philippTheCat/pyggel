@@ -333,8 +333,15 @@ class Font(object):
     def make_text_image(self, text="", color=(1,1,1,1), linewrap=None):
         return FontImage(self, text, color, linewrap)
 
-    def add_image(self, name, image):
-        self.images[name] = image
+    def add_image(self, name, img):
+        if isinstance(img, image.Image) or\
+           isinstance(img, image.Animation):
+            self.images[name] = img
+        else:
+            if img.split(".")[-1] in ("gif", "GIF"):
+                self.images[name] = image.GIFImage(img)
+            else:
+                self.images[name] = image.Image(img)
 
 class MEFontImage(object):
     """A font image that renders more slowly,
@@ -504,7 +511,10 @@ class MEFont(object):
            isinstance(img, image.Animation):
             self.images[name] = img
         else:
-            self.images[name] = image.Image(img)
+            if img.split(".")[-1] in ("gif", "GIF"):
+                self.images[name] = image.GIFImage(img)
+            else:
+                self.images[name] = image.Image(img)
 
     def _load_font(self):
         """Load the font, and create glyphs"""
