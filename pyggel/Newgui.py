@@ -39,7 +39,7 @@ class Theme(object):
             if not i in ("self", "filename"):
                 exec "%s = None"%i
 
-        exec compile("g="+open(filename, "r").read(),
+        exec compile("g={%s}"%open(filename, "r").read(),
                      "ThemeFile", "exec")
         for widget in g:
             for val in g[widget]:
