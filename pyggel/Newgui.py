@@ -629,6 +629,11 @@ class Frame(App, Widget):
         self.widgets.reverse()
         view.screen.pop_clip()
 
+    def unfocus(self):
+        Widget.unfocus(self)
+        for i in self.widgets:
+            i.unfocus()
+
 class NewLine(Widget):
     widget_name = "NewLine"
     def __init__(self, app, height=0, special_name=None):
@@ -656,18 +661,22 @@ class Label(Widget):
 
         self.text = start_text
         self.image = self.font.make_text_image(self.text, font_color)
+        self.image.color = self.font_color_inactive
         self.image.compile()
         self.size = self.image.get_size()
         if background_image:
             self.background, self.size, self.tsize, self.tshift = self.load_background(background_image)
         self.pack()
 
-    def render(self, offset=(0,0)):
-        if self.key_active:
-            self.image.colorize = self.font_color
-        else:
-            self.image.colorize = self.font_color_inactive
-        Widget.render(self, offset)
+    def unfocus(self):
+        Widget.unfocus(self)
+        if self.image.color == self.font_color:
+            self.image.color = self.font_color_inactive
+
+    def focus(self):
+        Widget.focus(self)
+        if self.image.color == self.font_color_inactive:
+            self.image.color = self.font_color
 
 class Button(Widget):
     widget_name = "Button"
@@ -815,6 +824,7 @@ class Radio(Frame):
                 c.state = 1
             c.dispatch.bind("click", self.check_click)
             l = Label(self, i, font_color=fc, font_color_inactive=fc2)
+            l.dispatch.bind("click", self.check_click_label)
             NewLine(self)
             self.options.append([i, c, l, c.state])
             self.states[i] = c.state
@@ -845,6 +855,13 @@ class Radio(Frame):
                     check.state = 1
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
+
+    def check_click_label(self):
+        for i in self.options:
+            name, check, label, state = i
+            if label._mhover: #they were clicked ;)
+                check.state = abs(check.state-1)
+                self.check_click()
 
 class MultiChoiceRadio(Radio):
     widget_name = "MultiChoiceRadio"
