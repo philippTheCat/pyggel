@@ -26,7 +26,7 @@ def main():
     frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300), background_image="data/gui/base.png")
     frame.packer.packtype = "wrap"
 
-    pyggel.Newgui.Button(frame, "click!:PXD", callbacks=[test_callback],
+    pyggel.Newgui.Button(frame, "click!:P", callbacks=[test_callback],
                          background_image="data/gui/base.png",
                          background_image_hover="data/gui/base.png")
     pyggel.Newgui.Button(frame, "click!124675326745327645762354",
@@ -41,7 +41,7 @@ def main():
     for i in xrange(10):
         pyggel.Newgui.Label(frame, "testing456", background_image="data/gui/base.png")
 
-    pyggel.Newgui.Button(app, "Click me!", callbacks=[test_callback],
+    pyggel.Newgui.Button(app, "Click me!:PXD", callbacks=[test_callback],
                          background_image="data/gui/base.png",
                          background_image_hover="data/gui/base.png",
                          background_image_click=None)
