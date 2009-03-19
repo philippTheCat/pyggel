@@ -44,7 +44,7 @@ def main():
 
     img.blit(img2, (0, 0))
 
-    obj = pyggel.mesh.OBJ("data/carrot.obj")
+    obj = pyggel.mesh.OBJ("data/kart.obj")
     obj2 = obj.copy()
     obj2.pos = (0,0,5)
     
@@ -61,8 +61,8 @@ def main():
     my_scene.add_2d(img6)
 
     my_scene.add_3d(obj)
-    my_scene.add_3d(obj2)
-    my_scene.add_3d(horse)
+    #my_scene.add_3d(obj2)
+    #my_scene.add_3d(horse)
     my_scene.add_3d(box)
     for i in img3d:
         my_scene.add_3d(i)
