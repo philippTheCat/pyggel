@@ -63,6 +63,9 @@ class Theme(object):
             "NewLine":{
                 "font":"default"
                  },
+            "Spacer":{
+                "font":"default"
+                },
             "Icon":{
                 "font":"default"
                 },
@@ -740,6 +743,13 @@ class NewLine(Widget):
         self.size = (0, height)
         self.pack()
 
+class Spacer(Widget):
+    widget_name = "Spacer"
+    def __init__(self, app, size=(0,0), special_name=None):
+        Widget.__init__(self, app, None, tdef, special_name)
+        self.size = size
+        self.pack()
+
 class Icon(Widget):
     widget_name = "Icon"
     def __init__(self, app, pos=None, image=None):
@@ -749,7 +759,7 @@ class Icon(Widget):
                isinstance(image, _image.Image):
                 self.image = image
             else:
-                if image.split(".")[-1] in ("gif", "GIF"):
+                if type(image) is type("") and image.split(".")[-1] in ("gif", "GIF"):
                     self.image = _image.GIFImage(image)
                 else:
                     self.image = _image.Image(image)
@@ -1285,9 +1295,7 @@ class MoveBar(Widget):
 
     def unfocus(self):
         self.image.colorize = self.font_color_inactive
-        if self.child == self.app.widgets[0]:
-            Widget.focus(self)
-        else:
+        if not self.child == self.app.widgets[0]:
             Widget.unfocus(self)
 
 class Window(MoveBar):
@@ -1501,6 +1509,8 @@ class Menu(Button):
         if callback:
             self.dispatch.bind("menu-click", callback)
 
+        self.skip_click = False
+
     def add_frame(self, name, options, images, fc, ff, fs, ssi, sfc, sfs):
         goback = int(self.cur_frame)
         frame = Frame(self.get_root_app(), (self.pos[0], self.pos[1]+self.size[1]), background_image=images[0], font=ff)
@@ -1516,24 +1526,37 @@ class Menu(Button):
         bimages = images[1::]
         simages = ssi
         sfu, sfi, sfb, sfuh, sfih, sfbh, sfuc, sfic, sfbc = sfs
+        need_space = False
+        space_size = 0
 
         w = 0
         incw = 0
         if not frame == self.frames[0]:
-            c = Button(frame, "../"+name.split(".")[-1], background_image=bimages[0],
-                       background_image_hover=bimages[1],
-                       background_image_click=bimages[2],
-                       font_color=fc[0], font_color_hover=fc[1],
-                       font_color_click=fc[2], font=ff,
-                       font_underline=fu, font_italic=fi, font_bold=fb,
-                       font_underline_hover=fuh, font_italic_hover=fih, font_bold_hover=fbh,
-                       font_underline_click=fuc, font_italic_click=fic, font_bold_click=fbc)
+            if self.sub_icon:
+                ic = pygame.image.load(self.sub_icon).convert_alpha()
+                ic = pygame.transform.flip(ic, True, False)
+            else:
+                ic = self.mefont.glyphs[""]["<"].copy()
+            x = Icon(frame, image=ic)
+            Spacer(frame, (1,0))
+            need_space = True
+            space_size = x.size[0]+1
+            c = Button(frame, name.split(".")[-1], background_image=simages[0],
+                       background_image_hover=simages[1],
+                       background_image_click=simages[2],
+                       font_color=sfc[0], font_color_hover=sfc[1],
+                       font_color_click=sfc[2], font=ff,
+                       font_underline=sfu, font_italic=sfi, font_bold=sfb,
+                       font_underline_hover=sfuh, font_italic_hover=sfih, font_bold_hover=sfbh,
+                       font_underline_click=sfuc, font_italic_click=sfic, font_bold_click=sfbc)
             NewLine(frame)
-            w = c.size[0]
+            w = c.size[0]+space_size
             c.dispatch.bind("click", self.swap_frame(goback))
 
         for i in options:
             if type(i) is type(""):
+                if need_space:
+                    Spacer(frame, (space_size, 0))
                 c = Button(frame, i, background_image=bimages[0],
                            background_image_hover=bimages[1],
                            background_image_click=bimages[2],
@@ -1543,8 +1566,8 @@ class Menu(Button):
                            font_underline_hover=fuh, font_italic_hover=fih, font_bold_hover=fbh,
                            font_underline_click=fuc, font_italic_click=fic, font_bold_click=fbc)
                 NewLine(frame)
-                if c.size[0] > w:
-                    w = c.size[0]
+                if c.size[0]+space_size > w:
+                    w = c.size[0]+space_size
                 if name:
                     ni = name+"."+i
                 else:
@@ -1552,6 +1575,8 @@ class Menu(Button):
                 c.dispatch.bind("click", self.bind_to_event(ni))
                 c.dispatch.bind("click", self.do_unfocus)
             else:
+                if need_space:
+                    Spacer(frame, (space_size, 0))
                 c = Button(frame, i[0], background_image=simages[0],
                            background_image_hover=simages[1],
                            background_image_click=simages[2],
@@ -1566,8 +1591,8 @@ class Menu(Button):
                     ic = self.mefont.glyphs[""][">"].copy()
                 x = Icon(frame, image=ic)
                 NewLine(frame)
-                if c.size[0] > w:
-                    w = c.size[0]
+                if c.size[0]+space_size > w:
+                    w = c.size[0]+space_size
                 if x.size[0] > incw:
                     incw = x.size[0]
                 c.dispatch.bind("click", self.swap_frame(self.cur_frame+1))
@@ -1582,7 +1607,8 @@ class Menu(Button):
             h = 1
         for i in frame.widgets:
             if not (isinstance(i, NewLine) or\
-                    isinstance(i, Icon)):
+                    isinstance(i, Icon) or\
+                    isinstance(i, Spacer)):
                 i.size = w-i.tsize[0]*2, i.size[1]-i.tsize[1]*2
                 _size = 0
                 if i.breg: i.breg, _size, a, i.tshift = i.load_background(bimages[0])
@@ -1595,11 +1621,14 @@ class Menu(Button):
             if isinstance(i, Icon):
                 _x, _y = i.pos
                 _h = i.size[1]
-                _b = frame.widgets[-1].size[1]
+                if need_space:
+                    _b = frame.widgets[-3].size[1]
+                else:
+                    _b = frame.widgets[-1].size[1]
                 _y += int((_b-_h)/2)
                 i.pos = (_x+1, _y)
 
-        frame.size = (w+incw+1, h)
+        frame.size = (w+incw+1+space_size, h)
         if images[0]:
             frame.background, frame.size, frame.tsize, frame.tshift = frame.load_background(images[0])
 
@@ -1624,6 +1653,9 @@ class Menu(Button):
         return do
 
     def do_visible(self):
+        if self.skip_click:
+            self.skip_click = False
+            return
         self.do_swap_frame(0)
 
     def bind_to_event(self, name):
@@ -1634,7 +1666,15 @@ class Menu(Button):
     def do_unfocus(self):
         for i in self.frames:
             i.visible = False
+            i.key_active=False
+            i.key_hold_lengths = {}
+            i._mhold=False
+            i._mhover=False
+        self.cur_frame = 0
         self.unfocus()
+        self.handle_mousemotion(None)
+        if self._mhover:
+            self.skip_click = True
 
     def unfocus(self):
         if not self.frames[self.cur_frame].visible:
