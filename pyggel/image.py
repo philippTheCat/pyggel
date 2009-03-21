@@ -383,7 +383,8 @@ class Image3D(Image):
 
 def create_empty_image(size=(2,2), color=(1,1,1,1)):
     """Same as create_empty_texture, except returns an image.Image instead"""
-    i = pygame.Surface(size)
+    view.require_init()
+    i = pygame.Surface(size).convert_alpha()
     if len(color) == 3:
         color = color + (1,)
     i.fill((255,255,255,255))
@@ -391,7 +392,8 @@ def create_empty_image(size=(2,2), color=(1,1,1,1)):
 
 def create_empty_image3d(size=(2,2), color=(1,1,1,1)):
     """Same as create_empty_texture, except returns an image.Image3D instead"""
-    i = pygame.Surface(size)
+    view.require_init()
+    i = pygame.Surface(size).convert_alpha()
     if len(color) == 3:
         color = color + (1,)
     i.fill((255,255,255,255))
@@ -408,6 +410,7 @@ class Animation(object):
            rotation is the 3d rotation of the image
            scale is the scale factor for the image
            colorize is the color of the image"""
+        view.require_init()
         self.frames = frames
 
         self.pos = pos

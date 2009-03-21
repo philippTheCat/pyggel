@@ -294,6 +294,6 @@ def clear_screen(scene=None):
     glEnable(GL_SCISSOR_TEST)
 
 def require_init():
-    """Called if a function requires init to have been called - raises TypeError if not."""
+    """Called if a function requires the view to have been init'd - raises TypeError if not."""
     if not screen.have_init:
-        raise TypeError, "pyggel.init must be called before this action can occur"
+        raise TypeError, "view must be init'd before this action can occur (pyggel.init or pyggel.view.init)"

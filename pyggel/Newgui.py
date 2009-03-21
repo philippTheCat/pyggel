@@ -1102,7 +1102,7 @@ class Input(Widget):
             font_bold = self.theme.get(self, "font-bold")
 
         self.text = start_text
-        self.image = self.mefont.make_text_image(self.text, font_color, font_underline, font_italic, font_bold)
+        self.image = self.mefont.make_text_image(self.text, font_color, None, font_underline, font_italic, font_bold)
 
         self.font_colors = (font_color, font_color_inactive)
 
@@ -1214,9 +1214,9 @@ class Input(Widget):
         tpx += offset[0]
         tpy += offset[1]
         if self.key_active:
-            self.image.colorize = self.font_colors[0]
+            self.image.color = self.font_colors[0]
         else:
-            self.image.colorize = self.font_colors[1]
+            self.image.color = self.font_colors[1]
         self.image.pos = (tpx, tpy)
         if self.background:
             bx, by = self.pos

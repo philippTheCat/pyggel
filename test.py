@@ -27,7 +27,7 @@ def main():
                                                random.randint(-10, 10),
                                                10)))
 
-    font = pyggel.font.Font()
+    font = pyggel.font.MEFont()
     font3d = pyggel.font.Font3D()
     img4 = font.make_text_image("Hello World: 2D", (1, 1, 0), underline=True, italic=True, bold=True)
     img4.pos = (50,50)
