@@ -72,7 +72,8 @@ class Theme(object):
             "Frame":{
                 "font":"default",
                 "size":(100,100),
-                "background-image":None
+                "background-image":None,
+                "image-border":None
                 },
             "Label":{
                 "font":"default",
@@ -82,7 +83,8 @@ class Theme(object):
                 "font-color-inactive":(1,1,1,.5),
                 "font-underline":False,
                 "font-italic":False,
-                "font-bold":False
+                "font-bold":False,
+                "image-border":None
                 },
             "Button":{
                 "font":"default",
@@ -101,12 +103,14 @@ class Theme(object):
                 "font-bold-hover":False,
                 "font-underline-click":False,
                 "font-italic-click":False,
-                "font-bold-click":False
+                "font-bold-click":False,
+                "image-border":None
                 },
             "Checkbox":{
                 "font":"default",
                 "background-image":None,
-                "check-image":None
+                "check-image":None,
+                "image-border":None
                 },
             "Radio":{
                 "size":(100,100),
@@ -118,7 +122,8 @@ class Theme(object):
                 "font-color-inactive":(1,1,1,.5),
                 "font-underline":False,
                 "font-italic":False,
-                "font-bold":False
+                "font-bold":False,
+                "image-border":None
                 },
             "MultiChoiceRadio":{
                 "size":(100,100),
@@ -130,7 +135,8 @@ class Theme(object):
                 "font-color-inactive":(1,1,1,.5),
                 "font-underline":False,
                 "font-italic":False,
-                "font-bold":False
+                "font-bold":False,
+                "image-border":None
                 },
             "Input":{
                 "font":"default",
@@ -141,7 +147,8 @@ class Theme(object):
                 "font-color-inactive":(1,1,1,.5),
                 "font-underline":False,
                 "font-italic":False,
-                "font-bold":False
+                "font-bold":False,
+                "image-border":None
                 },
             "MoveBar":{
                 "font":"default",
@@ -152,7 +159,8 @@ class Theme(object):
                 "font-bold":False,
                 "title":"Window...",
                 "width":100,
-                "background-image":None
+                "background-image":None,
+                "image-border":None
                 },
             "Window":{
                 "font":"default",
@@ -163,7 +171,8 @@ class Theme(object):
                 "font-bold":False,
                 "size":(100,100),
                 "background-image":None,
-                "movebar-background-image":None
+                "movebar-background-image":None,
+                "image-border":None
                 },
             "Menu":{
                 "name":"menu...",
@@ -214,7 +223,8 @@ class Theme(object):
                 "sub-font-bold-hover":False,
                 "sub-font-underline-click":False,
                 "sub-font-italic-click":False,
-                "sub-font-bold-click":False
+                "sub-font-bold-click":False,
+                "image-border":None
                 }
 
             }
@@ -496,7 +506,7 @@ class App(object):
 
 class Widget(object):
     widget_name = "Widget"
-    def __init__(self, app, pos=None, font=tdef, special_name=None):
+    def __init__(self, app, pos=None, font=tdef, image_border=tdef, special_name=None):
         self.app = app
         self.pos = pos
         self.size = (0,0)
@@ -507,6 +517,13 @@ class Widget(object):
 
         if special_name:
             self.widget_name = special_name
+        if image_border == tdef:
+            try:
+                image_border = self.app.theme.get(self, "image-border")
+            except:
+                image_border = None
+
+        self.image_border = image_border
 
         if font in (tdef, None):
             font = self.app.theme.get(self, "font")
@@ -542,16 +559,14 @@ class Widget(object):
         x = int(x/3)
         y = int(y/3)
         try:
-            new, tsize = _image.load_and_tile_resize_image(self.theme.data(filename), (self.size[0]+x*2, self.size[1]+y*2))
+            new, tsize = _image.load_and_tile_resize_image(self.theme.data(filename), (self.size[0]+x*2, self.size[1]+y*2),
+                                                           border_size=self.image_border)
         except:
-            new, tsize = _image.load_and_tile_resize_image(filename, (self.size[0]+x*2, self.size[1]+y*2))
-
-        x = new.get_width()/2 - self.size[0]/2
-        y = new.get_height()/2 - self.size[1]/2
-        tshift = (x, y)
+            new, tsize = _image.load_and_tile_resize_image(filename, (self.size[0]+x*2, self.size[1]+y*2),
+                                                           border_size=self.image_border)
         size = new.get_size()
 
-        return new, size, tsize, tshift
+        return new, size, tsize, tsize
 
     def pack(self):
         self.app.packer.pack()
@@ -658,8 +673,9 @@ class Widget(object):
 
 class Frame(App, Widget):
     widget_name = "Frame"
-    def __init__(self, app, pos=None, size=tdef, background_image=tdef, font=tdef, special_name=None):
-        Widget.__init__(self, app, pos, font, special_name)
+    def __init__(self, app, pos=None, size=tdef, background_image=tdef, font=tdef, image_border=tdef,
+                 special_name=None):
+        Widget.__init__(self, app, pos, font, image_border, special_name)
 
         if size == tdef:
             size = self.theme.get(self, "size")
@@ -739,21 +755,21 @@ class Frame(App, Widget):
 class NewLine(Widget):
     widget_name = "NewLine"
     def __init__(self, app, height=0, special_name=None):
-        Widget.__init__(self, app, None, tdef, special_name)
+        Widget.__init__(self, app, None, tdef, None, special_name)
         self.size = (0, height)
         self.pack()
 
 class Spacer(Widget):
     widget_name = "Spacer"
     def __init__(self, app, size=(0,0), special_name=None):
-        Widget.__init__(self, app, None, tdef, special_name)
+        Widget.__init__(self, app, None, tdef, None, special_name)
         self.size = size
         self.pack()
 
 class Icon(Widget):
     widget_name = "Icon"
     def __init__(self, app, pos=None, image=None):
-        Widget.__init__(self, app, pos, tdef, None)
+        Widget.__init__(self, app, pos, tdef, None, None)
         if image:
             if isinstance(image, _image.Animation) or\
                isinstance(image, _image.Image):
@@ -772,8 +788,9 @@ class Label(Widget):
     def __init__(self, app, start_text=tdef, pos=None, background_image=tdef, font_color=tdef,
                  font_color_inactive=tdef, font=tdef,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 image_border=tdef,
                  special_name=None):
-        Widget.__init__(self, app, pos, font, special_name)
+        Widget.__init__(self, app, pos, font, image_border, special_name)
 
         if start_text == tdef:
             start_text = self.theme.get(self, "text")
@@ -820,8 +837,9 @@ class Button(Widget):
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
                  font_underline_hover=tdef, font_italic_hover=tdef, font_bold_hover=tdef,
                  font_underline_click=tdef, font_italic_click=tdef, font_bold_click=tdef,
+                 image_border=tdef,
                  special_name=None):
-        Widget.__init__(self, app, pos, font, special_name)
+        Widget.__init__(self, app, pos, font, image_border, special_name)
 
         if text == tdef:
             text = self.theme.get(self, "text")
@@ -904,8 +922,9 @@ class Button(Widget):
 
 class Checkbox(Widget):
     widget_name = "Checkbox"
-    def __init__(self, app, pos=None, background_image=tdef, check_image=tdef, font=tdef, special_name=None):
-        Widget.__init__(self, app, pos, font, special_name)
+    def __init__(self, app, pos=None, background_image=tdef, check_image=tdef, font=tdef, image_border=tdef,
+                 special_name=None):
+        Widget.__init__(self, app, pos, font, image_border, special_name)
 
         if background_image == tdef:
             background_image = self.theme.get(self, "background-image")
@@ -955,8 +974,9 @@ class Radio(Frame):
                  background_image=tdef, option_background_image=tdef, option_check_image=tdef,
                  font_color=tdef, font_color_inactive=tdef, font=tdef,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 image_border=tdef,
                  special_name=None):
-        Frame.__init__(self, app, pos, tdef, None, font, special_name)
+        Frame.__init__(self, app, pos, tdef, None, font, image_border, special_name)
         self.packer.packtype = None
 
         if background_image == tdef:
@@ -1038,12 +1058,13 @@ class MultiChoiceRadio(Radio):
                  background_image=tdef, option_background_image=tdef, option_check_image=tdef,
                  font_color=tdef, font_color_inactive=tdef, font=tdef,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 image_border=tdef,
                  special_name=None):
         Radio.__init__(self, app, pos, options, background_image,
                        option_background_image, option_check_image,
                        font_color, font_color_inactive, font,
                        font_underline, font_italic, font_bold,
-                       special_name)
+                       image_border, special_name)
 
     def check_click(self):
         for i in self.options:
@@ -1059,8 +1080,9 @@ class Input(Widget):
     def __init__(self, app, start_text=tdef, width=tdef, pos=None, background_image=tdef,
                  font_color=tdef, font_color_inactive=tdef, font=tdef,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 image_border=tdef,
                  special_name=None):
-        Widget.__init__(self, app, pos, font, special_name)
+        Widget.__init__(self, app, pos, font, image_border, special_name)
 
         if start_text == tdef:
             start_text = self.theme.get(self, "text")
@@ -1220,8 +1242,9 @@ class MoveBar(Widget):
     def __init__(self, app, title=tdef, pos=(0,0), width=tdef, background_image=tdef,
                  font_color=tdef, font_color_inactive=tdef, font=tdef, child=None,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 image_border=tdef,
                  special_name=None):
-        Widget.__init__(self, app, pos, font, special_name)
+        Widget.__init__(self, app, pos, font, image_border, special_name)
         self.override_pos = True #window is always overridden,sorry :P
 
         if title == tdef:
@@ -1304,6 +1327,7 @@ class Window(MoveBar):
                  background_image=tdef, movebar_background_image=tdef,
                  font_color=tdef, font_color_inactive=tdef, font=tdef,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
+                 image_border=tdef,
                  special_name=None):
         
         if title == tdef:
@@ -1325,11 +1349,11 @@ class Window(MoveBar):
         if font_bold == tdef:
             font_bold = app.theme.get(self, "font-bold")
 
-        child = Frame(app, pos, size, background_image, font, special_name)
+        child = Frame(app, pos, size, background_image, font, image_border, special_name)
         MoveBar.__init__(self, app, title, pos, size[0], movebar_background_image,
                          font_color, font_color_inactive, font, child,
                          font_underline, font_italic, font_bold,
-                         special_name)
+                         image_border, special_name)
 
         self.packer = self.child.packer
         self.fonts = self.app.fonts
@@ -1366,7 +1390,8 @@ class Menu(Button):
                  sub_font_underline_hover=tdef, sub_font_italic_hover=tdef, sub_font_bold_hover=tdef,
                  sub_font_underline_click=tdef, sub_font_italic_click=tdef, sub_font_bold_click=tdef,
                  sub_icon=tdef,
-                 callback=None, special_name=None):
+                 callback=None, image_border=tdef,
+                 special_name=None):
         if name == tdef:
             name = app.theme.get(self, "name")
         if background_image == tdef:
@@ -1475,7 +1500,7 @@ class Menu(Button):
                         font_underline, font_italic, font_bold,
                         font_underline_hover, font_italic_hover, font_bold_hover,
                         font_underline_click, font_italic_click, font_bold_click,
-                        special_name)
+                        image_border, special_name)
         self.dispatch.bind("click", self.do_visible)
 
         self.frames = []
@@ -1513,7 +1538,8 @@ class Menu(Button):
 
     def add_frame(self, name, options, images, fc, ff, fs, ssi, sfc, sfs):
         goback = int(self.cur_frame)
-        frame = Frame(self.get_root_app(), (self.pos[0], self.pos[1]+self.size[1]), background_image=images[0], font=ff)
+        frame = Frame(self.get_root_app(), (self.pos[0], self.pos[1]+self.size[1]), background_image=images[0], font=ff,
+                      image_border=self.image_border)
         frame.packer.packtype = None
         frame.visible = False
         frame.dispatch.bind("unfocus", self.do_unfocus)
@@ -1548,7 +1574,8 @@ class Menu(Button):
                        font_color_click=sfc[2], font=ff,
                        font_underline=sfu, font_italic=sfi, font_bold=sfb,
                        font_underline_hover=sfuh, font_italic_hover=sfih, font_bold_hover=sfbh,
-                       font_underline_click=sfuc, font_italic_click=sfic, font_bold_click=sfbc)
+                       font_underline_click=sfuc, font_italic_click=sfic, font_bold_click=sfbc,
+                       image_border=self.image_border)
             NewLine(frame)
             w = c.size[0]+space_size
             c.dispatch.bind("click", self.swap_frame(goback))
@@ -1564,7 +1591,8 @@ class Menu(Button):
                            font_color_click=fc[2], font=ff,
                            font_underline=fu, font_italic=fi, font_bold=fb,
                            font_underline_hover=fuh, font_italic_hover=fih, font_bold_hover=fbh,
-                           font_underline_click=fuc, font_italic_click=fic, font_bold_click=fbc)
+                           font_underline_click=fuc, font_italic_click=fic, font_bold_click=fbc,
+                           image_border=self.image_border)
                 NewLine(frame)
                 if c.size[0]+space_size > w:
                     w = c.size[0]+space_size
@@ -1584,7 +1612,8 @@ class Menu(Button):
                            font_color_click=sfc[2], font=ff,
                            font_underline=sfu, font_italic=sfi, font_bold=sfb,
                            font_underline_hover=sfuh, font_italic_hover=sfih, font_bold_hover=sfbh,
-                           font_underline_click=sfuc, font_italic_click=sfic, font_bold_click=sfbc)
+                           font_underline_click=sfuc, font_italic_click=sfic, font_bold_click=sfbc,
+                           image_border=self.image_border)
                 if self.sub_icon:
                     ic = self.sub_icon
                 else:

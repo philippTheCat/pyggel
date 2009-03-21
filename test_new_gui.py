@@ -29,7 +29,7 @@ def main():
     scene.add_2d(app)
     scene.add_2d(newapp)
 
-    frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300))
+    frame = pyggel.Newgui.Frame(app, (500, 0), (140, 300), image_border=9)
     frame.packer.packtype = "wrap"
 
     pyggel.Newgui.Button(frame, "click!:P", callbacks=[test_callback],
