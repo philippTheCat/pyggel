@@ -35,7 +35,7 @@ def main():
     img5.scale = 2
 
     img6 = pyggel.image.GIFImage("data/football.gif", pos=(150, 150))
-    img7 = pyggel.image.GIFImage3D("data/hulk.gif", pos=(0,0,1))
+    img7 = pyggel.image.GIFImage3D("data/football.gif", pos=(0,0,1))
 
     pyggel.view.set_cursor(pyggel.image.SpriteSheet("data/ar.png",
                                     [(0,0,16,16), (16,0,16,16), (32,0,16,16), (16,0,16,16)],
