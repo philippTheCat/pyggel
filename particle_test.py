@@ -4,9 +4,6 @@ from pyggel import *
 def main():
     pyggel.init()
 
-##    my_light = light.Light((0,100,0), (0.5,0.5,0.5,1),
-##                                  (1,1,1,1), (50,50,50,10),
-##                                  (0,0,0), True)
     pyggel.view.set_lighting(False)
     pyggel.view.set_background_color((1,1,1))
 
@@ -23,19 +20,21 @@ def main():
     scene.add_3d_blend(emitter)
     scene.add_3d_blend(emitter2)
 
+    eh = event.Handler()
+
     clock = pygame.time.Clock()
 
     while 1:
         clock.tick(999)
-        print clock.get_fps()
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pyggel.quit()
-                return None
+        pyggel.view.set_title("FPS: %s"%clock.get_fps())
 
-            if event.type == KEYDOWN and event.key == K_SPACE:
-                emitter.visible = not emitter.visible
-                emitter2.visible = not emitter2.visible
+        eh.update()
+        if eh.quit:
+            pyggel.quit()
+            return None
+        if " " in eh.keyboard.hit:
+            emitter.visible = not emitter.visible
+            emitter2.visible = not emitter2.visible
 
         view.clear_screen()
         scene.render(camera)

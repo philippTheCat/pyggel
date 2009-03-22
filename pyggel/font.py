@@ -352,6 +352,9 @@ class FontImage(object):
         new.pos = self.pos
         new.rotation = self.rotation
         new.size = self.size
+        new._compiled = self._compiled
+        new.rebuild_glyphs()
+        return new
 
     def render(self, camera=None):
         """Render the image."""

@@ -430,6 +430,7 @@ class Skyball(Sphere):
     def render(self, camera):
         """Render the Skyball
            camera is the camera the scene is using"""
+        glDisable(GL_LIGHTING)
         glDepthMask(GL_FALSE)
         glPushMatrix()
         camera.set_skybox_data()
@@ -437,6 +438,8 @@ class Skyball(Sphere):
         Sphere.render(self)
         glPopMatrix()
         glDepthMask(GL_TRUE)
+        if view.screen.lighting:
+            glEnable(GL_LIGHTING)
 
     def copy(self):
         """Return a copy of teh Skyball - sharing the same dadta.DisplayList"""

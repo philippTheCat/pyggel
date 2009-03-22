@@ -13,14 +13,15 @@ def main():
     camera1 = pyggel.camera.LookFromCamera((0,0,-10))
     camera2 = pyggel.camera.LookAtCamera((0,0,5), distance=10)
     camera = camera1
-    font = pyggel.font.Font(None, 32)
-    img = font.make_text_image3D("Hello\nWorld: 3D", (1, 1, 0, 1))
+    font = pyggel.font.Font3D(None, 32)
+    font2d = pyggel.font.Font(None, 32)
+    img = font.make_text_image("Hello\nWorld: 3D", (1, 1, 0, 1))
     img.scale = 5
-    img2 = font.make_text_image3D("Hello World: 3D X2!!!", (0, 1, 1, 1))
+    img2 = font.make_text_image("Hello World: 3D X2!!!", (0, 1, 1, 1))
     img2.pos = (0, .7, 0)
     img3 = img2.copy()
     img3.pos = (0, 0, 0)
-    img4 = font.make_text_image3D("Testy...123...", (0, 1, 0, 1))
+    img4 = font.make_text_image("Testy...123...", (0, 1, 0, 1))
     img4.pos = (0, -1, 0)
     img5 = img4.copy()
 
@@ -29,7 +30,7 @@ def main():
     img5.colorize = (1, 0, 0, .5)
     img5.pos = (0, .1, 0)
 
-    text = font.make_text_image("ARG!!!!", (1, 0, 0, 1))
+    text = font2d.make_text_image("ARG!!!!", (1, 0, 0, 1))
     text2 = text.copy()
     text2.pos = (0,75)
 
@@ -68,75 +69,67 @@ def main():
 
     mscene.add_light(light)
 
-##    quads = []
-##    for x in xrange(10):
-##        for z in xrange(10):
-##            quads.append(pyggel.geometry.Quad(5, (x*5.5,0,z*5.5),
-##                                              texture=data.Texture("data/tile_example.png"),
-##                                              facing="top"))
-##
-##    mscene.add_3d(pyggel.misc.StaticObjectGroup(quads))
     quad = pyggel.geometry.Plane(50, (0,0,0),
                                  texture=data.Texture("data/tile_example.png"),
                                  facing="top", tile=10)
     mscene.add_3d(quad)
 
+    eh = pyggel.event.Handler()
+
     clock = pygame.time.Clock()
 
     while 1:
         clock.tick(999)
-##        print clock.get_fps()
+        pyggel.view.set_title("FPS: %s"%clock.get_fps())
 
-        for event in pyggel.get_events():
-            if event.type == QUIT:
-                pyggel.quit()
-                return None
+        eh.update()
 
-            if event.type == KEYDOWN:
-                if event.key == K_RETURN:
-                    if camera == camera1:
-                        camera = camera2
-                    else:
-                        camera = camera1
+        if eh.quit:
+            pyggel.quit()
+            return None
+        if K_RETURN in eh.keyboard.hit:
+            if camera == camera1:
+                camera = camera2
+            else:
+                camera = camera1
 
-                if event.key == K_s:
-                    if mscene.graph.skybox == skybox:
-                        mscene.graph.skybox = skyball
-                    elif mscene.graph.skybox == skyball:
-                        mscene.graph.skybox = None
-                    else:
-                        mscene.graph.skybox = skybox
+        if "s" in eh.keyboard.hit:
+            if mscene.graph.skybox == skybox:
+                mscene.graph.skybox = skyball
+            elif mscene.graph.skybox == skyball:
+                mscene.graph.skybox = None
+            else:
+                mscene.graph.skybox = skybox
 
-                if event.key == K_SPACE:
-                    misc.save_screenshot("test.png")
+        if " " in eh.keyboard.hit:
+            misc.save_screenshot("test.png")
 
-        key = pygame.key.get_pressed()
-        if key[K_m]:
-            if key[K_LEFT]:
+        if "m" in eh.keyboard.active:
+            if K_LEFT in eh.keyboard.active:
                 camera.posx -= .1
-            if key[K_RIGHT]:
+            if K_RIGHT in eh.keyboard.active:
                 camera.posx += .1
-            if key[K_DOWN]:
+            if K_DOWN in eh.keyboard.active:
                 camera.posy -= .1
-            if key[K_UP]:
+            if K_UP in eh.keyboard.active:
                 camera.posy += .1
-            if key[K_MINUS]:
+            if "-" in eh.keyboard.active:
                 camera.posz -= .1
-            if key[K_EQUALS]:
+            if "=" in eh.keyboard.active:
                 camera.posz += .1
-        elif key[K_r]:
-            if key[K_LEFT]:
-                camera.roty -= .25
-            if key[K_RIGHT]:
-                camera.roty += .25
-            if key[K_UP]:
-                camera.rotx -= .25
-            if key[K_DOWN]:
-                camera.rotx += .25
-            if key[K_MINUS]:
-                camera.rotz -= .25
-            if key[K_EQUALS]:
-                camera.rotz += .25
+        if "r" in eh.keyboard.active:
+            if K_LEFT in eh.keyboard.active:
+                camera.roty -= .1
+            if K_RIGHT in eh.keyboard.active:
+                camera.roty += .1
+            if K_DOWN in eh.keyboard.active:
+                camera.rotx += .1
+            if K_UP in eh.keyboard.active:
+                camera.rotx -= .1
+            if "-" in eh.keyboard.active:
+                camera.rotz -= .1
+            if "=" in eh.keyboard.active:
+                camera.rotz += .1
 
         box.rotation[1] += 1
 
