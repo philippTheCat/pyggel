@@ -728,9 +728,18 @@ class Widget(object):
         self._mhover=False
 
 class Frame(App, Widget):
+    """A widget capable of having other widgets inside it, like an app, while having the attributes of a Widget as well."""
     widget_name = "Frame"
     def __init__(self, app, pos=None, size=tdef, background_image=tdef, font=tdef, image_border=tdef,
                  special_name=None):
+        """Create the frame
+           app must be the App/Frame/Window this widget is attached to
+           pos must be None (to use app.packer) or the (x,y) pos of the widget
+           size must be tdef or the (x,y) size of the frame
+           background_image must be tdef or the filename of the image to use as the background
+           font must be tdef/None or the (Font, MEFont) fonts to use
+           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, pos, font, image_border, special_name)
 
         if size == tdef:
@@ -818,6 +827,9 @@ class NewLine(Widget):
 class Spacer(Widget):
     widget_name = "Spacer"
     def __init__(self, app, size=(0,0), special_name=None):
+        """Create the spacer
+           app must be the App/Frame/Window this widget is attached to
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, None, tdef, None, special_name)
         self.size = size
         self.pack()
@@ -825,6 +837,10 @@ class Spacer(Widget):
 class Icon(Widget):
     widget_name = "Icon"
     def __init__(self, app, pos=None, image=None):
+        """Create the icon
+           app must be the App/Frame/Window this widget is attached to
+           pos must be None (to use app.packer) or the (x,y) pos of the widget
+           image must be the image.Image, image.Animation or filename of the image"""
         Widget.__init__(self, app, pos, tdef, None, None)
         if image:
             if isinstance(image, _image.Animation) or\
@@ -841,15 +857,28 @@ class Icon(Widget):
 
 class Label(Widget):
     widget_name = "Label"
-    def __init__(self, app, start_text=tdef, pos=None, background_image=tdef, font_color=tdef,
+    def __init__(self, app, text=tdef, pos=None, background_image=tdef, font_color=tdef,
                  font_color_inactive=tdef, font=tdef,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
                  image_border=tdef,
                  special_name=None):
+        """Create the label
+           app must be the App/Frame/Window this widget is attached to
+           text must be tdef or the text of the label
+           pos must be None (to use app.packer) or the (x,y) pos of the widget
+           background_image must be tdef or the filename of the image to use as the background
+           font_color must be tdef or the (R,G,B,A)(0-1) color of the text
+           font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text for when the widget is not focused
+           font must be tdef/None or the (Font, MEFont) fonts to use
+           font_underline must be True/False - whether text is underlined
+           font_italic must be True/False - whether text is italic
+           font_bold must be True/False - whether text is bold
+           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, pos, font, image_border, special_name)
 
-        if start_text == tdef:
-            start_text = self.theme.get(self, "text")
+        if text == tdef:
+            text = self.theme.get(self, "text")
         if background_image == tdef:
             background_image = self.theme.get(self, "background-image")
         if font_color == tdef:
@@ -866,7 +895,7 @@ class Label(Widget):
         self.font_color = font_color
         self.font_color_inactive = font_color_inactive
 
-        self.text = start_text
+        self.text = text
         self.image = self.font.make_text_image(self.text, font_color, None, font_underline, font_italic, font_bold)
         self.image.color = self.font_color_inactive
         self.image.compile()
@@ -895,6 +924,29 @@ class Button(Widget):
                  font_underline_click=tdef, font_italic_click=tdef, font_bold_click=tdef,
                  image_border=tdef,
                  special_name=None):
+        """Create the label
+           app must be the App/Frame/Window this widget is attached to
+           text must be tdef or the text of the label
+           pos must be None (to use app.packer) or the (x,y) pos of the widget
+           callbacks must be a list of functions or methods to call whent the button is clicked
+           background_image must be tdef or the filename of the image to use as the background
+           background_image_hover must be tdef or the filename of the image to use as the background when mouse is hovering
+           background_image_click must be tdef or the filename of the image to use as the background when the button is clicked
+           font_color must be tdef or the (R,G,B,A)(0-1) color of the text
+           font_color_hover must be tdef or the (R,G,B,A)(0-1) color of the text when mouse is hovering
+           font_color_click must be tdef or the (R,G,B,A)(0-1) color of the text when the button is clicked
+           font must be tdef/None or the (Font, MEFont) fonts to use
+           font_underline must be True/False - whether text is underlined
+           font_underline_hover must be True/False - whether text is underlined when mouse is hovering
+           font_underline_click must be True/False - whether text is underlined when the button is clicked
+           font_italic must be True/False - whether text is italic
+           font_italic_hover must be True/False - whether text is italic when mouse is hovering
+           font_italic_click must be True/False - whether text is italic when button is clicked
+           font_bold must be True/False - whether text is bold
+           font_bold_italic must be True/False - whether text is bold when mouse is hovering
+           font_bold_click must be True/False - whether text is bold when button is clicked
+           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, pos, font, image_border, special_name)
 
         if text == tdef:
