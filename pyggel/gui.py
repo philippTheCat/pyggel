@@ -543,7 +543,7 @@ class Widget(object):
            app must be the App/Frame/Window this widget is attached to
            pos must be None (to use app.packer) or the (x,y) pos of the widget
            font must be tdef/None or the (Font, MEFont) fonts to use
-           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           image_border must be tdef or the pixel size of the border tiles of the background image (if any)
            special_name must be None or the name used to grab a value different from widget_name from the theme"""
         self.app = app
         self.pos = pos
@@ -609,7 +609,7 @@ class Widget(object):
         return new, size, tsize, tsize
 
     def pack(self):
-        """Pposition this widget with others using app.packer."""
+        """Position this widget with others using app.packer."""
         self.app.packer.pack()
 
     def _collidem(self):
@@ -758,6 +758,7 @@ class Frame(App, Widget):
         self.pack()
 
     def _collidem_c(self):
+        """Returns whether mouse is touching the renderable area of the frame."""
         x, y = self.app.get_mouse_pos()
         a, b = self.pos
         w, h = self.size
@@ -766,6 +767,7 @@ class Frame(App, Widget):
         return (a+c <= x <= a+w-f) and (b+d <= y <= b+h-g)
 
     def get_mouse_pos(self):
+        """Return the mouse pos in relation to teh renderable area of the frame."""
         x, y = self.app.get_mouse_pos()
         x -= self.pos[0] + self.tshift[0]
         y -= self.pos[1] + self.tshift[1]
@@ -776,18 +778,21 @@ class Frame(App, Widget):
         if self._mhover:
             App.handle_mousedown(self, button, name)
         return self._collidem()
+    handle_mousedown.__doc__ = Widget.handle_mousedown.__doc__
 
     def handle_mouseup(self, button, name):
         if self._mhold:
             Widget.handle_mouseup(self, button, name)
             App.handle_mouseup(self, button, name)
             return True
+    handle_mouseup.__doc__ = Widget.handle_mouseup.__doc__
 
     def handle_mousehold(self, button, name):
         Widget.handle_mousehold(self, button, name)
         if self._mhold:
             App.handle_mousehold(self, button, name)
             return True
+    handle_mousehold.__doc__ = Widget.handle_mousehold.__doc__
 
     def handle_mousemotion(self, change):
         Widget.handle_mousemotion(self, change)
@@ -797,6 +802,7 @@ class Frame(App, Widget):
         for i in self.widgets:
             i._mhover = False
         return self._collidem()
+    handle_mousemotion.__doc__ = Widget.handle_mousemotion.__doc__
 
     def render(self, offset=(0,0)):
         Widget.render(self, offset)
@@ -811,30 +817,40 @@ class Frame(App, Widget):
             if i.visible: i.render(offset)
         self.widgets.reverse()
         view.screen.pop_clip()
+    render.__doc__ = Widget.render.__doc__
 
     def unfocus(self):
         Widget.unfocus(self)
         for i in self.widgets:
             i.unfocus()
+    unfocus.__doc__ = Widget.unfocus.__doc__
 
 class NewLine(Widget):
+    """A widget that simply forces other widgets to a new line in the packer."""
     widget_name = "NewLine"
     def __init__(self, app, height=0, special_name=None):
+        """Create the NewLine
+           app must be the App/Frame/Window this widget is attached to
+           height must be None or the minimum height of the new line
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, None, tdef, None, special_name)
         self.size = (0, height)
         self.pack()
 
 class Spacer(Widget):
+    """A widget that simply forces other widgets over in the packer."""
     widget_name = "Spacer"
     def __init__(self, app, size=(0,0), special_name=None):
         """Create the spacer
            app must be the App/Frame/Window this widget is attached to
+           size must be the (x,y) size of the space
            special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, None, tdef, None, special_name)
         self.size = size
         self.pack()
 
 class Icon(Widget):
+    """A widget that simply contains an image to be rendered."""
     widget_name = "Icon"
     def __init__(self, app, pos=None, image=None):
         """Create the icon
@@ -856,6 +872,7 @@ class Icon(Widget):
         self.pack()
 
 class Label(Widget):
+    """A widget that simply displays text, with a background if specified."""
     widget_name = "Label"
     def __init__(self, app, text=tdef, pos=None, background_image=tdef, font_color=tdef,
                  font_color_inactive=tdef, font=tdef,
@@ -870,9 +887,9 @@ class Label(Widget):
            font_color must be tdef or the (R,G,B,A)(0-1) color of the text
            font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text for when the widget is not focused
            font must be tdef/None or the (Font, MEFont) fonts to use
-           font_underline must be True/False - whether text is underlined
-           font_italic must be True/False - whether text is italic
-           font_bold must be True/False - whether text is bold
+           font_underline must be tdef or True/False - whether text is underlined
+           font_italic must be tdef or True/False - whether text is italic
+           font_bold must be tdef or True/False - whether text is bold
            image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
            special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, pos, font, image_border, special_name)
@@ -908,23 +925,26 @@ class Label(Widget):
         Widget.unfocus(self)
         if self.image.color == self.font_color:
             self.image.color = self.font_color_inactive
+    unfocus.__doc__ = Widget.unfocus.__doc__
 
     def focus(self):
         Widget.focus(self)
         if self.image.color == self.font_color_inactive:
             self.image.color = self.font_color
+    focus.__doc__ = Widget.focus.__doc__
 
 class Button(Widget):
+    """A widget that renders text with a background, if spedified, for each state, regular, hover, click, and fires events when clicked."""
     widget_name = "Button"
     def __init__(self, app, text=tdef, pos=None, callbacks=[],
                  background_image=tdef, background_image_hover=tdef, background_image_click=tdef,
-                 font_color=tdef, font_color_hover=tdef, font_color_click=tdef, font=tdef,
+                 font=tdef, font_color=tdef, font_color_hover=tdef, font_color_click=tdef,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
                  font_underline_hover=tdef, font_italic_hover=tdef, font_bold_hover=tdef,
                  font_underline_click=tdef, font_italic_click=tdef, font_bold_click=tdef,
                  image_border=tdef,
                  special_name=None):
-        """Create the label
+        """Create the button
            app must be the App/Frame/Window this widget is attached to
            text must be tdef or the text of the label
            pos must be None (to use app.packer) or the (x,y) pos of the widget
@@ -932,19 +952,19 @@ class Button(Widget):
            background_image must be tdef or the filename of the image to use as the background
            background_image_hover must be tdef or the filename of the image to use as the background when mouse is hovering
            background_image_click must be tdef or the filename of the image to use as the background when the button is clicked
+           font must be tdef/None or the (Font, MEFont) fonts to use
            font_color must be tdef or the (R,G,B,A)(0-1) color of the text
            font_color_hover must be tdef or the (R,G,B,A)(0-1) color of the text when mouse is hovering
            font_color_click must be tdef or the (R,G,B,A)(0-1) color of the text when the button is clicked
-           font must be tdef/None or the (Font, MEFont) fonts to use
-           font_underline must be True/False - whether text is underlined
-           font_underline_hover must be True/False - whether text is underlined when mouse is hovering
-           font_underline_click must be True/False - whether text is underlined when the button is clicked
-           font_italic must be True/False - whether text is italic
-           font_italic_hover must be True/False - whether text is italic when mouse is hovering
-           font_italic_click must be True/False - whether text is italic when button is clicked
-           font_bold must be True/False - whether text is bold
-           font_bold_italic must be True/False - whether text is bold when mouse is hovering
-           font_bold_click must be True/False - whether text is bold when button is clicked
+           font_underline must be tdef or True/False - whether text is underlined
+           font_underline_hover must be tdef or True/False - whether text is underlined when mouse is hovering
+           font_underline_click must be tdef or True/False - whether text is underlined when the button is clicked
+           font_italic must be tdef or True/False - whether text is italic
+           font_italic_hover must be tdef or True/False - whether text is italic when mouse is hovering
+           font_italic_click must be tdef or True/False - whether text is italic when button is clicked
+           font_bold must be tdef or True/False - whether text is bold
+           font_bold_italic must be tdef or True/False - whether text is bold when mouse is hovering
+           font_bold_click must be tdef or True/False - whether text is bold when button is clicked
            image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
            special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, pos, font, image_border, special_name)
@@ -1027,11 +1047,21 @@ class Button(Widget):
             self.image = self.ireg
             self.background = self.breg
         Widget.render(self, offset)
+    render.__doc__ = Widget.render.__doc__
 
 class Checkbox(Widget):
+    """A widget that contains two states, which are swapped when clicked, and fires an event when changed."""
     widget_name = "Checkbox"
     def __init__(self, app, pos=None, background_image=tdef, check_image=tdef, font=tdef, image_border=tdef,
                  special_name=None):
+        """Create the label
+           app must be the App/Frame/Window this widget is attached to
+           pos must be None (to use app.packer) or the (x,y) pos of the widget
+           background_image must be tdef or the filename of the image to use as the image when state is 0
+           check_image must be tdef or the filename of the image to use as the image when state is 1
+           font must be tdef/None or the (Font, MEFont) fonts to use
+           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, pos, font, image_border, special_name)
 
         if background_image == tdef:
@@ -1067,7 +1097,9 @@ class Checkbox(Widget):
         self.pack()
 
     def _change_state(self):
+        """Change the state of the widget. Fire "change" event to dispatch."""
         self.state = abs(self.state-1)
+        self.dispatch.fire("change", self.state)
 
     def render(self, offset):
         if self.state:
@@ -1075,8 +1107,10 @@ class Checkbox(Widget):
         else:
             self.image = self.off
         Widget.render(self, offset)
+    render.__doc__ = Widget.render.__doc__
 
 class Radio(Frame):
+    """A widget that contains several different checkboxes and labels, allowing you to pick one or another."""
     widget_name = "Radio"
     def __init__(self, app, pos=None, options=[],
                  background_image=tdef, option_background_image=tdef, option_check_image=tdef,
@@ -1084,6 +1118,21 @@ class Radio(Frame):
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
                  image_border=tdef,
                  special_name=None):
+        """Create the radio
+           app must be the App/Frame/Window this widget is attached to
+           pos must be None (to use app.packer) or the (x,y) pos of the widget
+           options must be a list of string options for the widget
+           background_image must be tdef or the filename of the image to use as the background
+           option_background_image must be tdef or the filename of the image to use as the background for each option check
+           option_check_image must be tdef or the filename of the image to use as the check_image for each option check
+           font must be tdef/None or the (Font, MEFont) fonts to use
+           font_color must be tdef or the (R,G,B,A)(0-1) color of the text
+           font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text when inactive
+           font_underline must be tdef or True/False - whether text is underlined
+           font_italic must be tdef or True/False - whether text is italic
+           font_bold must be tdef or True/False - whether text is bold
+           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Frame.__init__(self, app, pos, tdef, None, font, image_border, special_name)
         self.packer.packtype = None
 
@@ -1137,6 +1186,7 @@ class Radio(Frame):
         self.pack()
 
     def check_click(self):
+        """Checks which check/label was clicked, and sets that to active state, and fires "change" event to dispatch."""
         for i in self.options:
             name, check, label, state = i
             if check.state != state: #changed!
@@ -1150,10 +1200,12 @@ class Radio(Frame):
                 else:
                     check.state = 1
                 label.focus()
+                self.dispatch.fire("change", name)
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
 
     def check_click_label(self):
+        """Checks whether a label was clicked - if so generates appropriate check click."""
         for i in self.options:
             name, check, label, state = i
             if label._mhover: #they were clicked ;)
@@ -1161,6 +1213,7 @@ class Radio(Frame):
                 self.check_click()
 
 class MultiChoiceRadio(Radio):
+    """A widget that contains several different checkboxes and labels, allowing you to pick several."""
     widget_name = "MultiChoiceRadio"
     def __init__(self, app, pos=None, options=[],
                  background_image=tdef, option_background_image=tdef, option_check_image=tdef,
@@ -1173,6 +1226,7 @@ class MultiChoiceRadio(Radio):
                        font_color, font_color_inactive, font,
                        font_underline, font_italic, font_bold,
                        image_border, special_name)
+    __init__.__doc__ = Radio.__init__.__doc__
 
     def check_click(self):
         for i in self.options:
@@ -1182,14 +1236,30 @@ class MultiChoiceRadio(Radio):
             state = check.state
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
+    check_click.__doc__ = Radio.check_click.__doc__
 
 class Input(Widget):
+    """A widget that allows you to capture keyboard input and convert it into text."""
     widget_name = "Input"
     def __init__(self, app, start_text=tdef, width=tdef, pos=None, background_image=tdef,
                  font_color=tdef, font_color_inactive=tdef, font=tdef,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
                  image_border=tdef,
                  special_name=None):
+        """Create the input
+           app must be the App/Frame/Window this widget is attached to
+           start_text must be tdef or the text the input starts with
+           width must be tdef or the max pixel width of the text input box
+           pos must be None (to use app.packer) or the (x,y) pos of the widget
+           background_image must be tdef or the filename of the image to use as the background
+           font must be tdef/None or the (Font, MEFont) fonts to use
+           font_color must be tdef or the (R,G,B,A)(0-1) color of the text
+           font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text when inactive
+           font_underline must be tdef or True/False - whether text is underlined
+           font_italic must be tdef or True/False - whether text is italic
+           font_bold must be tdef or True/False - whether text is bold
+           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, pos, font, image_border, special_name)
 
         if start_text == tdef:
@@ -1232,6 +1302,7 @@ class Input(Widget):
     def force_pos_update(self, pos):
         Widget.force_pos_update(self, pos)
         self.calc_working_pos()
+    force_pos_update.__doc__ = Widget.force_pos_update.__doc__
 
     def can_handle_key(self, key, string):
         if string and string in self.mefont.acceptable:
@@ -1240,8 +1311,10 @@ class Input(Widget):
                    K_BACKSPACE, K_RETURN):
             return True
         return False
+    can_handle_key.__doc__ = Widget.can_handle_key.__doc__
 
     def submit_text(self):
+        """Fire the "submit" event to dispatch, and clear the current text."""
         if self.text:
             self.dispatch.fire("submit", self.text)
         self.text = ""
@@ -1250,7 +1323,7 @@ class Input(Widget):
         self.calc_working_pos()
 
     def move_cursor(self, x):
-        """Move the cursor position."""
+        """Move the text cursor position."""
         self.cursor_image.reset()
         self.cursor_pos += x
         if self.cursor_pos < 0:
@@ -1287,6 +1360,7 @@ class Input(Widget):
                     self.image.text = self.text
                     self.move_cursor(1)
                 return True
+    handle_keydown.__doc__ = Widget.handle_keydown.__doc__
 
     def calc_working_pos(self):
         """Calculate the position of the text cursor - ie, where in the text are we typing... and the text offset."""
@@ -1315,6 +1389,7 @@ class Input(Widget):
     def focus(self):
         Widget.focus(self)
         self.cursor_image.reset()
+    focus.__doc__ = Widget.focus.__doc__
 
     def render(self, offset=(0,0)):
         """Render the Input widget."""
@@ -1344,14 +1419,32 @@ class Input(Widget):
             self.cursor_image.pos = (wpx, wpy)
             self.cursor_image.render()
             self.cursor_image.pos = self.wpos
+    render.__doc__ = Widget.render.__doc__
 
 class MoveBar(Widget):
+    """A widget that is basically like a label except it will move when clicked and held.
+       Can have a child attached (any other widget, generally a Frame though) that moves with it."""
     widget_name = "MoveBar"
     def __init__(self, app, title=tdef, pos=(0,0), width=tdef, background_image=tdef,
                  font_color=tdef, font_color_inactive=tdef, font=tdef, child=None,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
                  image_border=tdef,
                  special_name=None):
+        """Create the movebar
+           app must be the App/Frame/Window this widget is attached to
+           title must be tdef or the text for the widget
+           pos must be the (x,y) pos of the widget
+           width must be tdef or the width of the widget
+           background_image must be tdef or the filename of the image to use as the background
+           font must be tdef/None or the (Font, MEFont) fonts to use
+           font_color must be tdef or the (R,G,B,A)(0-1) color of the text
+           font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text when inactive
+           font_underline must be tdef or True/False - whether text is underlined
+           font_italic must be tdef or True/False - whether text is italic
+           font_bold must be tdef or True/False - whether text is bold
+           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           special_name must be None or the name used to grab a value different from widget_name from the theme
+           child must be None or the widget object that is bound to this movebar"""
         Widget.__init__(self, app, pos, font, image_border, special_name)
         self.override_pos = True #window is always overridden,sorry :P
 
@@ -1417,19 +1510,23 @@ class MoveBar(Widget):
                 self.child.pos = (x, y)
             return True
         return _retval
+    handle_mousemotion.__doc__ = Widget.handle_mousemotion.__doc__
 
     def focus(self):
         self.image.colorize = self.font_color
         if self.child:
             self.child.focus()
         Widget.focus(self)
+    focus.__doc__ = Widget.focus.__doc__
 
     def unfocus(self):
         self.image.colorize = self.font_color_inactive
         if not self.child == self.app.widgets[0]:
             Widget.unfocus(self)
+    unfocus.__doc__ = Widget.unfocus.__doc__
 
 class Window(MoveBar):
+    """A widget that simply create a frame and a movebar to hold it, then keep strack of them."""
     widget_name = "Window"
     def __init__(self, app, title=tdef, pos=(0,0), size=tdef,
                  background_image=tdef, movebar_background_image=tdef,
@@ -1437,7 +1534,21 @@ class Window(MoveBar):
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
                  image_border=tdef,
                  special_name=None):
-        
+        """Create the movebar
+           app must be the App/Frame/Window this widget is attached to
+           title must be tdef or the text for the movebar
+           size must be tdef or the (x,y) size of the frame (and x for the movebar)
+           pos must be the (x,y) pos of the widget
+           background_image must be tdef or the filename of the image to use as the background for the frame
+           movebar_background_image must be tdef or the filename of the image to use as the background for the movebar
+           font must be tdef/None or the (Font, MEFont) fonts to use
+           font_color must be tdef or the (R,G,B,A)(0-1) color of the text
+           font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text when inactive
+           font_underline must be tdef or True/False - whether text is underlined
+           font_italic must be tdef or True/False - whether text is italic
+           font_bold must be tdef or True/False - whether text is bold
+           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         if title == tdef:
             title = app.theme.get(self, "title")
         if size == tdef:
@@ -1470,12 +1581,15 @@ class Window(MoveBar):
     def new_widget(self, widg):
         widg.app = self.child
         self.child.new_widget(widg)
+    new_widget.__doc__ = Frame.new_widget.__doc__
 
     def update_fonts(self, fonts):
         self.fonts = fonts
+    update_fonts.__doc__ = Frame.update_fonts.__doc__
 
     
 class Menu(Button):
+    """A widget that creates a menu, that allows submenus, and fires an event to the dispatch when one is selected."""
     widget_name = "Menu"
     def __init__(self, app, name=tdef, pos=None, options=[],
                  background_image=tdef, background_image_hover=tdef,
@@ -1500,6 +1614,60 @@ class Menu(Button):
                  sub_icon=tdef,
                  callback=None, image_border=tdef,
                  special_name=None):
+        """Create the menu
+           app must be the App/Frame/Window this widget is attached to
+           name must be tdef or the name of the widget and the text for the menu button
+           pos must be None (to use app.packer) or the (x,y) pos of the widget
+           options must be a list of options in the (if an option is a list, the first value is considered the name of the sub-menu,
+                                                     and the options for it - allows unlimited nesting)
+           background_image must be tdef or the filename of the image to use as the background for the menu button
+           background_image_hover must be tdef or the filename of the image to use as the background when mouse is hovering for the menu button
+           background_image_click must be tdef or the filename of the image to use as the background when the button is clicked for the menu button
+           option_background_image must be tdef or the filename of the image to use as the background for each menu option
+           option_background_image_hover must be tdef or the filename of the image to use as the background when mouse is hovering for each menu option
+           option_background_image_click must be tdef or the filename of the image to use as the background when the button is clicked for each menu option
+           sub_background_image must be tdef or the filename of the image to use as the background for each sub-menu option
+           sub_background_image_hover must be tdef or the filename of the image to use as the background when mouse is hovering for each sub-menu option
+           sub_background_image_click must be tdef or the filename of the image to use as the background when the button is clicked for each sub-menu option
+           font must be tdef/None or the (Font, MEFont) fonts to use
+           font_color must be tdef or the (R,G,B,A)(0-1) color of the text for the menu button
+           font_color_hover must be tdef or the (R,G,B,A)(0-1) color of the text when mouse is hovering for the menu button
+           font_color_click must be tdef or the (R,G,B,A)(0-1) color of the text when the button is clicked for the menu button
+           option_font_color must be tdef or the (R,G,B,A)(0-1) color of the text for the menu button
+           option_font_color_hover must be tdef or the (R,G,B,A)(0-1) color of the text when mouse is hovering for each menu option
+           option_font_color_click must be tdef or the (R,G,B,A)(0-1) color of the text when the button is clicked for each menu option
+           sub_font_color must be tdef or the (R,G,B,A)(0-1) color of the text for each sub-menu option
+           sub_font_color_hover must be tdef or the (R,G,B,A)(0-1) color of the text when mouse is hovering for each sub-menu option
+           sub_color_click must be tdef or the (R,G,B,A)(0-1) color of the text when the button is clicked for each sub-menu option
+           font_underline must be tdef or True/False - whether text is underlined for the menu button
+           font_underline_hover must be tdef or True/False - whether text is underlined when mouse is hovering for the menu button
+           font_underline_click must be tdef or True/False - whether text is underlined when the button is clicked for the menu button
+           option_font_underline must be tdef or True/False - whether text is underlined for each menu option
+           option_font_underline_hover must be tdef or True/False - whether text is underlined when mouse is hovering for each menu option
+           option_font_underline_click must be tdef or True/False - whether text is underlined when the button is clicked for each menu option
+           sub_font_underline must be tdef or True/False - whether text is underlined for each sub-menu option
+           sub_font_underline_hover must be tdef or True/False - whether text is underlined when mouse is hovering for each sub-menu option
+           sub_font_underline_click must be tdef or True/False - whether text is underlined when the button is clicked for each sub-menu option
+           font_italic must be tdef or True/False - whether text is italic for the menu button
+           font_italic_hover must be tdef or True/False - whether text is italic when mouse is hovering for the menu button
+           font_italic_click must be tdef or True/False - whether text is italic when button is clicked for the menu button
+           option_font_italic must be tdef or True/False - whether text is italic for each menu option
+           option_font_italic_hover must tdef or be True/False - whether text is italic when mouse is hovering for each menu option
+           option_font_italic_click must tdef or be True/False - whether text is italic when button is clicked for each menu option
+           sub_font_italic must be tdef or True/False - whether text is italic for each sub-menu option
+           sub_font_italic_hover must be tdef or True/False - whether text is italic when mouse is hovering for each sub-menu option
+           sub_font_italic_click must be tdef or True/False - whether text is italic when button is clicked for each sub-menu option
+           font_bold must be tdef or True/False - whether text is bold for the menu button
+           font_bold_hover must be tdef or True/False - whether text is bold when mouse is hovering for the menu button
+           font_bold_click must be tdef or True/False - whether text is bold when button is clicked for the menu button
+           option_font_bold must be tdef or True/False - whether text is bold for each menu option
+           option_font_bold_hover must be tdef or True/False - whether text is bold when mouse is hovering for each menu option
+           option_font_bold_click must be tdef or True/False - whether text is bold when button is clicked for each menu option
+           sub_font_bold must be tdef or True/False - whether text is bold for each sub-menu option
+           sub_font_bold_hover must be tdef or True/False - whether text is bold when mouse is hovering for each sub-menu option
+           sub_font_bold_click must be tdef or True/False - whether text is bold when button is clicked for each sub-menu option
+           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         if name == tdef:
             name = app.theme.get(self, "name")
         if background_image == tdef:
@@ -1645,6 +1813,7 @@ class Menu(Button):
         self.skip_click = False
 
     def add_frame(self, name, options, images, fc, ff, fs, ssi, sfc, sfs):
+        """Build frames for each menu/sun-menu, and entries."""
         goback = int(self.cur_frame)
         frame = Frame(self.get_root_app(), (self.pos[0], self.pos[1]+self.size[1]), background_image=images[0], font=ff,
                       image_border=self.image_border)
@@ -1778,6 +1947,7 @@ class Menu(Button):
         self.cur_frame = goback
 
     def do_swap_frame(self, num):
+        """Swap current frame to frame number num."""
         self.cur_frame = num
         for i in self.frames:
             i.visible = False
@@ -1785,22 +1955,26 @@ class Menu(Button):
         self.frames[num].focus()
 
     def swap_frame(self, num):
+        """Return a function that when called calls do_swap_frame(num)"""
         def do():
             self.do_swap_frame(num)
         return do
 
     def do_visible(self):
+        """Set the top level frame to visible."""
         if self.skip_click:
             self.skip_click = False
             return
         self.do_swap_frame(0)
 
     def bind_to_event(self, name):
+        """Return funtction that when called fire a "menu-click" even with arg name."""
         def send():
             self.dispatch.fire("menu-click", name)
         return send
 
     def do_unfocus(self):
+        """Unfocus the widget, and all frames."""
         for i in self.frames:
             i.visible = False
             i.key_active=False
@@ -1816,3 +1990,4 @@ class Menu(Button):
     def unfocus(self):
         if not self.frames[self.cur_frame].visible:
             Widget.unfocus(self)
+    unfocus.__doc__ = Button.unfocus.__doc__
