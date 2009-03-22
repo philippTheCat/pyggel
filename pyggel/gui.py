@@ -250,7 +250,16 @@ class Theme(object):
         return name
 
 class Packer(object):
-    def __init__(self, app=None, packtype="wrap", size=(10,10)):
+    """An object used to position widgets so they don't overlap, in a set pattern."""
+    def __init__(self, app, packtype="wrap", size=(10,10)):
+        """Create the Packer
+           app must be the object creating the packer
+           packtype must be None or string of wrap type to use, available values are:
+               "wrap", "center", None
+           size must be a tuple (x, y) representing the dimensions of the area for packing.
+               packer will try and keep widgets inside this confine, but
+               if a single widget is too wide, it will spill over the width, and
+               the packer will not limit widgets in the height value - just use it for centering and such"""
         self.app = app
         self.packtype = packtype
         self.size = size
@@ -258,12 +267,14 @@ class Packer(object):
         self.need_to_pack = False
 
     def pack(self):
+        """Position all app.widgets."""
         self.app.widgets.reverse()
         getattr(self, "pack_%s"%self.packtype)()
         self.app.widgets.reverse()
         self.need_to_pack = False
 
     def pack_wrap(self):
+        """Position app.widgets in a manner that simply tried to keep them from spilling over the width."""
         nw = 0
         nh = 0
         newh = 0
@@ -291,6 +302,7 @@ class Packer(object):
             i.force_pos_update(pos)
 
     def pack_center(self):
+        """Position app.widgets in a manner that tries to center them in the center of the size given."""
         rows = [[]]
         w = 0
         for i in self.app.widgets:
@@ -329,6 +341,7 @@ class Packer(object):
             top += sizes[i][1]
 
     def pack_None(self):
+        """Position app.widgets so they merely do not overlap."""
         nw = 0
         nh = 0
         newh = 0
@@ -354,7 +367,7 @@ class App(object):
     def __init__(self, event_handler):
         """Create the App.
            event_handler must be the event.Handler object that the gui will use to get events,
-           and each event handler may only have on App attached to it."""
+               sets event_handler's current gui to this App"""
         self.event_handler = event_handler
         self.event_handler.gui = self
         self.event_handler.all_guis.append(self)
@@ -374,6 +387,7 @@ class App(object):
         self.size = view.screen.screen_size_2d
 
     def activate(self):
+        """Sets event_handler's active gui to self."""
         self.event_handler.gui = self
         self.visible=True
         for i in self.event_handler.all_guis:
@@ -382,19 +396,25 @@ class App(object):
                 for x in i.widgets:
                     x.unfocus()
     def kill(self):
+        """Removes App from event_handler."""
         if self in self.event_handler.all_guis:
             self.event_handler.all_guis.remove(self)
 
     def get_font(self, name):
+        """Return theme Font and MEFont bound to name."""
         return self.fonts[name]
 
     def get_regfont(self, name):
+        """Return theme Font bound to name."""
         return self.fonts[name][0]
 
     def get_mefont(self, name):
+        """Return theme MEFont bound to name."""
         return self.fonts[name][1]
 
     def update_fonts(self, fonts):
+        """Sets all App/Theme fonts to fonts.
+           fonts must be a dict of {"name":(Font, MEFont)} obejcts"""
         self.fonts = fonts
         for i in self.widgets:
             if i.widget_name in ("Frame", "Window"):
@@ -516,8 +536,15 @@ class App(object):
         self.widgets.reverse()
 
 class Widget(object):
+    """The base widget class - all other widgets should inherit from this widget."""
     widget_name = "Widget"
     def __init__(self, app, pos=None, font=tdef, image_border=tdef, special_name=None):
+        """Create the widget
+           app must be the App/Frame/Window this widget is attached to
+           pos must be None (to use app.packer) or the (x,y) pos of the widget
+           font must be tdef/None or the (Font, MEFont) fonts to use
+           image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
+           special_name must be None or the name used to grab a value different from widget_name from the theme"""
         self.app = app
         self.pos = pos
         self.size = (0,0)
@@ -557,12 +584,14 @@ class Widget(object):
         self.khl = 200 #milliseconds to hold keys for repeat!
 
     def get_root_app(self):
+        """Return the root App object this widget, or it's parent (etc.) is attached to."""
         app = self.app
         while hasattr(app, "app") and app.app:
             app = app.app
         return app
 
     def load_background(self, filename):
+        """Load and scale an image ot be used for the background for a widget."""
         try:
             x, y = pygame.image.load(self.theme.data(filename)).get_size()
         except:
@@ -580,20 +609,24 @@ class Widget(object):
         return new, size, tsize, tsize
 
     def pack(self):
+        """Pposition this widget with others using app.packer."""
         self.app.packer.pack()
 
     def _collidem(self):
+        """Returns whether mouse is colliding with the widget or not."""
         x, y = self.app.get_mouse_pos()
         a, b = self.pos
         w, h = self.size
         return (x >= a and x <= a+w) and (y >= b and y <= b+h)
 
     def focus(self):
+        """Focus this widget so it is at the top of rendering and event calls."""
         self.app.set_top_widget(self)
         self.key_active = True
         self.dispatch.fire("focus")
 
     def handle_mousedown(self, button, name):
+        """Handle a mouse down event from the App."""
         if name == "left":
             if self._mhover:
                 self._mhold = True
@@ -602,6 +635,7 @@ class Widget(object):
             self.unfocus()
 
     def handle_mouseup(self, button, name):
+        """Handle a mouse release event from the App."""
         if name == "left":
             if self._mhold and self._mhover:
                 self._mhold = False
@@ -609,11 +643,13 @@ class Widget(object):
                 return True
 
     def handle_mousehold(self, button, name):
+        """Handle a mouse hold event from the App."""
         if name == "left":
             if self._mhold:
                 return True
 
     def handle_mousemotion(self, change):
+        """Handle a mouse motion event from the App."""
         self._mhover = self._collidem()
         for i in self.app.widgets:
             if not i == self:
@@ -621,15 +657,18 @@ class Widget(object):
         return self._mhover
 
     def can_handle_key(self, key, string):
+        """Return whether key/string is used by this widget."""
         return False
 
     def handle_keydown(self, key, string):
+        """Handle a key down event from the App."""
         if self.can_handle_key(key, string):
             if self.key_active:
                 self.dispatch.fire("keypress", key, string)
                 return True
 
     def handle_keyhold(self, key, string):
+        """Handle a key hold event from the App."""
         if self.can_handle_key(key, string):
             if self.key_active:
                 if key in self.key_hold_lengths:
@@ -641,6 +680,7 @@ class Widget(object):
                 return True
 
     def handle_keyup(self, key, string):
+        """Handle a key release event from the App."""
         if self.can_handle_key(key, string):
             if self.key_active:
                 if key in self.key_hold_lengths:
@@ -648,9 +688,11 @@ class Widget(object):
                 return True
 
     def handle_uncaught_event(self, event):
+        """Handle any non mouse or key event from the App."""
         pass
 
     def get_clip(self):
+        """Return the render clipping region of the image."""
         x, y = self.pos
         w, h = self.size
         x += self.tsize[0]
@@ -660,9 +702,11 @@ class Widget(object):
         return (x, y), (w, h)
 
     def force_pos_update(self, pos):
+        """Force the widget to change it's position."""
         self.pos = pos
 
     def render(self, offset=(0,0)):
+        """Render the widget at widget.pos + offset."""
         x, y = self.pos
         x += offset[0]
         y += offset[1]
@@ -676,6 +720,7 @@ class Widget(object):
             self.image.pos = (self.pos[0]+self.tshift[0], self.pos[1]+self.tshift[1]) #need to reset!
 
     def unfocus(self):
+        """Remove the widget's focus."""
         self.key_active=False
         self.key_hold_lengths = {}
         self.dispatch.fire("unfocus")
