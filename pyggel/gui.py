@@ -13,13 +13,17 @@ import os
 
 tdef = "theme"
 class Theme(object):
+    """A class used to create/load themes and content for widgets."""
     def __init__(self, app):
+        """Create the theme
+           app must be the App object that is creating this theme"""
         self.theme = self.make_default_theme()
         self.app = app
         self.path = ""
         self.make_fonts(None)
 
-    def make_fonts(self, filename):
+    def make_fonts(self):
+        """Build all the fonts the theme calls for."""
         g = {}
         for a in self.theme["Fonts"]:
             b = self.theme["Fonts"][a]
@@ -31,8 +35,12 @@ class Theme(object):
         self.app.update_fonts(g)
 
     def load(self, filename):
+        """Load a theme from filename."""
         if filename:
-            self.path = os.path.split(filename)[0]
+            try:
+                self.path = os.path.split(filename)[0]
+            except:
+                self.path = ""
         else:
             self.path = ""
         for i in list(locals()) + list(globals()) + list(dir(__builtins__)):
@@ -44,9 +52,10 @@ class Theme(object):
             for val in g[widget]:
                 self.theme[widget][val] = g[widget][val]
 
-        self.make_fonts(filename)
+        self.make_fonts()
 
     def make_default_theme(self):
+        """Create a base theme so that anything not specified in a loaded theme (if any) are missed."""
         g = {"Fonts":{
                 "default":{
                     "fontfile":None,
@@ -231,9 +240,11 @@ class Theme(object):
         return g
 
     def get(self, widget, val):
+        """Get the value of the theme declaration for widget.val"""
         return self.theme[widget.widget_name][val]
 
     def data(self, name):
+        """Return the path/to/name for a data object."""
         if self.path:
             return os.path.join(self.path, name)
         return name
