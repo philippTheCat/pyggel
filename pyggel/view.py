@@ -138,8 +138,6 @@ def init(screen_size=None, screen_size_2d=None,
     build_screen()
 
     glEnable(GL_TEXTURE_2D)
-    glFrontFace(GL_CW)
-    glCullFace(GL_BACK)
     glEnable(GL_COLOR_MATERIAL)
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
