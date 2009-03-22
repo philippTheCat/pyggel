@@ -68,6 +68,7 @@ class Mouse(object):
         return "extra-%s"%button
 
     def do_active_hit(self, event):
+        """Add a hit event."""
         if not event.button in self.active:
             name = self.get_name(event.button)
             self.active.append(event.button)
@@ -76,6 +77,7 @@ class Mouse(object):
             self.hit.append(name)
 
     def do_buttonup(self, event):
+        """Remove a button from active list."""
         if event.button in self.active:
             name = self.get_name(event.button)
             self.active.remove(event.button)
