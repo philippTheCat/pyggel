@@ -20,7 +20,7 @@ class Theme(object):
         self.theme = self.make_default_theme()
         self.app = app
         self.path = ""
-        self.make_fonts(None)
+        self.make_fonts()
 
     def make_fonts(self):
         """Build all the fonts the theme calls for."""
@@ -1772,7 +1772,7 @@ class Menu(Button):
 
         Button.__init__(self, app, name, pos, [],
                         background_image, background_image_hover, background_image_click,
-                        font_color, font_color_hover, font_color_click, font,
+                        font, font_color, font_color_hover, font_color_click,
                         font_underline, font_italic, font_bold,
                         font_underline_hover, font_italic_hover, font_bold_hover,
                         font_underline_click, font_italic_click, font_bold_click,
@@ -1983,11 +1983,11 @@ class Menu(Button):
             i._mhover=False
         self.cur_frame = 0
         self.unfocus()
-        self.handle_mousemotion(None)
         if self._mhover:
             self.skip_click = True
 
     def unfocus(self):
         if not self.frames[self.cur_frame].visible:
             Widget.unfocus(self)
+            self._mhover = self._collidem()
     unfocus.__doc__ = Button.unfocus.__doc__
