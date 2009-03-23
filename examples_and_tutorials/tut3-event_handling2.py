@@ -1,4 +1,4 @@
-"""tut2-event_handling2.py
+"""tut3-event_handling2.py
 
 This tutorial continues from the last one, and continues event handling, showing how to attach callback functions to events."""
 
