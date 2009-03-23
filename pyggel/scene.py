@@ -142,7 +142,7 @@ class Scene(object):
         if light in self.graph.lights:
             self.graph.lights.remove(light)
 
-    def pick(self, mouse_pos, camera):
+    def pick(self, mouse_pos, camera=None):
         """Run picker and return which object(s) are hit in each render_3d* group in the scene.
            mouse_pos is the position of the mouse on screen
            camera is teh camera used to render the scene

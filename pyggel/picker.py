@@ -7,7 +7,7 @@ The picker module contains functions and classes to assist in selecting which 3d
 
 from include import *
 
-def Pick512Objects(x, y, objs, camera):
+def Pick512Objects(x, y, objs, camera=None):
     """Figure out which object in a list of up to 512 objects are selected.
        x, y are the mouse coords on screen
        objs is a list of renderable objects
@@ -23,12 +23,14 @@ def Pick512Objects(x, y, objs, camera):
     glLoadIdentity()
     gluPickMatrix(x, viewport[3] - y, 1, 1, viewport)
     glMultMatrixd(previousviewmatrix)
-    camera.push()
+    if camera:
+        camera.push()
     for i in objs:
         glPushName(i[1])
         if i[0].visible: i[0].render(camera)
         glPopName()
-    camera.pop()
+    if camera:
+        camera.pop()
     glFlush()
     glMatrixMode(GL_PROJECTION)
     glLoadMatrixd(previousviewmatrix)
