@@ -142,9 +142,11 @@ class Handler(object):
                keydown - when a key is pressed
                keyup - when a key is released
                keyhold - when a mouse key is held
+               keyactive - when a mouse key is active
                mousedown - when a mouse button is pressed
                mouseup - when a mouse button is released
                mousehold - when a mouse button is held
+               mouseactive - when a mouse button is active
                quit - when the QUIT event was fired (ie the X box on the window is hit)
                uncaught-event - when an unsupported event is fired
                update - called at end of grabbing events/firing callbacks.
@@ -157,6 +159,12 @@ class Handler(object):
                uncaught-event: event->the Pygame event
                quit, update: None"""
         self.dispatch.bind(event, function)
+
+    def replace_event(self, event, function):
+        """This is the same as bind_to_event, except that it forces function to be the only one attached to the event,
+           instead of allowing several."""
+        self.dispatch.name_bindings[event] = []
+        self.bind_to_event(event, function)
 
     def handle_event(self, event):
         """Handle an event, store in proper object, and fire callbacks."""
@@ -242,11 +250,13 @@ class Handler(object):
                     eventkey = i
                     name = self.keyboard.hook[eventkey]
                     self.dispatch.fire("keyhold", eventkey, name)
+                    self.dispatch.fire("keyactive", eventkey, name)
         for i in self.mouse.active:
             if not i in self.mouse.hit:
                 self.mouse.held.append(i)
                 if type(i) is type(1): #same thing as keys, only slightly different test!
                     self.dispatch.fire("mousehold", i, self.mouse.get_name(i))
+                    self.dispatch.fire("mouseactive", i, self.mouse.get_name(i))
 
         for i in self.gui_keyboard.active:
             if not i in self.gui_keyboard.hit:
