@@ -50,6 +50,7 @@ class Mouse(object):
                hit -> a list of all mouse buttons that were clicked
                held -> a list of all mouse buttons that were held"""
         self.active = []
+        self.motion = [0,0]
 
         self.hit = []
         self.held = []
@@ -198,9 +199,13 @@ class Handler(object):
             self.dispatch.fire("mouseup", event.button, name)
 
         elif event.type == MOUSEMOTION:
+            self.gui_mouse.motion[0] += event.rel[0]
+            self.gui_mouse.motion[1] += event.rel[1]
             if self.gui and self.gui.handle_mousemotion(event.rel):
                 return None
             self.dispatch.fire("mousemotion", event.rel)
+            self.mouse.motion[0] += event.rel[0]
+            self.mouse.motion[1] += event.rel[1]
             
         elif event.type == QUIT:
             self.quit = True
@@ -217,6 +222,8 @@ class Handler(object):
         """Grab all events, store in proper objects, and fire callbacks where necessary."""
         self.keyboard.hit = []
         self.mouse.hit = []
+        self.mouse.motion = [0,0]
+        self.gui_mouse.motion = [0,0]
         self.uncaught_events = []
         self.gui_uncaught_events = []
         self.gui_keyboard.hit = []
