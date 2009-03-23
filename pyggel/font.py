@@ -635,7 +635,8 @@ class Font(object):
         """Recreate the pygame font used."""
         self.pygame_font = pygame.font.Font(self.filename, self.size)
 
-    def make_text_image(self, text="", color=(1,1,1,1), linewrap=None, underline=False, italic=False, bold=False):
+    def make_text_image(self, text="", color=(1,1,1,1), linewrap=None,
+                        underline=False, italic=False, bold=False):
         """Create an FontImage object with the text rendered to it.
            text is the text to render
            color is the color of the text (0-1 RGBA)
@@ -663,13 +664,13 @@ class Font(object):
 
 class MEFont(object):
     """A font that produces image objects that render slower, but changing text is fast."""
-    def __init__(self, filename=None, fsize=32):
+    def __init__(self, filename=None, size=32):
         """Create the font
            filename must be None or the filename of the font to load
            size is the size of the font"""
         view.require_init()
         self._filename = filename
-        self._size = fsize
+        self._size = size
 
         self.images = {}
 
@@ -732,7 +733,8 @@ class MEFont(object):
 
         self.glyphs = {"": L, "b":Lb, "i":Li, "ib":Lib}
 
-    def make_text_image(self, text="", color=(1,1,1,1), linewrap=None, underline=False, italic=False, bold=False):
+    def make_text_image(self, text="", color=(1,1,1,1), linewrap=None,
+                        underline=False, italic=False, bold=False):
         """Create an FontImage object with the text rendered to it.
            text is the text to render
            color is the color of the text (0-1 RGBA)

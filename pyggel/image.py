@@ -18,7 +18,7 @@ class Image(object):
                  rotation=(0,0,0), scale=1,
                  colorize=(1,1,1,1)):
         """Create the Image
-           filename must be a filename to an image file, or a pygame.Surface object
+           filename must be a filename to an image file, a pygame.Surface object or an image.Image to copy
            pos is the 2d position of the image
            rotation is the 3d rotation of the image
            scale is the scale factor for the image
@@ -405,7 +405,7 @@ class Animation(object):
                  rotation=(0,0,0), scale=1,
                  colorize=None):
         """Create the Animation
-           frames must be a list/tuple of [frame, duration] objects
+           frames must be a list/tuple of [Image, duration] objects
            pos is the 2d position of the image
            rotation is the 3d rotation of the image
            scale is the scale factor for the image
@@ -500,7 +500,6 @@ class Animation(object):
     def fastforward(self):
         """Fast forward playback to the last frame."""
         self.seek(self.length()-1)
-        self.ptime = time.time()
 
     def get_width(self):
         """Return the width of the image."""

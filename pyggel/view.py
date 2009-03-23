@@ -108,8 +108,17 @@ def init(screen_size=None, screen_size_2d=None,
          fullscreen=False, hwrender=True,
          decorated=True):
     """Initialize the display, OpenGL and whether to use psyco or not.
-       screen_size must be the pixel dimensions of the display window
-       use_psyco must be a boolean value indicating whether psyco should be used or not"""
+       screen_size must be the pixel dimensions of the display window (defaults to 640x480)
+       screen_size_2d is the 2d size of the screen that the 2d elements use (defaults to screen_size),
+           the 2d elements are handled as if this is the real screen size,
+           and then scaled to fit the real screen size at render time,
+           this allows multiple screen resolutions without resorting to hacking the 2d or,
+           like some 3d engines do, make the 2d elements really 3d that are projected funny.
+       use_psyco must be a boolean value indicating whether psyco should be used or not (only if available)
+       icon_image must be a string indicating the image to load from disk, or a pygame Surface to use for the window icon
+       full_screen indicates whether the render screen is fullscreen or not
+       hwrender indicates whether hwrendering should be used for pygame operations
+       decorated indicates whether the display window should have a border and top bar or not"""
     if screen_size and not screen_size_2d:
         screen_size_2d = screen_size
     screen_size = screen.set_size(screen_size, screen_size_2d)
