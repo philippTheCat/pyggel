@@ -2,7 +2,7 @@
 
 This tutorial shows you how to setup a basic view, start a loop, limit FPS and quit when events are grabbed."""
 
-import get_pyggel #this just makes sure we grab pyggel - so if we are running from the install directory it still works ;)
+import _set_path #this just makes sure we grab pyggel/data directories - so if we are running from the install directory it still works ;)
 
 import pyggel
 from pyggel import *

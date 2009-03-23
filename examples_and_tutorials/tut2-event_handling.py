@@ -2,7 +2,7 @@
 
 This tutorial continues from the last one, and shows how to handle more kinds of events."""
 
-import get_pyggel #this just makes sure we grab pyggel - so if we are running from the install directory it still works ;)
+import _set_path #this just makes sure we grab pyggel/data directories - so if we are running from the install directory it still works ;)
 
 import pyggel
 from pyggel import *
