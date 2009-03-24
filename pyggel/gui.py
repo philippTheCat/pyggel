@@ -1229,6 +1229,7 @@ class MultiChoiceRadio(Radio):
     __init__.__doc__ = Radio.__init__.__doc__
 
     def check_click(self):
+        select = []
         for i in self.options:
             name, check, label, state = i
             if check.state != state:
@@ -1236,6 +1237,9 @@ class MultiChoiceRadio(Radio):
             state = check.state
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
+            if state:
+                select.append(name)
+        self.dispatch.fire("change", select)
     check_click.__doc__ = Radio.check_click.__doc__
 
 class Input(Widget):
@@ -1244,7 +1248,7 @@ class Input(Widget):
     def __init__(self, app, start_text=tdef, width=tdef, pos=None, background_image=tdef,
                  font_color=tdef, font_color_inactive=tdef, font=tdef,
                  font_underline=tdef, font_italic=tdef, font_bold=tdef,
-                 image_border=tdef,
+                 image_border=tdef, callback=None,
                  special_name=None):
         """Create the input
            app must be the App/Frame/Window this widget is attached to
@@ -1296,6 +1300,9 @@ class Input(Widget):
         if background_image:
             self.background, self.size, self.tsize, self.tshift = self.load_background(background_image)
         self.pack()
+
+        if callback:
+            self.dispatch.bind("submit", callback)
 
         self.calc_working_pos()
 
@@ -1812,10 +1819,31 @@ class Menu(Button):
 
         self.skip_click = False
 
+    def get_pos_for_frames(self, frame):
+        x, y = self.pos
+        y += self.size[1]
+        app = self.app
+        while hasattr(app, "app"):
+            a, b = app.pos
+            c, d = app.tsize
+            x += a + c
+            y += b + d
+            app = app.app
+
+        sx, sy = self.get_root_app().size
+
+        right = x + frame.size[0]
+        if right > sx:
+            right = sx
+        bottom = y + frame.size[1]
+        if bottom > sy:
+            bottom = sy
+        return right-frame.size[0], bottom-frame.size[1]
+
     def add_frame(self, name, options, images, fc, ff, fs, ssi, sfc, sfs):
         """Build frames for each menu/sun-menu, and entries."""
         goback = int(self.cur_frame)
-        frame = Frame(self.get_root_app(), (self.pos[0], self.pos[1]+self.size[1]), background_image=images[0], font=ff,
+        frame = Frame(self.get_root_app(), (0,0), background_image=images[0], font=ff,
                       image_border=self.image_border)
         frame.packer.packtype = None
         frame.visible = False
@@ -1953,6 +1981,7 @@ class Menu(Button):
             i.visible = False
         self.frames[num].visible = True
         self.frames[num].focus()
+        self.frames[num].pos = self.get_pos_for_frames(self.frames[num])
 
     def swap_frame(self, num):
         """Return a function that when called calls do_swap_frame(num)"""

@@ -63,6 +63,7 @@ def main():
     pyggel.gui.MoveBar(app, "TestWindow", child=frame)
     window = pyggel.gui.Window(app, "P Window-take2!!!", (100,100), (100,100))
     pyggel.gui.Label(window, "Woot!:P")
+    pyggel.gui.Menu(window, "testing?", options=["1"*6]*5, callback=test_menu)
     pyggel.gui.Menu(newapp, "Menu", options=["help", "test", "quit","2","3","4","Snazzlemegapoof!!!!",
                                              ["please work!", "1", "2", "3", "asfkjhsakfh",
                                               ["subagain!", "1", "2", "3"*10]]],
