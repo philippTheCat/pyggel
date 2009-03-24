@@ -7,7 +7,7 @@ The picker module contains functions and classes to assist in selecting which 3d
 
 from include import *
 
-def Pick512Objects(x, y, objs, camera=None):
+def Pick512Objects(x, y, objs, camera):
     """Figure out which object in a list of up to 512 objects are selected.
        x, y are the mouse coords on screen
        objs is a list of renderable objects
@@ -84,7 +84,7 @@ class Group(object):
             self.all_objs.remove(obj)
             self.all_names.remove(name)
         except:
-            pass
+            print "!@#!@#@#"
 
     def pick(self, mouse_pos, camera=None):
         """Run Pick512Objects(mouse_pos[0], mouse_pos[1], self.objects, camera) and return results."""
@@ -94,7 +94,7 @@ class Group(object):
         far = []
         names = []
         for objgroup in self.objects:
-            if not objgroup:
+            if not objgroup and len(self.objects)>1:
                 self.objects.remove(objgroup)
                 continue
             _n = Pick512Objects(x, y, objgroup, camera)

@@ -142,7 +142,7 @@ def main():
 
         pyggel.view.clear_screen()
 
-        hit = my_scene.pick(pygame.mouse.get_pos(), camera).hit
+        hit = my_scene.pick(pygame.mouse.get_pos(), camera)
         if hit:
             hit.colorize = (1, 0, 0, 1)
         if last_hit:

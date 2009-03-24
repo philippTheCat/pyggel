@@ -69,6 +69,7 @@ def main():
                    texture can be None or a single data.Texture for the face
                    facing is the index (0-5) of cube faces to render
                        values are 0-left, 1-right, 2-top, 3-bottom, 4-front, 5-back
+                       you can also use the names ("left", "front", etc.) to get the face...
            geometry.Plane(size, pos, rotation, colorize, texture, facing, tile)
                A Plane is exactly the same as a Quad, except that you can tile the texture so that it repeats,
                which is much faster than having a ton of quads...
@@ -91,8 +92,8 @@ def main():
     b = pyggel.geometry.Cube(1, pos=(-8, 0, 20), texture=tex) #this one is textured as a cubemap
     c = pyggel.geometry.Cube(1, pos=(-6, 0, 20), texture=[tex]*6) #this one copies the texture for each face
 
-    d = pyggel.geometry.Quad(1, pos=(-4, 0, 20), texture=tex, facing=4) #this will look exactly like the cubes, because it is facing us...
-    d = pyggel.geometry.Plane(10, pos=(-2, 0, 20), texture=tex, facing=4, tile=10)
+    d = pyggel.geometry.Quad(1, pos=(-4, 0, 20), texture=tex, facing="front") #this will look exactly like the cubes, because it is facing us...
+    d = pyggel.geometry.Plane(10, pos=(-2, 0, 20), texture=tex, facing="front", tile=10)
     e = pyggel.geometry.Sphere(1, pos=(-6, 6, 20), texture=tex)
 
     scene.add_3d((a,b,c,d,e))
