@@ -81,12 +81,12 @@ def main():
     c = pyggel.geometry.Cube(1, pos=(-1, 0, 0), texture=[tex]*6) #this one copies the texture for each face
 
     d = pyggel.geometry.Quad(1, pos=(1, 0, 0), texture=tex, facing=4) #this will look exactly like the cubes, because it is facing us...
-    d = pyggel.geometry.Plane(10, pos=(0, -7.5, 0), texture=tex, facing=4, tile=10)
-    e = pyggel.geometry.Sphere(1, pos=(3, 0, 0), texture=tex)
+    e = pyggel.geometry.Plane(10, pos=(0, -7.5, 0), texture=tex, facing=4, tile=10)
+    f = pyggel.geometry.Sphere(1, pos=(3, 0, 0), texture=tex)
 
     #Hey, those positions for the elements looks a lot nicer now, eh?
 
-    scene.add_3d((a,b,c,d,e))
+    scene.add_3d((a,b,c,d,e,f))
 
     #lets make a mesh!
     mesh = pyggel.mesh.OBJ("data/carrot.obj", pos=(5, 0, 0))
@@ -165,6 +165,7 @@ def main():
 
         #all right, let's check if any objects are picked, and work with them here
         #then, if there is a pick, let's make the object turn red...
+        #NOTE: scene.pick only checks 3d and 3d_blend object, not 3d_always!
         obj = scene.pick(pygame.mouse.get_pos(), camera)
         if obj:
             obj.colorize = (1,0,0,1)

@@ -93,10 +93,10 @@ def main():
     c = pyggel.geometry.Cube(1, pos=(-6, 0, 20), texture=[tex]*6) #this one copies the texture for each face
 
     d = pyggel.geometry.Quad(1, pos=(-4, 0, 20), texture=tex, facing="front") #this will look exactly like the cubes, because it is facing us...
-    d = pyggel.geometry.Plane(10, pos=(-2, 0, 20), texture=tex, facing="front", tile=10)
-    e = pyggel.geometry.Sphere(1, pos=(-6, 6, 20), texture=tex)
+    e = pyggel.geometry.Plane(10, pos=(-2, 0, 20), texture=tex, facing="front", tile=10)
+    f = pyggel.geometry.Sphere(1, pos=(-6, 6, 20), texture=tex)
 
-    scene.add_3d((a,b,c,d,e))
+    scene.add_3d((a,b,c,d,e,f))
 
     #Woah, so why are all these new 3d elements so dark and bland and everything?
     #Because we have no light in the scene.

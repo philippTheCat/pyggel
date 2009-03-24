@@ -87,6 +87,13 @@ class Cube(object):
             reg_type = 0
         else:
             reg_type = 1
+            _t = []
+            for i in self.texture:
+                if type(i) is type(""):
+                    _t.append(Texture(i))
+                else:
+                    _t.append(i)
+            self.texture = _t
 
         ox = .25
         oy = .33

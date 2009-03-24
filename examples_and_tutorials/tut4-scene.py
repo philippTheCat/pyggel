@@ -49,6 +49,7 @@ def main():
                pick returns the object picked or None
                NOTE: picking clears the screen - so always pick before you render, or after you call pyggel.view.refresh_screen!!!
                Another NOTE: picking is fairly slow - so if your game doesn't requrie it - don't use it!
+               Yet another NOTE: picking only checks objects in 3d and 3d_blend groups right now!
 
        Alright. Now that you know what a scene is and what it does, let's make one!"""
     scene = pyggel.scene.Scene()
