@@ -220,7 +220,7 @@ def main():
                          background_image_click=None)
     #Finally, let's add an Icon widget to the newapp, so it isn't so lonely...
     #And Icon does nothing, just shows an image.
-    pyggel.gui.Icon(newapp, image="data/gui/football.gif")
+    pyggel.gui.Icon(newapp, image="data/gui/smiley.gif")
 
 
     #And there you have it, a simple gui is set up, and running.

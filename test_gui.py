@@ -70,7 +70,7 @@ def main():
                        callback=test_menu)
     pyggel.gui.Button(newapp, "Swap Back!", callbacks=[lambda: swap_apps(app)],
                          background_image_click=None)
-    pyggel.gui.Icon(newapp, image="data/gui/football.gif")
+    pyggel.gui.Icon(newapp, image="data/gui/smiley.gif")
 
     clock = pygame.time.Clock()
 

@@ -2,7 +2,7 @@
     "default":{ #font "default"
         "fontfile":None, #None loads the system default, otherwise just make a .ttf file in the same dir
         "fontsize":32, #size
-        "images":{"XD":"football.gif"} #embeddable images, must be in same dir
+        "images":{"XD":"smiley.gif"} #embeddable images, must be in same dir
         }
     },
 "App":{}, #Theme stuff for Apps, nothing is used ;)

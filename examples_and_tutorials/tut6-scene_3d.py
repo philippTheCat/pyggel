@@ -26,23 +26,23 @@ def main():
     img2 = img.copy() #let's make another! copying is cheaper than loading the image again, because textures don't have to be recompiled or loaded.
     #You can also copy by doing img2 = pyggel.image.Image(img) - but that is just long ;)
     #let's change some attributes here...
-    img2.pos = (10, 0, 20) # new slot here, for "z" position
+    img2.pos = (10, 3, 20) # new slot here, for "z" position
     img2.rotation = (0,0,45)
 
     #Woot, animations too!
-    img3 = pyggel.image.GIFImage3D("data/football.gif")
-    img3.pos = (2, 2, 20)
+    img3 = pyggel.image.GIFImage3D("data/smiley.gif")
+    img3.pos = (2, 3, 20)
 
     img4 = pyggel.image.SpriteSheet3D("data/ar.png", [(0,0,16,16), (16,0,16,16), (32,0,16,16), (16,0,16,16)], 100)
-    img4.pos = (4,2,20)
+    img4.pos = (4,3,20)
 
     img5 = pyggel.image.GridSpriteSheet3D("data/ar.png", (3, 3), 100)
-    img5.pos = (6, 2, 20)
+    img5.pos = (6, 3, 20)
 
     #now the fonts
     font = pyggel.font.Font3D(None, 32) #sorry, no mefonts for 3d, and no embedded images/linewraps either, though newlines still work
     text1 = font.make_text_image("test?", italic=True)
-    text1.pos = (-2, -2, 20)
+    text1.pos = (-2, 3, 20)
 
     scene.add_3d((img, img2, img3, img4, img5)) #these images don't have perpixel alpha, so they are ok to go in base 3d class
     scene.add_3d_blend(text1) #unfortunately, this one does have perpixel alpha,
@@ -86,15 +86,15 @@ def main():
        all you do is change the position/rotation/scale/colorize of the object..."""
 
     #OK, let's make some stuff!
-    a = pyggel.geometry.Cube(1, pos=(-10, 0, 20)) #this one is untextured
+    a = pyggel.geometry.Cube(1, pos=(-10, 6, 20)) #this one is untextured
     #first, a texture to use...
     tex = pyggel.data.Texture("data/ar.png")
-    b = pyggel.geometry.Cube(1, pos=(-8, 0, 20), texture=tex) #this one is textured as a cubemap
-    c = pyggel.geometry.Cube(1, pos=(-6, 0, 20), texture=[tex]*6) #this one copies the texture for each face
+    b = pyggel.geometry.Cube(1, pos=(-8, 6, 20), texture=tex) #this one is textured as a cubemap
+    c = pyggel.geometry.Cube(1, pos=(-6, 6, 20), texture=[tex]*6) #this one copies the texture for each face
 
-    d = pyggel.geometry.Quad(1, pos=(-4, 0, 20), texture=tex, facing="front") #this will look exactly like the cubes, because it is facing us...
-    e = pyggel.geometry.Plane(10, pos=(-2, 0, 20), texture=tex, facing="front", tile=10)
-    f = pyggel.geometry.Sphere(1, pos=(-6, 6, 20), texture=tex)
+    d = pyggel.geometry.Quad(1, pos=(-4, 6, 20), texture=tex, facing="front") #this will look exactly like the cubes, because it is facing us...
+    e = pyggel.geometry.Plane(10, pos=(-6, -6, 20), texture=tex, facing="front", tile=10)
+    f = pyggel.geometry.Sphere(1, pos=(2, 6, 20), texture=tex)
 
     scene.add_3d((a,b,c,d,e,f))
 
@@ -117,7 +117,7 @@ def main():
        mesh.OBJ returns a mesh.BasicMesh object, which has the exact same usage as geometry objects do."""
 
     #lets make a mesh!
-    mesh = pyggel.mesh.OBJ("data/carrot.obj", pos=(-8, 6, 20))
+    mesh = pyggel.mesh.OBJ("data/carrot.obj", pos=(4, 6, 20))
     scene.add_3d(mesh)
 
     """And there we go, you have some geometry, a mesh, some 3d images/text and that is the basis for almost every scene in PYGGEL!"""

@@ -65,7 +65,7 @@ def main():
 
     #loading animations can be doen manually, specifying an image/duration for each frame, but there are some automated tools for that.
     #First, you can load a GIF into an animation:
-    img3 = pyggel.image.GIFImage("data/football.gif")
+    img3 = pyggel.image.GIFImage("data/smiley.gif")
     img3.pos = (10,150)
     #or you can load a spritesheet!
     img4 = pyggel.image.SpriteSheet("data/ar.png", [(0,0,16,16), (16,0,16,16), (32,0,16,16), (16,0,16,16)], 100)

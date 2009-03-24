@@ -2,7 +2,7 @@
     "default":{
         "fontfile":None,
         "fontsize":32,
-        "images":{"XD":"football.gif"}
+        "images":{"XD":"smiley.gif"}
         }
     },
 "App":{

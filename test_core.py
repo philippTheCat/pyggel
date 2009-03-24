@@ -34,8 +34,8 @@ def main():
     img5 = font3d.make_text_image("Hello World: 3D", (0, 1, 1))
     img5.scale = 2
 
-    img6 = pyggel.image.GIFImage("data/football.gif", pos=(150, 150))
-    img7 = pyggel.image.GIFImage3D("data/football.gif", pos=(0,0,1))
+    img6 = pyggel.image.GIFImage("data/smiley.gif", pos=(150, 150))
+    img7 = pyggel.image.GIFImage3D("data/smiley.gif", pos=(0,0,1))
 
     pyggel.view.set_cursor(pyggel.image.SpriteSheet("data/ar.png",
                                     [(0,0,16,16), (16,0,16,16), (32,0,16,16), (16,0,16,16)],
