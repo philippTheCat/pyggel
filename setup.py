@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from distutils.core import setup
 setup(name='pyggel',
-      version='0.06-alpha2',
+      version='0.07-alpha3',
       description='PYthon Graphical Game Engine and Libraries',
       author='Matt Roe',
       author_email='RoeBros@gmail.com',
