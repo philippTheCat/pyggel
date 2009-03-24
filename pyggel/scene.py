@@ -91,18 +91,24 @@ class Scene(object):
                 glEnable(GL_LIGHTING)
 
     def add_2d(self, ele):
-        """Add a 2d object to the scene."""
-        self.graph.render_2d.append(ele)
-        ele.scene = self
+        """Add a 2d object or list of objects to the scene."""
+        if not hasattr(ele, "__iter__"):
+            ele = [ele]
+        for i in ele:
+            self.graph.render_2d.append(i)
+            i.scene = self
 
     def remove_2d(self, ele):
         """Remove a 2d object from the scene."""
         self.graph.render_2d.remove(ele)
 
     def add_3d(self, ele):
-        """Add a 3d, non-blended, depth-tested object to the scene."""
-        self.graph.render_3d.append(ele)
-        self.graph.pick_3d.add_obj(ele)
+        """Add a 3d, non-blended, depth-tested object or list of objects to the scene."""
+        if not hasattr(ele, "__iter__"):
+            ele = [ele]
+        for i in ele:
+            self.graph.render_3d.append(i)
+            self.graph.pick_3d.add_obj(i)
 
     def remove_3d(self, ele):
         """Remove a 3d object from the scene."""
@@ -110,9 +116,12 @@ class Scene(object):
         self.graph.pick_3d.rem_obj(ele)
 
     def add_3d_blend(self, ele):
-        """Add a 3d, blended, depth-tested object to the scene."""
-        self.graph.render_3d_blend.append(ele)
-        self.graph.pick_3d_blend.add_obj(ele)
+        """Add a 3d, blended, depth-tested object or list of objects to the scene."""
+        if not hasattr(ele, "__iter__"):
+            ele = [ele]
+        for i in ele:
+            self.graph.render_3d_blend.append(i)
+            self.graph.pick_3d_blend.add_obj(i)
 
     def remove_3d_blend(self, ele):
         """Remove a 3d blended object from the scene."""
@@ -120,17 +129,21 @@ class Scene(object):
         self.graph.pick_3d_blend.rem_obj(ele)
 
     def add_3d_always(self, ele):
-        """Add a 3d, blended, non-depth-tested (always visible) object to the scene."""
-        self.graph.render_3d_always.append(ele)
-        self.graph.pick_3d_always.add_obj(ele)
+        """Add a 3d, blended, non-depth-tested (always visible) object or list of objects to the scene."""
+        if not hasattr(ele, "__iter__"):
+            ele = [ele]
+        for i in ele:
+            self.graph.render_3d_always.append(i)
+            self.graph.pick_3d_always.add_obj(i)
 
     def remove_3d_always(self, ele):
         """Remove a 3d always visible obejct from the scene."""
         self.graph.render_3d_always.remove(ele)
         self.graph.pick_3d_always.rem_obj(ele)
 
-    def add_skybox(self, ele):
-        """Add a Skybox or Skyball object to the scene."""
+    def add_skybox(self, ele=None):
+        """Add a Skybox or Skyball object to the scene.
+           If None is given, disables skybox."""
         self.graph.skybox = ele
 
     def add_light(self, light):

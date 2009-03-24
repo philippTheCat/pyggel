@@ -97,9 +97,9 @@ def main():
     font = pyggel.font.Font(None, 32)
     mefont = pyggel.font.MEFont(None, 32)
     #but wait - do we want some imbedded images?
-    font.add_image(":P", img3.copy())
+    font.add_image(":)", img4.copy())
     mefont.add_image(":)", img4.copy())
-    text1 = font.make_text_image("test?:P", italic=True)
+    text1 = font.make_text_image("test?:)", italic=True)
     text1.pos = (10, 350)
     text2 = mefont.make_text_image("test!:)", color=(1,0,0,1), underline=True)
     text2.pos = (10, 400)
@@ -108,10 +108,10 @@ def main():
     scene.add_2d(img)
     scene.add_2d(img2)
     scene.add_2d(img3)
-    scene.add_2d(img4)
-    scene.add_2d(img5)
-    scene.add_2d(text1)
-    scene.add_2d(text2)
+
+    #ok, so you can dump each and every object into the scene one at a time, or...
+    #you can dump them all at once...
+    scene.add_2d((img4, img5, text1, text2))
 
     clock = pygame.time.Clock() #pyggel automatically imports OpenGL/Pygame
                                 #for a full list of everything included,

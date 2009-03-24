@@ -44,11 +44,7 @@ def main():
     text1 = font.make_text_image("test?", italic=True)
     text1.pos = (-2, -2, 20)
 
-    scene.add_3d(img) #these images don't have perpixel alpha, so they are ok to go in base 3d class
-    scene.add_3d(img2)
-    scene.add_3d(img3)
-    scene.add_3d(img4)
-    scene.add_3d(img5)
+    scene.add_3d((img, img2, img3, img4, img5)) #these images don't have perpixel alpha, so they are ok to go in base 3d class
     scene.add_3d_blend(text1) #unfortunately, this one does have perpixel alpha,
                               #you can either put it in 3d and deal with the funny blending,
                               #or stick it in 3d_blend!
@@ -59,7 +55,71 @@ def main():
        Either by putting it into a class that scene can handle, or just calling gl render code between screen clear and refresh.
        But we've written a few classes to help with basic geometry so you don't have to reinvent the wheel all the time.
        These objects support all the features of other 3d objects (textures, colorize, pos, rotation, etc.):
-           Cube - a cube simply makes a cube, that can be textured and positioned like a lego."""
+           geometry.Cube(size, pos, rotation, colorize, texture)
+               size is the length of each side of the cube
+               pos is the (x,y,z) position of the object - defaults to (0,0,0)
+               rotation is the (x,y,z) rotation of the object - defaults to (0,0,0)
+               colorize is the (r,g,b,a) color, bound to range 0-1, of the object
+               texture can be None, a single data.Texture object which will be mapped as cube map,
+                   or a list of 6 data.Texture objects - each for it's own face
+
+           geometry.Quad(size, pos, rotation, colorize, texture, facing)
+               A Quad is basically a cube, except it only renders one face...
+               All the args are the same as for Cube, except:
+                   texture can be None or a single data.Texture for the face
+                   facing is the index (0-5) of cube faces to render
+                       values are 0-left, 1-right, 2-top, 3-bottom, 4-front, 5-back
+           geometry.Plane(size, pos, rotation, colorize, texture, facing, tile)
+               A Plane is exactly the same as a Quad, except that you can tile the texture so that it repeats,
+               which is much faster than having a ton of quads...
+               Args are the same as for Quad with one addition:
+                   tile is the number of times to repeat the image in the (x,y) surface of the plane
+           geometry.Sphere(size, pos, rotation, colorize, texture, detail)
+               The Args for a Sphere are virtually identacle to a Cube, only differences are:
+                   texture can be None or a single texture mapped to the Sphere
+                   size is the radius of the sphere
+                   detail is smoothness of the sphere - higher is more smooth - defaults to 30
+
+       Alrighty, so now you know how to add 4 kinds of geometry into your scene.
+       The interface for each of these is pretty simple - there aren't really any methods you need to use,
+       all you do is change the position/rotation/scale/colorize of the object..."""
+
+    #OK, let's make some stuff!
+    a = pyggel.geometry.Cube(1, pos=(-10, 0, 20)) #this one is untextured
+    #first, a texture to use...
+    tex = pyggel.data.Texture("data/ar.png")
+    b = pyggel.geometry.Cube(1, pos=(-8, 0, 20), texture=tex) #this one is textured as a cubemap
+    c = pyggel.geometry.Cube(1, pos=(-6, 0, 20), texture=[tex]*6) #this one copies the texture for each face
+
+    d = pyggel.geometry.Quad(1, pos=(-4, 0, 20), texture=tex, facing=4) #this will look exactly like the cubes, because it is facing us...
+    d = pyggel.geometry.Plane(10, pos=(-2, 0, 20), texture=tex, facing=4, tile=10)
+    e = pyggel.geometry.Sphere(1, pos=(-6, 6, 20), texture=tex)
+
+    scene.add_3d((a,b,c,d,e))
+
+    #Woah, so why are all these new 3d elements so dark and bland and everything?
+    #Because we have no light in the scene.
+    #The 3d image types are pseudo - they don't use lights, and they always face the camera (unless specifically rotated away)
+    #we will get to lights in the next lesson - for now, let's add a mesh and then we're done here :)
+
+    """Ok, so you want more than just blocks and balls?
+       Good, now we'll show you how you can import 3d models into PYGGEL.
+       NOTE: for now there is only a loader for OBJ files, but more loaders are planned for the next release...
+
+       Loading a mesh is quite simple:
+           mesh = mesh.OBJ(filename, swapyz, pos, rotation, colorize)
+               the pos, rotation and colorize args are the same as for geometry
+               filename is the filename of the .obj object to load
+               swapyz indicates whether to swap the y and the z coordinates for the mesh - defaults to True
+                   the reason behind this is the way some modellers' environment is set up is different than PYGGEL,
+                   so you generally need to convert.
+       mesh.OBJ returns a mesh.BasicMesh object, which has the exact same usage as geometry objects do."""
+
+    #lets make a mesh!
+    mesh = pyggel.mesh.OBJ("data/carrot.obj", pos=(-8, 6, 20))
+    scene.add_3d(mesh)
+
+    """And there we go, you have some geometry, a mesh, some 3d images/text and that is the basis for almost every scene in PYGGEL!"""
 
     clock = pygame.time.Clock() #pyggel automatically imports OpenGL/Pygame
                                 #for a full list of everything included,
