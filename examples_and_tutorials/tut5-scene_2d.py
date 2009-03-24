@@ -96,9 +96,12 @@ def main():
                underline, italic and bold - the attributes of the text, True or False for each"""
     font = pyggel.font.Font(None, 32)
     mefont = pyggel.font.MEFont(None, 32)
-    text1 = font.make_text_image("test?", italic=True)
+    #but wait - do we want some imbedded images?
+    font.add_image(":P", img3.copy())
+    mefont.add_image(":)", img4.copy())
+    text1 = font.make_text_image("test?:P", italic=True)
     text1.pos = (10, 350)
-    text2 = mefont.make_text_image("test!", color=(1,0,0,1), underline=True)
+    text2 = mefont.make_text_image("test!:)", color=(1,0,0,1), underline=True)
     text2.pos = (10, 400)
 
     #Now that we have all our images and fonts, lets add them to the scene and enjoy!
