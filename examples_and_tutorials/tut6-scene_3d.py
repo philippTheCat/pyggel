@@ -117,7 +117,8 @@ def main():
        mesh.OBJ returns a mesh.BasicMesh object, which has the exact same usage as geometry objects do."""
 
     #lets make a mesh!
-    mesh = pyggel.mesh.OBJ("data/carrot.obj", pos=(4, 6, 20))
+    mesh = pyggel.mesh.OBJ("data/bird_plane.obj", pos=(4, 6, 20), swapyz=False)
+    #this OBJ file is actually in PYGGEL coords, so no swapping is needed
     scene.add_3d(mesh)
 
     """And there we go, you have some geometry, a mesh, some 3d images/text and that is the basis for almost every scene in PYGGEL!"""

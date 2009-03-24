@@ -27,7 +27,8 @@ def Pick512Objects(x, y, objs, camera):
         camera.push()
     for i in objs:
         glPushName(i[1])
-        if i[0].visible: i[0].render(camera)
+        if i[0].visible:
+            i[0].render(camera)
         glPopName()
     if camera:
         camera.pop()

@@ -44,11 +44,10 @@ def main():
 
     img.blit(img2, (0, 0))
 
-    obj = pyggel.mesh.OBJ("data/carrot.obj")
+    obj = pyggel.mesh.OBJ("data/bird_plane.obj", False)
+    obj.scale = .5
     obj2 = obj.copy()
     obj2.pos = (0,0,5)
-    
-    horse = pyggel.mesh.OBJ("data/mikkis_horse_v4.obj")
 
     box = pyggel.geometry.Cube(5, texture=[data.Texture("data/stickdude.png")]*6)
     box.pos = (-5, 0, 0)
@@ -62,12 +61,11 @@ def main():
 
     my_scene.add_3d(obj)
     my_scene.add_3d(obj2)
-    my_scene.add_3d(horse)
     my_scene.add_3d(box)
     for i in img3d:
         my_scene.add_3d(i)
     my_scene.add_3d(img5)
-    my_scene.add_3d_always(img7)
+    my_scene.add_3d(img7)
 
     my_scene.add_light(my_light)
 

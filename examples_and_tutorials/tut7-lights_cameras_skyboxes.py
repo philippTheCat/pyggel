@@ -89,7 +89,7 @@ def main():
     scene.add_3d((a,b,c,d,e,f))
 
     #lets make a mesh!
-    mesh = pyggel.mesh.OBJ("data/carrot.obj", pos=(5, 0, 0))
+    mesh = pyggel.mesh.OBJ("data/bird_plane.obj", pos=(5, 0, 0), swapyz=False)
     scene.add_3d(mesh)
 
     """Alright, now that our 3d scene is lit and looks decent,
