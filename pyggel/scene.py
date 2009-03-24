@@ -21,6 +21,7 @@ class Tree(object):
         self.lights = []
 
         self.pick = picker.Group()
+        self.pick_always = picker.Group()
 
 class Scene(object):
     """A simple scene class used to store, render, pick and manipulate objects."""
@@ -114,10 +115,12 @@ class Scene(object):
             ele = [ele]
         for i in ele:
             self.graph.render_3d_always.append(i)
+            self.graph.pick_always.add_obj(i)
 
     def remove_3d_always(self, ele):
         """Remove a 3d always visible obejct from the scene."""
         self.graph.render_3d_always.remove(ele)
+        self.graph.pick_always.rem_obj(ele)
 
     def add_skybox(self, ele=None):
         """Add a Skybox or Skyball object to the scene.
@@ -136,7 +139,7 @@ class Scene(object):
             self.graph.lights.remove(light)
 
     def pick(self, mouse_pos, camera=None):
-        """Run picker and return which object(s) are hit in the 3d and 3d_blend groups - 3d_always are not checked!!!
+        """Run picker and return which object(s) are hit in the 3d* groups.
            mouse_pos is the position of the mouse on screen
            camera is the camera used to render the scene
            Returns picked object or None"""
@@ -144,10 +147,13 @@ class Scene(object):
 
         glDisable(GL_LIGHTING)
         glEnable(GL_ALPHA_TEST)
+        a = self.graph.pick_always.pick(mouse_pos, camera)
         h = self.graph.pick.pick(mouse_pos, camera)
         glDisable(GL_ALPHA_TEST)
         glEnable(GL_LIGHTING)
-        if h:
+        if a:
+            hit, depth = a
+        elif h:
             hit, depth = h
         else:
             hit = None

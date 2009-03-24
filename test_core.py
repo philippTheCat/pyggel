@@ -67,7 +67,7 @@ def main():
     for i in img3d:
         my_scene.add_3d(i)
     my_scene.add_3d(img5)
-    my_scene.add_3d(img7)
+    my_scene.add_3d_always(img7)
 
     my_scene.add_light(my_light)
 

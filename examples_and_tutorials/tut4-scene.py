@@ -46,7 +46,6 @@ def main():
                Now here is the other main function of the scene - to pick objects, ie, to figure out which object the mouse is hitting.
                To run the picker, you call scene.pick(mouse_pos), pick also takes an optional argument to pass a camera,
                    mouse_pos must be the 2d screen position of the mouse, ie, pygame.mouse.get_pos or pyggel.view.screen.get_mouse_pos.
-               Picking only checks objects in the 3d and 3d_blend groups - 3d_always messes with the depth buffer too much to be used!
                pick returns the object picked or None
                NOTE: picking clears the screen - so always pick before you render, or after you call pyggel.view.refresh_screen!!!
                Another NOTE: picking is fairly slow - so if your game doesn't requrie it - don't use it!
