@@ -58,8 +58,9 @@ class Scene(object):
         my_lights = list(all_lights)
         if self.graph.skybox and camera:
             self.graph.skybox.render(camera)
-        if self.render3d and camera:
-            camera.push()
+        if self.render3d:
+            if camera:
+                camera.push()
             for i in self.graph.lights:
                 i.gl_light = my_lights.pop()
                 i.shine()
@@ -78,7 +79,8 @@ class Scene(object):
 
             for i in self.graph.lights:
                 i.hide()
-            camera.pop()
+            if camera:
+                camera.pop()
 
         if self.render2d:
             view.set2d()

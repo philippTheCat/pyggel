@@ -847,6 +847,8 @@ def SpriteSheet3D(filename, frames=[], durations=[],
        scale is the scale factor for the image
        colorize is the color of the image"""
     view.require_init()
+    if type(durations) in [type(1), type(1.2)]:
+        durations = [durations]*len(frames)
     new = []
     image = pygame.image.load(filename).convert_alpha()
 
