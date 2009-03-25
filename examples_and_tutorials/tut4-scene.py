@@ -69,7 +69,8 @@ def main():
            return None #close the loop
 
         pyggel.view.clear_screen() #clear screen for new drawing...
-        if scene.pick(pyggel.view.screen.get_mouse_pos()).hit: #see if anything was picked
+        item = scene.pick(pyggel.view.screen.get_mouse_pos())
+        if item and item.hit: #see if anything was picked
             print "something hit! But since we have nothing in the scene this will never be called O.o"
         scene.render() #render the scene
         pyggel.view.refresh_screen() #flip the display buffer so anything drawn now appears
