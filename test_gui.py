@@ -11,7 +11,7 @@ def swap_apps(new):
     new.activate()
 
 def main():
-    pyggel.init()
+    pyggel.init(screen_size_2d=(600, 400))
 
     scene = pyggel.scene.Scene()
 

@@ -88,7 +88,7 @@ def main():
             pyggel.quit()
             return None
         if "left" in meh.mouse.hit:
-            if img.get_rect().collidepoint(meh.mouse.get_pos()):
+            if img.get_rect().collidepoint(pyggel.view.screen.get_mouse_pos2d()):
                 if img.to_be_blitted:
                     img.clear_blits()
                 else:
@@ -140,7 +140,7 @@ def main():
 
         pyggel.view.clear_screen()
 
-        hit = my_scene.pick(pygame.mouse.get_pos(), camera)
+        hit = my_scene.pick(pyggel.view.screen.get_mouse_pos(), camera)
         if hit:
             hit.colorize = (1, 0, 0, 1)
         if last_hit:
