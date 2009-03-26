@@ -166,7 +166,7 @@ def main():
         #all right, let's check if any objects are picked, and work with them here
         #then, if there is a pick, let's make the object turn red...
         #NOTE: scene.pick only checks 3d and 3d_blend object, not 3d_always!
-        obj = scene.pick(pygame.mouse.get_pos(), camera)
+        obj = scene.pick(pyggel.view.screen.get_mouse_pos(), camera)
         if obj:
             obj.colorize = (1,0,0,1)
         scene.render(camera) #render the scene

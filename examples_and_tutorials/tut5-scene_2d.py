@@ -127,6 +127,13 @@ def main():
            pyggel.quit() #close the window and clean up everything
            return None #close the loop
 
+        #let's do some mouse input handling, and flip and image when it is clicked:
+        #we use view.screen.get_mouse_pos2d to get the mouse pos in relation to the 2d screen size, which may be different
+        #view.screen.get_mouse_pos returns the mouse pos in relation to the real screen size
+        if "left" in event_handler.mouse.hit:
+            if img.get_rect().collidepoint(pyggel.view.screen.get_mouse_pos2d()): #check for a collision
+                img.scale = -img.scale
+
         pyggel.view.clear_screen() #clear screen for new drawing...
         scene.render() #render the scene
         pyggel.view.refresh_screen() #flip the display buffer so anything drawn now appears
