@@ -45,12 +45,12 @@ def level_parse(game, scene):
     x = y = 0 #OMGZ!
     height = len(GRID)
     width = len(GRID[0])
-    mx = width/2*5
-    my = height/2*5
+    mx = width/2.0*5
+    my = height/2.0*5
     mwh = max((width, height))
-    quad = pyggel.geometry.Plane(mwh*5,pos=[mx,0,my],facing="bottom",texture=pyggel.data.Texture("data/floor.png"),tile=mwh)
+    quad = pyggel.geometry.Plane(mwh*5,pos=[mx,-2.5,my],texture=pyggel.data.Texture("data/floor.png"),tile=mwh)
     static.append(quad)
-    quad = pyggel.geometry.Plane(mwh*5,pos=[mx,0,my],facing="top",texture=pyggel.data.Texture("data/ceiling.png"),tile=mwh)
+    quad = pyggel.geometry.Plane(mwh*5,pos=[mx,2.5,my],texture=pyggel.data.Texture("data/ceiling.png"),tile=mwh)
     static.append(quad)
     for row in GRID:
         for column in row:

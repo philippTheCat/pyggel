@@ -64,12 +64,9 @@ def main():
                    or a list of 6 data.Texture objects - each for it's own face
 
            geometry.Quad(size, pos, rotation, colorize, texture, facing)
-               A Quad is basically a cube, except it only renders one face...
+               A Quad is a simple 3d square
                All the args are the same as for Cube, except:
                    texture can be None or a single data.Texture for the face
-                   facing is the index (0-5) of cube faces to render
-                       values are 0-left, 1-right, 2-top, 3-bottom, 4-front, 5-back
-                       you can also use the names ("left", "front", etc.) to get the face...
            geometry.Plane(size, pos, rotation, colorize, texture, facing, tile)
                A Plane is exactly the same as a Quad, except that you can tile the texture so that it repeats,
                which is much faster than having a ton of quads...
@@ -92,8 +89,10 @@ def main():
     b = pyggel.geometry.Cube(1, pos=(-8, 6, 20), texture=tex) #this one is textured as a cubemap
     c = pyggel.geometry.Cube(1, pos=(-6, 6, 20), texture=[tex]*6) #this one copies the texture for each face
 
-    d = pyggel.geometry.Quad(1, pos=(-4, 6, 20), texture=tex, facing="front") #this will look exactly like the cubes, because it is facing us...
-    e = pyggel.geometry.Plane(10, pos=(-6, -6, 20), texture=tex, facing="front", tile=10)
+    d = pyggel.geometry.Quad(1, pos=(-4, 6, 20), texture=tex) #this will look exactly like the cubes, because it is facing us...
+    d.rotation=(90,0,0) #so it faces us
+    e = pyggel.geometry.Plane(10, pos=(-6, -6, 20), texture=tex, tile=10)
+    e.rotation=(90,0,0)
     f = pyggel.geometry.Sphere(1, pos=(2, 6, 20), texture=tex)
 
     scene.add_3d((a,b,c,d,e,f))

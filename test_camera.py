@@ -69,9 +69,9 @@ def main():
 
     mscene.add_light(light)
 
-    quad = pyggel.geometry.Plane(50, (0,0,0),
+    quad = pyggel.geometry.Plane(50, (0,5,0),
                                  texture=data.Texture("data/tile_example.png"),
-                                 facing="top", tile=10)
+                                 tile=10)
     mscene.add_3d(quad)
 
     eh = pyggel.event.Handler()

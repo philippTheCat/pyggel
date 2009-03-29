@@ -80,8 +80,10 @@ def main():
     b.rotation = (0,45,45)
     c = pyggel.geometry.Cube(1, pos=(-1, 0, 0), texture=[tex]*6) #this one copies the texture for each face
 
-    d = pyggel.geometry.Quad(1, pos=(1, 0, 0), texture=tex, facing=4) #this will look exactly like the cubes, because it is facing us...
-    e = pyggel.geometry.Plane(10, pos=(0, -7.5, 0), texture=tex, facing=4, tile=10)
+    d = pyggel.geometry.Quad(1, pos=(1, 0, 0), texture=tex) #this will look exactly like the cubes, because it is facing us...
+    d.rotation=(90,0,0)
+    e = pyggel.geometry.Plane(10, pos=(0, -7.5, 0), texture=tex, tile=10)
+    e.rotation=(90,0,0)
     f = pyggel.geometry.Sphere(1, pos=(3, 0, 0), texture=tex)
 
     #Hey, those positions for the elements looks a lot nicer now, eh?

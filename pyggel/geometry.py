@@ -159,64 +159,56 @@ class Cube(object):
         except: return self.scale, self.scale, self.scale
 
 class Quad(Cube):
-    """An object representing only one face of a cube"""
+    """A simple 3d square object."""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
-                 colorize=(1,1,1,1), texture=None, facing=0):
+                 colorize=(1,1,1,1), texture=None):
         """Create the Quad
-           size is the absolute size of a face on a cube
+           size is the quad
            pos is the position of the quad
            rotation is the rotation of the quad
            colorize is the color of the quad
-           texture can be None, a string filename of an image to load or a data.Texture object - entire texture is mapped to the face
-           facing is which face of the cube this is, values are:
-               left, right, top, bottom, front, back or 0, 1, 2, 3, 4, 5"""
+           texture can be None, a string filename of an image to load or a data.Texture object - entire texture is mapped to the face"""
 
-        f = {"left":0,
-             "right":1,
-             "top":2,
-             "bottom":3,
-             "front":4,
-             "back":5}
-        if type(facing) is type(""):
-            facing = f[facing]
-        self.facing = facing
+        view.require_init()
+        self.size = size
+        self.pos = pos
+        self.rotation = rotation
+        if not texture:
+            texture = blank_texture
+        if type(texture) is type(""):
+            texture = Texture(texture)
+        self.texture = texture
+        self.colorize = colorize
 
-        self.xnorms = [1,0,3,2,5,4]
+        self.scale = 1
 
-        Cube.__init__(self, size, pos, rotation, colorize, texture)
+        self.display_list = data.DisplayList()
+
+        self.visible = True
+
+        self._compile()
 
     def _compile(self):
         """Compile the Quad into a data.DisplayList"""
         self.display_list.begin()
         self.texture.bind()
 
-        ox = .25
-        oy = .33
-        i = self.sides[self.facing]
-        ix = 0
-        x, y = self.split_coords[i[5]]
-        x *= ox
-        y *= oy
-
         glBegin(GL_QUADS)
-        coords = ((0,0), (0,1), (1,1), (1,0))
-
-        glNormal3f(*self.normals[self.xnorms[i[6]]])
-
-        for x in i[:4]:
-            glTexCoord2fv(coords[ix])
-            a, b, c = self.corners[x]
-            a *= 1.1
-            b *= 1.1
-            c *= 1.1
-            glVertex3f(a,b,c)
-            ix += 1
+        glNormal3f(0,1,0)
+        glTexCoord2f(0,0)
+        glVertex3f(-1, 0, -1)
+        glTexCoord2f(1, 0)
+        glVertex3f(1, 0, -1)
+        glTexCoord2f(1,1)
+        glVertex3f(1, 0, 1)
+        glTexCoord2f(0,1)
+        glVertex3f(-1,0,1)
         glEnd()
         self.display_list.end()
 
     def copy(self):
         """Return a copy of the Quad, sharing the same display list"""
-        n = Quad(self.size, self.pos, self.rotation, self.colorize, self.texture, self.facing)
+        n = Quad(self.size, self.pos, self.rotation, self.colorize, self.texture)
         n.scale = self.scale
         n.display_list = self.display_list
         return n
@@ -227,34 +219,20 @@ class Quad(Cube):
         Cube.render(self, camera)
 
 class Plane(Quad):
-    """Like a Quad, except the texture is tiled on the face, which increases performance"""
+    """Like a Quad, except the texture is tiled on the face, which increases performance over a lot of quads tiled"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
-                 colorize=(1,1,1,1), texture=None, facing=0,
-                 tile=1):
+                 colorize=(1,1,1,1), texture=None, tile=1):
         """Create the Plane
-           size is the absolute size of a face on a cube
+           size of the plane
            pos is the position of the quad
            rotation is the rotation of the quad
            colorize is the color of the quad
            texture can be None, a string filename of an image to load or a data.Texture object - entire texture is mapped to the face
-           facing is which face of the cube this is, values are:
-               left, right, top, bottom, front, back or 0, 1, 2, 3, 4, 5
            tile is the number of times to tile the texture across the Plane"""
 
-        f = {"left":0,
-             "right":1,
-             "top":2,
-             "bottom":3,
-             "front":4,
-             "back":5}
-        if type(facing) is type(""):
-            facing = f[facing]
-        self.facing = facing
-
-        self.xnorms = [1,0,3,2,5,4]
         self.tile = tile
 
-        Quad.__init__(self, size, pos, rotation, colorize, texture, facing)
+        Quad.__init__(self, size, pos, rotation, colorize, texture)
 
     def _compile(self):
         """Compile Plane into a data.DisplayList"""
@@ -265,29 +243,16 @@ class Plane(Quad):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT)
 
-        ox = .25
-        oy = .33
-        i = self.sides[self.facing]
-        ix = 0
-        x, y = self.split_coords[i[5]]
-        x *= ox
-        y *= oy
-
         glBegin(GL_QUADS)
-        coords = ((0,0), (0,self.tile),
-                  (self.tile,self.tile),
-                  (self.tile,0))
-
-        glNormal3f(*self.normals[self.xnorms[i[6]]])
-
-        for x in i[:4]:
-            glTexCoord2fv(coords[ix])
-            a, b, c = self.corners[x]
-            a *= 1.1
-            b *= 1.1
-            c *= 1.1
-            glVertex3f(a,b,c)
-            ix += 1
+        glNormal3f(0,1,0)
+        glTexCoord2f(0,0)
+        glVertex3f(-1, 0, -1)
+        glTexCoord2f(self.tile, 0)
+        glVertex3f(1, 0, -1)
+        glTexCoord2f(self.tile, self.tile)
+        glVertex3f(1, 0, 1)
+        glTexCoord2f(0, self.tile)
+        glVertex3f(-1,0,1)
         glEnd()
         self.display_list.end()
 
@@ -302,12 +267,7 @@ class Plane(Quad):
         glRotatef(b, 0, 1, 0)
         glRotatef(c, 0, 0, 1)
         s = self.size / self.tile if (self.size and self.tile) else self.size
-        if self.facing in (2,3):
-            glScalef(.5*self.size,.5*s,.5*self.size)
-        if self.facing in (0,1):
-            glScalef(.5*s,.5*self.size,.5*self.size)
-        if self.facing in (4,5):
-            glScalef(.5*self.size,.5*self.size,.5*s)
+        glScalef(.5*self.size,.5*self.size,.5*self.size)
         try:
             glScalef(*self.scale)
         except:
@@ -318,7 +278,7 @@ class Plane(Quad):
 
     def copy(self):
         """Return a copy of the Plane - sharing the same display list..."""
-        n = Plane(self.size, self.pos, self.rotation, self.colorize, self.texture, self.facing, self.tile)
+        n = Plane(self.size, self.pos, self.rotation, self.colorize, self.texture, self.tile)
         n.scale = self.scale
         n.display_list = self.display_list
         return n
