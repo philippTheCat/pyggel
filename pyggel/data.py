@@ -13,11 +13,11 @@ class Texture(object):
     """An object to load and store an OpenGL texture"""
     def __init__(self, filename, flip=0):
         """Create a texture
-           flip indicates whether the texture data needs to be flipped - deprecated...
+           flip indicates whether the texture data needs to be flipped - some formats need this
            filename can be be a filename for an image, or a pygame.Surface object"""
         view.require_init()
         self.filename = filename
-        self.flip = 0
+        self.flip = flip
 
         self.size = (0,0)
 
@@ -30,7 +30,7 @@ class Texture(object):
             self.filename = None
 
     def _get_next_biggest(self, x, y):
-        """Get the next biggest poer of two x and y sizes"""
+        """Get the next biggest power of two x and y sizes"""
         nw = 16
         nh = 16
         while nw < x:
