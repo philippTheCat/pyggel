@@ -64,7 +64,7 @@ def test_safe(filename, acceptable_functions=[]):
     for i in xrange(len(new)):
         if new[i] == "(":
             last = new[i-1].split()[-1].split(".")[-1]
-            if last == "(" or True in [last.endswith(__i) for __i in (", ", ",", ": ", ":")]:
+            if last == "(" or True in [last.endswith(__i) for __i in (", ", ",", ": ", ":","=")]:
                 continue
             if len(new[i-1].split()) >= 2:
                 before_that = new[i-1].split()[-2].split(".")[-1]
