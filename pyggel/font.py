@@ -10,20 +10,20 @@ import image, view, data
 
 class Font3D(object):
     """A font object used for rendering text to images"""
-    def __init__(self, filename=None, fsize=32):
+    def __init__(self, filename=None, size=32):
         """Create the font
            filename can be None or the filename of the font to load (TTF)
-           fsize is the size of the font"""
+           size is the size of the font"""
         view.require_init()
         self.filename = filename
-        self.fsize = fsize
-        self.fontname = str(self.filename) + ":" + str(self.fsize)
+        self.size = size
+        self.fontname = str(self.filename) + ":" + str(self.size)
 
         self._load_font()
 
     def _load_font(self):
         """Load the font"""
-        self.pygame_font = pygame.font.Font(self.filename, self.fsize)
+        self.pygame_font = pygame.font.Font(self.filename, self.size)
 
     def make_text_image(self, text="", color=(1,1,1,1), underline=False, italic=False, bold=False):
         """Create an image.Image3D object with the text rendered to it.
