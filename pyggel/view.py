@@ -285,8 +285,12 @@ def set3d():
 def refresh_screen():
     """Flip the screen buffer, displaying any changes since the last clear."""
     if screen.cursor and screen.cursor_visible and pygame.mouse.get_focused():
+        glPushMatrix()
         glDisable(GL_LIGHTING)
-        screen.cursor.pos = screen.get_mouse_pos()
+        screen.cursor.pos = screen.get_mouse_pos2d()
+        rx = 1.0 * screen.screen_size[0] / screen.screen_size_2d[0]
+        ry = 1.0 * screen.screen_size[1] / screen.screen_size_2d[1]
+        glScalef(rx, ry, 1)
         if screen.cursor_center:
             x, y = screen.cursor.pos
             x -= int(screen.cursor.get_width() / 2)
@@ -295,6 +299,7 @@ def refresh_screen():
         screen.cursor.render()
         if screen.lighting:
             glEnable(GL_LIGHTING)
+        glPopMatrix()
     pygame.display.flip()
 
 def clear_screen(scene=None):
