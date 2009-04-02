@@ -691,12 +691,12 @@ class Widget(object):
         """Handle any non mouse or key event from the App."""
         pass
 
-    def get_clip(self):
+    def get_clip(self, offset=(0,0)):
         """Return the render clipping region of the image."""
         x, y = self.pos
         w, h = self.size
-        x += self.tsize[0]
-        y += self.tsize[1]
+        x += self.tsize[0] + offset[0]
+        y += self.tsize[1] + offset[1]
         w -= self.tsize[0]*2
         h -= self.tsize[1]*2
         return (x, y), (w, h)
@@ -806,7 +806,7 @@ class Frame(App, Widget):
 
     def render(self, offset=(0,0)):
         Widget.render(self, offset)
-        view.screen.push_clip2d(*self.get_clip())
+        view.screen.push_clip2d(*self.get_clip(offset))
         self.widgets.reverse()
 
         x, y = self.pos
@@ -1417,7 +1417,7 @@ class Input(Widget):
             self.background.pos = (bx, by)
             self.background.render()
             self.background.pos = self.pos
-        view.screen.push_clip2d(*self.get_clip())
+        view.screen.push_clip2d(*self.get_clip(offset))
         self.image.render()
         self.image.pos = self.tpos
         view.screen.pop_clip()
