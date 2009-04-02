@@ -162,11 +162,10 @@ def main():
     #the radio keeps a dict of option:state objects for the state fo each option,
     #just check for which one has a state of 1 for the actual state.
     #like the Checkbox you can attach a function to the dispatch event "change",
-    #the function must take one arg, which is the new selected option
+    #the function must take one arg, which is a dict of all options and their states - either 1, selected or 0, not
     pyggel.gui.Radio(app, options=["test", "34", "56"])
 
-    #The MultiChoiceRadio is exactly the same as the radio, except it allows multipl options to be clicked
-    #also, the change event sends a list of all selected options
+    #The MultiChoiceRadio is exactly the same as the radio, except it allows multiple options to be clicked
     pyggel.gui.MultiChoiceRadio(app, options=["mc1", "mc2"])
     pyggel.gui.NewLine(app)
 

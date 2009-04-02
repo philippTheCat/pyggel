@@ -1190,6 +1190,7 @@ class Radio(Frame):
 
     def check_click(self):
         """Checks which check/label was clicked, and sets that to active state, and fires "change" event to dispatch."""
+        need_change = False
         for i in self.options:
             name, check, label, state = i
             if check.state != state: #changed!
@@ -1203,9 +1204,12 @@ class Radio(Frame):
                 else:
                     check.state = 1
                 label.focus()
-                self.dispatch.fire("change", name)
+##                self.dispatch.fire("change", name)
+                need_change = True
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
+        if need_change:
+            self.dispatch.fire("change", self.states)
 
     def check_click_label(self):
         """Checks whether a label was clicked - if so generates appropriate check click."""
@@ -1232,7 +1236,6 @@ class MultiChoiceRadio(Radio):
     __init__.__doc__ = Radio.__init__.__doc__
 
     def check_click(self):
-        select = []
         for i in self.options:
             name, check, label, state = i
             if check.state != state:
@@ -1240,9 +1243,7 @@ class MultiChoiceRadio(Radio):
             state = check.state
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
-            if state:
-                select.append(name)
-        self.dispatch.fire("change", select)
+    self.dispatch.fire("change", self.states)
     check_click.__doc__ = Radio.check_click.__doc__
 
 class Input(Widget):
