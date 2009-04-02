@@ -1243,7 +1243,7 @@ class MultiChoiceRadio(Radio):
             state = check.state
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
-    self.dispatch.fire("change", self.states)
+        self.dispatch.fire("change", self.states)
     check_click.__doc__ = Radio.check_click.__doc__
 
 class Input(Widget):
