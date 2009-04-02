@@ -53,6 +53,7 @@ def main():
     box.pos = (-5, 0, 0)
 
     my_scene = pyggel.scene.Scene()
+    my_scene.pick = True
     my_scene.add_2d(img)
     my_scene.add_2d(img2)
     my_scene.add_2d(img2sub)
@@ -140,14 +141,14 @@ def main():
 
         pyggel.view.clear_screen()
 
-        hit = my_scene.pick(pyggel.view.screen.get_mouse_pos(), camera)
+        hit = my_scene.render(camera)
+        if last_hit:
+            last_hit.colorize = (1,1,1,1)
         if hit:
             hit.colorize = (1, 0, 0, 1)
-        if last_hit:
-            if not hit == last_hit:
-                last_hit.colorize = (1,1,1,1)
         last_hit = hit
-        my_scene.render(camera)
+
+        mpx, mpy = pyggel.view.screen.get_mouse_pos()
 
         pyggel.view.refresh_screen()
 main()

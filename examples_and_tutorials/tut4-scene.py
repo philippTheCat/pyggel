@@ -37,19 +37,17 @@ def main():
            lights:
                Almost every scene needs them. Scenes may have up to 8 lights attached to them at any time.
                To add/remove a light simply call scene.add_light(light)/scene.remove_light(light).
-               Acceptable light objects are pyggel.light.Light obejcts, only.
+               Acceptable light objects are pyggel.light.Light objects, only.
 
            rendering:
                Ok, here is the main point of the scene - to efficiently and accurately render all your objects.
                To render you simply call scene.render() - render takes an optional argument to pass a camera to use to render.
            picking:
                Now here is the other main function of the scene - to pick objects, ie, to figure out which object the mouse is hitting.
-               To run the picker, you call scene.pick(mouse_pos), pick also takes an optional argument to pass a camera,
-                   mouse_pos must be the 2d screen position of the mouse, ie, pygame.mouse.get_pos or pyggel.view.screen.get_mouse_pos.
-               pick returns the object picked or None
-               NOTE: picking clears the screen - so always pick before you render, or after you call pyggel.view.refresh_screen!!!
-               Another NOTE: picking is fairly slow - so if your game doesn't requrie it - don't use it!
-               Yet another NOTE: picking only checks objects in 3d and 3d_blend groups right now!
+               picking is integrated into the rendering loop, so setting it up is quite simple:
+                   scene.pick = True #this tells the render method to also pick while it runs
+                   picked_object = scene.render() #when you call render, the return object will be None or the picked object.
+               And that is all there is to it.
 
        Alright. Now that you know what a scene is and what it does, let's make one!"""
     scene = pyggel.scene.Scene()
@@ -69,10 +67,9 @@ def main():
            return None #close the loop
 
         pyggel.view.clear_screen() #clear screen for new drawing...
-        item = scene.pick(pyggel.view.screen.get_mouse_pos())
+        item = scene.render() #render the scene, also, see if anything was picked
         if item and item.hit: #see if anything was picked
             print "something hit! But since we have nothing in the scene this will never be called O.o"
-        scene.render() #render the scene
         pyggel.view.refresh_screen() #flip the display buffer so anything drawn now appears
 
 main()

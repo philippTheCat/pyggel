@@ -14,6 +14,7 @@ def main():
     event_handler = pyggel.event.Handler()
 
     scene = pyggel.scene.Scene()
+    scene.pick = True #let's make sure we are picking here, eh?
 
     """Alrighty, so when we left off in the last tutorial, we had a few 3d elements in,
        but they looked bad because there were no lights!
@@ -112,6 +113,8 @@ def main():
                                 #for a full list of everything included,
                                 #look in pyggel/include.py
 
+    last_obj = None #here we store which object was "picked" in the scene
+
     while 1:
         clock.tick(60) #limit FPS
         pyggel.view.set_title("FPS: %s"%int(clock.get_fps()))
@@ -163,17 +166,19 @@ def main():
         pyggel.view.clear_screen() #clear screen for new drawing...
         """Now, you need to make sure the scene actually uses your camera.
            PYGGEL scenes are very flexible, and allow you to swap cameras on demand,
-           just pass whatever camera you want right now to the render (and pick, if using it) calls."""
+           just pass whatever camera you want right now to the render call."""
 
         #all right, let's check if any objects are picked, and work with them here
         #then, if there is a pick, let's make the object turn red...
-        #NOTE: scene.pick only checks 3d and 3d_blend object, not 3d_always!
-        obj = scene.pick(pyggel.view.screen.get_mouse_pos(), camera)
-        if obj:
+
+        #first, we render the scene, this also returns our object
+        obj = scene.render(camera) #render the scene
+        #Now, since we want to highlight the object the mouse is over, we gotta undo it too
+        if last_obj:
+            last_obj.colorize = (1,1,1,1)
+        last_obj = obj
+        if obj: #now we colorize the correct object
             obj.colorize = (1,0,0,1)
-        scene.render(camera) #render the scene
-        if obj:
-            obj.colorize = (1,1,1,1)
         pyggel.view.refresh_screen() #flip the display buffer so anything drawn now appears
 
         """And there you have all the basics to building a game with PYGGEL. Good luck!"""

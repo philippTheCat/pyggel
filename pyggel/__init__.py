@@ -6,7 +6,7 @@ This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contr
 from include import *
 
 import mesh, view, image, camera, math3d, light
-import scene, font, geometry, misc, picker, data
+import scene, font, geometry, misc, data
 import particle, event, gui
 
 def quit():

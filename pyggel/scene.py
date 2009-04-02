@@ -6,7 +6,7 @@ The scene module contains classes used to represent an entire group of renderabl
 """
 
 from include import *
-import camera, view, picker, misc
+import camera, view, misc
 from light import all_lights
 
 class Tree(object):
@@ -20,8 +20,6 @@ class Tree(object):
         self.skybox = None
         self.lights = []
 
-        self.pick = picker.Group()
-
 class Scene(object):
     """A simple scene class used to store, render, pick and manipulate objects."""
     def __init__(self):
@@ -31,10 +29,19 @@ class Scene(object):
         self.render2d = True
         self.render3d = True
 
+        self.pick = False #can be true or false
+
     def render(self, camera=None):
         """Render all objects.
-           camera must no or the camera object used to render the scene"""
+           camera must no or the camera object used to render the scene
+           Returns None or picked object if Scene.pick is True and an object is actually touching the mouse."""
         view.set3d()
+        pick = None
+
+        mpx, mpy = view.screen.get_mouse_pos()
+        mpy = view.screen.screen_size[1] - mpy
+        last_depth = 1
+
         my_lights = list(all_lights)
         if self.graph.skybox and camera:
             self.graph.skybox.render(camera)
@@ -46,15 +53,38 @@ class Scene(object):
                 i.shine()
             glEnable(GL_ALPHA_TEST)
             for i in self.graph.render_3d:
-                if i.visible: i.render(camera)
+                if i.visible:
+                    i.render(camera)
+                    if self.pick:
+                        dep = glReadPixelsf(mpx, mpy, 1, 1, GL_DEPTH_COMPONENT)[0][0]
+                        if dep < last_depth:
+                            last_depth = dep
+                            pick = i
             glDisable(GL_ALPHA_TEST)
+            r, g, b, a = glReadPixelsf(mpx, mpy, 1, 1, GL_RGBA)[0][0]
+            last_color = r,g,b,a
             glDepthMask(GL_FALSE)
             for i in self.graph.render_3d_blend:
-                if i.visible: i.render(camera)
+                if i.visible:
+                    i.render(camera)
+                    if self.pick:
+                        r, g, b, a = glReadPixelsf(mpx, mpy, 1, 1, GL_RGBA)[0][0]
+                        col = r,g,b,a
+                        if col != last_color:
+                            print "swfjhsdfh"
+                            last_color = col
+                            pick = i
             glDepthMask(GL_TRUE)
             glDisable(GL_DEPTH_TEST)
             for i in self.graph.render_3d_always:
-                if i.visible: i.render(camera)
+                if i.visible:
+                    i.render(camera)
+                    if self.pick:
+                        r, g, b, a = glReadPixelsf(mpx, mpy, 1, 1, GL_GBA)[0][0]
+                        col = r,g,b,a
+                        if col != last_color:
+                            last_color = col
+                            pick = i
             glEnable(GL_DEPTH_TEST)
 
             for i in self.graph.lights:
@@ -75,6 +105,8 @@ class Scene(object):
                 glEnable(GL_LIGHTING)
             glPopMatrix()
 
+        return pick
+
     def add_2d(self, ele):
         """Add a 2d object or list of objects to the scene."""
         if not hasattr(ele, "__iter__"):
@@ -93,12 +125,10 @@ class Scene(object):
             ele = [ele]
         for i in ele:
             self.graph.render_3d.append(i)
-            self.graph.pick.add_obj(i)
 
     def remove_3d(self, ele):
         """Remove a 3d object from the scene."""
         self.graph.render_3d.remove(ele)
-        self.graph.pick.rem_obj(ele)
 
     def add_3d_blend(self, ele):
         """Add a 3d, blended, depth-tested object or list of objects to the scene."""
@@ -106,12 +136,10 @@ class Scene(object):
             ele = [ele]
         for i in ele:
             self.graph.render_3d_blend.append(i)
-            self.graph.pick.add_obj(i)
 
     def remove_3d_blend(self, ele):
         """Remove a 3d blended object from the scene."""
         self.graph.render_3d_blend.remove(ele)
-        self.graph.pick.rem_obj(ele)
 
     def add_3d_always(self, ele):
         """Add a 3d, blended, non-depth-tested (always visible) object or list of objects to the scene."""
@@ -137,25 +165,6 @@ class Scene(object):
             raise ValueError("Too many Lights - max 8")
 
     def remove_light(self, light):
+        """Remove a light from the scene."""
         if light in self.graph.lights:
             self.graph.lights.remove(light)
-
-    def pick(self, mouse_pos, camera=None):
-        """Run picker and return which object(s) are hit in the 3d and 3d_blend groups, 3d_always objects won't pick!!!
-           mouse_pos is the position of the mouse on screen
-           camera is the camera used to render the scene
-           Returns picked object or None"""
-        view.set3d()
-
-        glDisable(GL_LIGHTING)
-        glEnable(GL_ALPHA_TEST)
-        h = self.graph.pick.pick(mouse_pos, camera)
-        glDisable(GL_ALPHA_TEST)
-        glEnable(GL_LIGHTING)
-        if h:
-            hit, depth = h
-        else:
-            hit = None
-
-        view.clear_screen()
-        return hit
