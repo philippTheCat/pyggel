@@ -624,9 +624,11 @@ class Widget(object):
         self.app.set_top_widget(self)
         self.key_active = True
         self.dispatch.fire("focus")
+        self._mhover = self._collidem()
 
     def handle_mousedown(self, button, name):
         """Handle a mouse down event from the App."""
+        self._mhover = self._collidem()
         if name == "left":
             if self._mhover:
                 self._mhold = True
@@ -636,6 +638,7 @@ class Widget(object):
 
     def handle_mouseup(self, button, name):
         """Handle a mouse release event from the App."""
+        self._mhover = self._collidem()
         if name == "left":
             if self._mhold and self._mhover:
                 self._mhold = False
