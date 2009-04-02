@@ -1204,7 +1204,7 @@ class Radio(Frame):
                 else:
                     check.state = 1
                 label.focus()
-##                self.dispatch.fire("change", name)
+                check.focus()
                 need_change = True
             i[0], i[1], i[2], i[3] = name, check, label, state
             self.states[name] = state
