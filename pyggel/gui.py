@@ -754,7 +754,10 @@ class Frame(App, Widget):
 
         if background_image:
             self.background, self.size, self.tsize, self.tshift = self.load_background(background_image)
-        self.packer = Packer(self, size=self.size)
+        x, y = self.size
+        x -= self.tsize[0]*2
+        y -= self.tsize[1]*2
+        self.packer = Packer(self, size=(x, y))
         self.pack()
 
     def _collidem_c(self):
