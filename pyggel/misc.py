@@ -86,12 +86,13 @@ def test_safe(filename, acceptable_functions=[]):
 
     return True, []
 
-def randfloat(a, b):
+def randfloat(a, b, num=8):
     """Returns a random floating point number in range(a,b)."""
-    a = int(a*100000000)
-    b = int(b*100000000)
+    num = 10**num
+    a = int(a*num)
+    b = int(b*num)
     x = random.randint(a, b)
-    return x * 0.00000001
+    return x * (1.0/num)
 
 class ObjectGroup(object):
     """A simple Group object for storing a lot of similar objects in."""
