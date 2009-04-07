@@ -337,3 +337,17 @@ class AABox(Vector):
             return False
         else:
             return other.collide(self)
+
+def calcTriNormal(t1, t2, t3, flip=False):
+    """Return a normal for lighting based on 3 points.
+       Code provided by Ian Mallet."""
+    v1 = t2[0]-t1[0],t2[1]-t1[1],t2[2]-t1[2]
+    v2 = t3[0]-t1[0],t3[1]-t1[1],t3[2]-t1[2]
+    vx = (v1[1] * v2[2]) - (v1[2] * v2[1])
+    vy = (v1[2] * v2[0]) - (v1[0] * v2[2])
+    vz = (v1[0] * v2[1]) - (v1[1] * v2[0])
+    if flip:
+        vx = -vx
+        vy = -vy
+        vz = -vz
+    return (vx, vy, vz)
