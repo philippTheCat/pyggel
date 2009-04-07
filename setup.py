@@ -2,7 +2,7 @@
 from distutils.core import setup
 import pyggel
 setup(name='pyggel',
-      version=pyggel.VERSION,
+      version=pyggel.PYGGEL_VERSION,
       description='PYthon Graphical Game Engine and Libraries',
       author='Matt Roe',
       author_email='RoeBros@gmail.com',
