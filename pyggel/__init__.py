@@ -21,3 +21,7 @@ init = view.init
 def get_events():
     """Return (for now) generated pygame events..."""
     return pygame.event.get()
+
+def get_version():
+    """Return the version string for PYGGEL."""
+    return PYGGEL_VERSION
