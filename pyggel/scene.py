@@ -87,7 +87,6 @@ class Scene(object):
                         r, g, b, a = glReadPixelsf(mpx, mpy, 1, 1, GL_RGBA)[0][0]
                         col = r,g,b,a
                         if col != last_color:
-                            print "swfjhsdfh"
                             last_color = col
                             pick = i
             glDepthMask(GL_TRUE)

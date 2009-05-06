@@ -37,7 +37,7 @@ def main():
     font2 = pyggel.font.MEFont(None, 32)
     text3 = font2.make_text_image("Testing -\n1, 2, 3", (0, 0, 1, 1))
 
-    box = pyggel.geometry.Cube(5, texture=[data.Texture("data/ar.png")]*6)
+    box = pyggel.geometry.Cube(5, texture=data.Texture("data/ar.png"))
     box.pos = (0,0,5)
     box.rotation = list(box.rotation)
     sphere = pyggel.geometry.Sphere(5, texture=data.Texture("data/ar.png"))

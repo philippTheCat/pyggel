@@ -122,7 +122,7 @@ class Image(object):
 
         self.display_list = data.DisplayList()
         self.display_list.begin()
-        self.texture.bind()
+
         off = self.offset
 
         l = -off[0]
@@ -184,6 +184,7 @@ class Image(object):
             glScalef(self.scale, self.scale, 1)
 
         glColor(*self.colorize)
+        self.texture.bind()
         self.display_list.render()
         glPopMatrix()
         if self.to_be_blitted:
@@ -278,6 +279,7 @@ class Image3D(Image):
             glScalef(self.scale, self.scale, 1)
         glColor(*self.colorize)
         glDisable(GL_LIGHTING)
+        self.texture.bind()
         self.display_list.render()
         if view.screen.lighting:
             glEnable(GL_LIGHTING)
@@ -341,7 +343,6 @@ class Image3D(Image):
 
         self.display_list = data.DisplayList()
         self.display_list.begin()
-        self.texture.bind()
 
         w = self.get_width()*1.0/self._altered_image_size[0]
         h = self.get_height()*1.0/self._altered_image_size[1]

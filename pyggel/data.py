@@ -11,6 +11,7 @@ import view
 
 class Texture(object):
     """An object to load and store an OpenGL texture"""
+    bound = None
     def __init__(self, filename, flip=0):
         """Create a texture
            flip indicates whether the texture data needs to be flipped - some formats need this
@@ -68,12 +69,14 @@ class Texture(object):
 
     def bind(self):
         """Binds the texture for usage"""
-        glBindTexture(GL_TEXTURE_2D, self.gl_tex)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
+        if not Texture.bound == self:
+            glBindTexture(GL_TEXTURE_2D, self.gl_tex)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
+            Texture.bound = self
 
     def __del__(self):
         """Clear the texture data"""

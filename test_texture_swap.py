@@ -1,7 +1,7 @@
 import pyggel
 from pyggel import *
 
-import random
+import random, time
 
 def main():
     pyggel.view.init(screen_size=(800,600), screen_size_2d=(640, 480))
@@ -63,8 +63,7 @@ def main():
     my_scene.add_3d(obj)
     my_scene.add_3d(obj2)
     my_scene.add_3d(box)
-    for i in img3d:
-        my_scene.add_3d(i)
+    my_scene.add_3d(img3d)
     my_scene.add_3d(img5)
     my_scene.add_3d(img7)
 
@@ -79,6 +78,23 @@ def main():
     meh = pyggel.event.Handler()
     meh.bind_to_event(" ", lambda a,b: pyggel.misc.save_screenshot("Test.png"))
 
+    to_swap = [obj, box, img5]+img3d
+
+    swap_to_image = pyggel.data.create_empty_texture(color=(0,1,0,.75))
+    for i in to_swap: #here are our objects we want to change around...
+        if isinstance(i, pyggel.mesh.BasicMesh):
+            #needs a little different from others!
+            current = i.gl_lists
+            new = []
+            for x in current:
+                new.append([x[0], swap_to_image]) #this is because the mesh stores a list of [display list, texture] objects!
+            i.swap_texs = [current, new] #this value can be whatever you want!
+        else:
+            i.swap_texs = [i.texture, swap_to_image]
+        i.current_swap_tex = 0 #because it is!
+        #now the rest will be handled in teh main loop!
+
+    last_time = time.time()
     while 1:
         clock.tick(999)
         pyggel.view.set_title("FPS: %s"%clock.get_fps())
@@ -137,7 +153,14 @@ def main():
         c -= 1
         img2.rotation = a,b,c
 
-        img5.visible = not img5.visible
+        if time.time() - last_time >= 1: #limit to every second
+            last_time = time.time()
+            for i in to_swap: #time to apply those texture swaps!
+                i.current_swap_tex = abs(i.current_swap_tex - 1)
+                if isinstance(i, pyggel.mesh.BasicMesh):
+                    i.gl_lists = i.swap_texs[i.current_swap_tex]
+                else:
+                    i.texture = i.swap_texs[i.current_swap_tex]
 
         pyggel.view.clear_screen()
 

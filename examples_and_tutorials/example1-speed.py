@@ -36,9 +36,9 @@ def main():
     a.rotation = (45, 45, 0)
 
     tex = pyggel.data.Texture("data/ar.png")
-    b = pyggel.geometry.Cube(1, pos=(-3, 0, 0), texture=tex)
+    b = pyggel.geometry.Cube(1, pos=(-3, 0, 0), texture=tex, mirror=False)
     b.rotation = (0,45,45)
-    c = pyggel.geometry.Cube(1, pos=(-1, 0, 0), texture=["data/ar.png"]*6)
+    c = pyggel.geometry.Cube(1, pos=(-1, 0, 0), texture="data/ar.png")
 
     d = pyggel.geometry.Quad(1, pos=(1, 0, 0), texture=tex)
     d.rotation=(90,0,0)

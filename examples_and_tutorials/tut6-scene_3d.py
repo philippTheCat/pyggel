@@ -62,6 +62,9 @@ def main():
                colorize is the (r,g,b,a) color, bound to range 0-1, of the object
                texture can be None, a single data.Texture object which will be mapped as cube map,
                    or a list of 6 data.Texture objects - each for it's own face
+               mirror indicates whether the texture is the same for each face (like [tex]*6, if mirror is True)
+                   or if it is used as a cube map (if False)
+                   defaults to True
 
            geometry.Quad(size, pos, rotation, colorize, texture, facing)
                A Quad is a simple 3d square
@@ -86,8 +89,8 @@ def main():
     a = pyggel.geometry.Cube(1, pos=(-10, 6, 20)) #this one is untextured
     #first, a texture to use...
     tex = pyggel.data.Texture("data/ar.png")
-    b = pyggel.geometry.Cube(1, pos=(-8, 6, 20), texture=tex) #this one is textured as a cubemap
-    c = pyggel.geometry.Cube(1, pos=(-6, 6, 20), texture=[tex]*6) #this one copies the texture for each face
+    b = pyggel.geometry.Cube(1, pos=(-8, 6, 20), texture=tex, mirror=False) #this one is textured as a cubemap
+    c = pyggel.geometry.Cube(1, pos=(-6, 6, 20), texture=tex) #this one copies the texture for each face
 
     d = pyggel.geometry.Quad(1, pos=(-4, 6, 20), texture=tex) #this will look exactly like the cubes, because it is facing us...
     d.rotation=(90,0,0) #so it faces us

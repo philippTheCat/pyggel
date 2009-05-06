@@ -74,67 +74,67 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
                 else:
                     norms.append(0)
             sfaces.append((face, norms, texcoords, material))
-        
 
-    gl_list = data.DisplayList()
-    gl_list.begin()
-    current_tex = None
+
+    faces_ordered_by_material = {}
     for face in sfaces:
-        vertices, normals, texture_coords, material = face
-        if smtl:
-            mtl = smtl[material]
-            try:
-                if not current_tex == mtl:
-                    mtl.bind()
-                    current_tex = mtl
-            except:
-                if not current_tex == blank_texture:
-                    blank_texture.bind()
-                    current_tex = blank_texure
+        v, n, t, m = face
+        if m in faces_ordered_by_material:
+            faces_ordered_by_material[m].append(face)
         else:
-            if not current_tex == blank_texutre:
-                blank_texture.bind()
-                current_tex = blank_texture
-        glBegin(GL_POLYGON)
-        for i in xrange(len(vertices)):
-            if normals[i] > 0:
-                glNormal3fv(snormals[normals[i] - 1])
-            if texture_coords[i] > 0:
-                glTexCoord2fv(stexcoords[texture_coords[i] - 1])
-            glVertex3fv(svertices[vertices[i] - 1])
-        glEnd()
-    gl_list.end()
+            faces_ordered_by_material[m] = [face]
+
+    lists = []
+    for i in faces_ordered_by_material:
+        sfaces = faces_ordered_by_material[i]
+
+        material = smtl[i]
+
+        gl_list = data.DisplayList()
+        gl_list.begin()
+        current_tex = None
+        for face in sfaces:
+            vertices, normals, texture_coords, _m = face
+            glBegin(GL_POLYGON)
+            for i in xrange(len(vertices)):
+                if normals[i] > 0:
+                    glNormal3fv(snormals[normals[i] - 1])
+                if texture_coords[i] > 0:
+                    glTexCoord2fv(stexcoords[texture_coords[i] - 1])
+                glVertex3fv(svertices[vertices[i] - 1])
+            glEnd()
+        gl_list.end()
+
+        lists.append([gl_list, material])
 
     verts = []
     for i in sfaces:
         for x in i[0]:
             verts.append(svertices[x-1])
 
-    return BasicMesh(gl_list, pos, rotation, verts, 1, colorize, smtl)
+    return BasicMesh(lists, pos, rotation, verts, 1, colorize)
 
 class BasicMesh(object):
     """A basic, static (non-animated) mesh class."""
-    def __init__(self, display_list, pos=(0,0,0),
+    def __init__(self, lists, pos=(0,0,0),
                  rotation=(0,0,0), verts=[],
-                 scale=1, colorize=(1,1,1,1),
-                 materials=None):
+                 scale=1, colorize=(1,1,1,1)):
         """Create the mesh object
-           display_list is the data.DisplayList holding the 3d rendering of the mesh
+           lists is a list of [data.DisplayList, texture] objects holding the 3d rendering of the mesh
            pos must be a three-part tuple representing the position of the mesh
            rotation must be a three-part tuple representing the rotation of the mesh
            verts is a list of vertices in the mesh
            scale must be a number or three part tuple representing the scale value of the mesh
-           colorize is a 4 part tuple representing the (RGBA 0-1) color of the mesh
-           materials are the texture/color materials the mesh uses"""
+           colorize is a 4 part tuple representing the (RGBA 0-1) color of the mesh"""
         view.require_init()
-        self.display_list = display_list
+
+        self.gl_lists = lists
         self.pos = pos
         self.rotation = rotation
         self.verts = verts
         self.scale = scale
         self.colorize = colorize
         self.visible = True
-        self.materials = materials #this is necessary so the textures aren't deleted when they no longer have references to them!
 
     def get_dimensions(self):
         """Return the width/height/depth of the mesh"""
@@ -163,10 +163,9 @@ class BasicMesh(object):
 
     def copy(self):
         """Return a copy of the mesh, sharing the same data.DisplayList"""
-        return BasicMesh(self.display_list, list(self.pos),
+        return BasicMesh(self.gl_lists, list(self.pos),
                          list(self.rotation), list(self.verts),
-                         self.scale, list(self.colorize),
-                         self.materials)
+                         self.scale, list(self.colorize))
 
     def render(self, camera=None):
         """Render the mesh
@@ -183,5 +182,8 @@ class BasicMesh(object):
         except:
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
-        self.display_list.render()
+
+        for i in self.gl_lists:
+            i[1].bind()
+            i[0].render()
         glPopMatrix()

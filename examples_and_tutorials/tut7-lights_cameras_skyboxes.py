@@ -77,9 +77,9 @@ def main():
     a.rotation = (45, 45, 0)
     #first, a texture to use...
     tex = pyggel.data.Texture("data/ar.png")
-    b = pyggel.geometry.Cube(1, pos=(-3, 0, 0), texture=tex) #this one is textured as a cubemap
+    b = pyggel.geometry.Cube(1, pos=(-3, 0, 0), texture=tex, mirror=False) #this one is textured as a cubemap
     b.rotation = (0,45,45)
-    c = pyggel.geometry.Cube(1, pos=(-1, 0, 0), texture=[tex]*6) #this one copies the texture for each face
+    c = pyggel.geometry.Cube(1, pos=(-1, 0, 0), texture=tex) #this one copies the texture for each face
 
     d = pyggel.geometry.Quad(1, pos=(1, 0, 0), texture=tex) #this will look exactly like the cubes, because it is facing us...
     d.rotation=(90,0,0)

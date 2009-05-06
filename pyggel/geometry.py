@@ -12,17 +12,19 @@ from data import blank_texture, Texture
 class Cube(object):
     """A geometric cube that can be colored and textured"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
-                 colorize=(1,1,1,1), texture=None):
+                 colorize=(1,1,1,1), texture=None, mirror=True):
         """Create a cube
            size is the absolute size of the cube
            pos is the position of the cube
            rotation is the rotation of the cube
            colorize is the color of the cube (0-1 RGBA)
-           texture can be None, a data.Texture object or a list of 6 data.Texture objects
-               if None the cube will not be textures
-               if data.Texture the texture will be mapped as a cube map to the cube
-               a string representing the filename of an image to load as a cube map
-               if a list of 6 textures each face of the quad will have one of the images"""
+           texture can be None, a data.Texture object or a string representing the filename of a texture to load
+           mirror indicates whether each face of the cube has the full texture on it (so each is identicle) or
+               if True, each face will have the entire texture mapped to it
+               if False, the Texture is considered a cube map, like this:
+                   blank, blank, top, blank,
+                   back, left, front, right,
+                   blank, blank, bottom, blank"""
         view.require_init()
         self.size = size
         self.pos = pos
@@ -33,6 +35,8 @@ class Cube(object):
             texture = Texture(texture)
         self.texture = texture
         self.colorize = colorize
+
+        self.mirror = mirror
 
         self.corners = ((-1, -1, 1),#topleftfront
                       (1, -1, 1),#toprightfront
@@ -82,18 +86,6 @@ class Cube(object):
     def _compile(self):
         """Compile the cube's rendering into a data.DisplayList"""
         self.display_list.begin()
-        if isinstance(self.texture, data.Texture):
-            self.texture.bind()
-            reg_type = 0
-        else:
-            reg_type = 1
-            _t = []
-            for i in self.texture:
-                if type(i) is type(""):
-                    _t.append(Texture(i))
-                else:
-                    _t.append(i)
-            self.texture = _t
 
         ox = .25
         oy = .33
@@ -103,14 +95,10 @@ class Cube(object):
             x, y = self.split_coords[i[5]]
             x *= ox
             y *= oy
-            if reg_type == 0:
-                coords = ((x, y), (x, y+oy), (x+ox, y+oy), (x+ox, y))
-            else:
+            if self.mirror:
                 coords = ((0,0), (0,1), (1,1), (1,0))
-                tex = self.texture[i[4]]
-                if not tex == last_tex:
-                    tex.bind()
-                    last_tex = tex
+            else:
+                coords = ((x, y), (x, y+oy), (x+ox, y+oy), (x+ox, y))
 
             glBegin(GL_QUADS)
 
@@ -119,9 +107,6 @@ class Cube(object):
             for x in i[:4]:
                 glTexCoord2fv(coords[ix])
                 a, b, c = self.corners[x]
-##                a *= 1.1
-##                b *= 1.1
-##                c *= 1.1
                 glVertex3f(a,b,c)
                 ix += 1
             glEnd()
@@ -143,6 +128,7 @@ class Cube(object):
         except:
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
+        self.texture.bind()
         self.display_list.render()
         glPopMatrix()
 
@@ -191,7 +177,6 @@ class Quad(Cube):
     def _compile(self):
         """Compile the Quad into a data.DisplayList"""
         self.display_list.begin()
-        self.texture.bind()
 
         glBegin(GL_QUADS)
         glNormal3f(0,1,0)
@@ -237,7 +222,6 @@ class Plane(Quad):
     def _compile(self):
         """Compile Plane into a data.DisplayList"""
         self.display_list.begin()
-        self.texture.bind()
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
@@ -273,6 +257,7 @@ class Plane(Quad):
         except:
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
+        self.texture.bind()
         self.display_list.render()
         glPopMatrix()
 
@@ -290,7 +275,7 @@ class Skybox(Cube):
         """Create the Skybox
            texture can be the same as a Cube, None, data.Texture, string filename or  list of 6 data.Texture objects
            colorize - the color of the Skybox"""
-        Cube.__init__(self, 1, colorize=colorize, texture=texture)
+        Cube.__init__(self, 1, colorize=colorize, texture=texture, mirror=False)
         self.sides = ((3,0,4,7, 2, 2, 5),#left
                       (6,5,1,2, 3, 4, 4),#right
                       (3,7,6,2, 5, 0, 2),#top
@@ -359,7 +344,6 @@ class Sphere(object):
     def _compile(self):
         """Compile the Sphere into a data.DisplayList"""
         self.display_list.begin()
-        self.texture.bind()
         Sphere = gluNewQuadric()
         gluQuadricTexture(Sphere, GLU_TRUE)
         gluSphere(Sphere, 1, self.detail, self.detail)
@@ -381,6 +365,7 @@ class Sphere(object):
         except:
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
+        self.texture.bind()
         self.display_list.render()
         glPopMatrix()
 
