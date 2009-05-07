@@ -14,13 +14,11 @@ class Tree(object):
     def __init__(self):#, hs, ps):
         """Create the Tree."""
         self.render_3d = []
-        self.render_3d_shader = []
         self.render_3d_blend = []
         self.render_2d = []
         self.render_3d_always = []
         self.skybox = None
         self.lights = []
-        self.shader = None
 
 class Scene(object):
     """A simple scene class used to store, render, pick and manipulate objects."""
@@ -66,19 +64,6 @@ class Scene(object):
                         if dep < last_depth:
                             last_depth = dep
                             pick = i
-
-            if self.graph.shader:
-                self.graph.shader.run()
-            for i in self.graph.render_3d_shader:
-                if i.visible:
-                    i.render(camera)
-                    if self.pick:
-                        dep = glReadPixelsf(mpx, mpy, 1, 1, GL_DEPTH_COMPONENT)[0][0]
-                        if dep < last_depth:
-                            last_depth = dep
-                            pick = i
-            if self.graph.shader:
-                glUseProgram(0)
 
             glDisable(GL_ALPHA_TEST)
             r, g, b, a = glReadPixelsf(mpx, mpy, 1, 1, GL_RGBA)[0][0]
@@ -152,17 +137,6 @@ class Scene(object):
         """Remove a 3d object from the scene."""
         self.graph.render_3d.remove(ele)
 
-    def add_3d_shader(self, ele):
-        """Add a 3d, non-blended, depth-tested object or list of objects to the scene that can use GLSL shaders."""
-        if not hasattr(ele, "__iter__"):
-            ele = [ele]
-        for i in ele:
-            self.graph.render_3d_shader.append(i)
-
-    def remove_3d_shader(self, ele):
-        """Remove a 3d shader object from the scene."""
-        self.graph.render_3d_shader.remove(ele)
-
     def add_3d_blend(self, ele):
         """Add a 3d, blended, depth-tested object or list of objects to the scene."""
         if not hasattr(ele, "__iter__"):
@@ -201,11 +175,3 @@ class Scene(object):
         """Remove a light from the scene."""
         if light in self.graph.lights:
             self.graph.lights.remove(light)
-
-    def set_shader(self, shader):
-        """Adds shader to the scene."""
-        self.graph.shader = shader
-
-    def remove_shader(self):
-        """Remove a shader from the scene."""
-        self.graph.shader = None
