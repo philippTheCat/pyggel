@@ -147,14 +147,15 @@ class Image(object):
         glTexCoord2f(0, 0)
         glVertex3f(l, t, 0)
 
-        glTexCoord2f(w, 0)
-        glVertex3f(r, t, 0)
+        glTexCoord2f(0, h)
+        glVertex3f(l, b, 0)
 
         glTexCoord2f(w, h)
         glVertex3f(r, b, 0)
 
-        glTexCoord2f(0, h)
-        glVertex3f(l, b, 0)
+        glTexCoord2f(w, 0)
+        glVertex3f(r, t, 0)
+
         glEnd()
 
         self.display_list.end()
