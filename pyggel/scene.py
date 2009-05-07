@@ -39,7 +39,8 @@ class Scene(object):
            Returns None or picked object if Scene.pick is True and an object is actually touching the mouse."""
         if self.render_buffer:
             self.render_buffer.enable()
-        view.set3d()
+        else:
+            view.set3d()
         pick = None
 
         mpx, mpy = view.screen.get_mouse_pos()

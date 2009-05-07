@@ -160,12 +160,13 @@ class VertexArray(object):
         glDisableClientState(GL_TEXTURE_COORD_ARRAY)
 
 class FrameBuffer(object):
-    def __init__(self, size=None, clear_color=(0,0,0,0)):
+    def __init__(self, size=(512,512), clear_color=(0,0,0,0)):
         view.require_init()
         if not FBO_AVAILABLE:
             raise AttributeError("Frame buffer objects not available!")
         if not size:
             size = view.screen.screen_size
+
         self.size = size
         self.clear_color = clear_color
 
@@ -205,10 +206,21 @@ class FrameBuffer(object):
         glClearColor(r, g, b, 1)
         glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
         glClearColor(*view.screen.clear_color)
+
+        screen_size = self.size
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glViewport(0,0,*screen_size)
+        gluPerspective(45, 1.0*screen_size[0]/screen_size[1], 0.1, 100.0)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+        glEnable(GL_DEPTH_TEST)
+        glPushMatrix()
         
     def disable(self):
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
         glDrawBuffers(1, [GL_COLOR_ATTACHMENT0_EXT])
+        glPopMatrix()
 
 def create_empty_texture(size=(2,2), color=(1,1,1,1)):
     """Create an empty data.Texture

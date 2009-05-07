@@ -12,20 +12,21 @@ def main():
                                   (0,0,0), True)
 
     camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
-    fbo_camera = pyggel.camera.LookAtCamera((0,0,0), distance=5)
+    fbo_camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
     fbo_camera.rotx = 90
 
     obj = pyggel.mesh.OBJ("data/bird_plane.obj", False)
     obj.scale = .5
 
     box = pyggel.geometry.Cube(2.5, texture=None)
+    box.pos=(-3, 0, 0)
 
     my_scene = pyggel.scene.Scene()
     fbo_scene = pyggel.scene.Scene()
     fbo_scene.render_buffer = pyggel.data.FrameBuffer(clear_color=(1,1,1))
 
     fbo_scene.add_3d(obj)
-    my_scene.add_3d(box)
+    my_scene.add_3d((box,obj))
 
     my_scene.add_light(my_light)
     fbo_scene.add_light(my_light)

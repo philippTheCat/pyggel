@@ -51,7 +51,7 @@ class Cube(object):
                       (2,1,5,6, 3, 4, 4),#right
                       (7,3,2,6, 5, 0, 2),#top
                       (0,4,5,1, 4, 5, 3),#bottom
-                      (1,2,3,0, 0, 1, 0),#front
+                      (3,0,1,2, 0, 1, 0),#front
                       (6,5,4,7, 1, 3, 1))#back
         self.normals = ((0, 0, 1), #front
                         (0, 0, -1), #back
