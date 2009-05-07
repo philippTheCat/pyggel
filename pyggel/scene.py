@@ -97,6 +97,7 @@ class Scene(object):
                 camera.pop()
 
         if self.render2d:
+            glDisable(GL_CULL_FACE)
             view.set2d()
             glPushMatrix()
             rx = 1.0 * view.screen.screen_size[0] / view.screen.screen_size_2d[0]
@@ -108,6 +109,7 @@ class Scene(object):
             if view.screen.lighting:
                 glEnable(GL_LIGHTING)
             glPopMatrix()
+            glEnable(GL_CULL_FACE)
 
         if self.render_buffer:
             self.render_buffer.disable()

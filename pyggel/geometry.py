@@ -48,11 +48,11 @@ class Cube(object):
                       (-1, 1, -1))#bottomleftback
 
         self.sides = ((7,4,0,3, 2, 2, 5),#left
-                      (6,5,1,2, 3, 4, 4),#right
-                      (6,2,3,7, 5, 0, 2),#top
-                      (1,5,4,0, 4, 5, 3),#bottom
-                      (3,0,1,2, 0, 1, 0),#front
-                      (7,4,5,6, 1, 3, 1))#back
+                      (2,1,5,6, 3, 4, 4),#right
+                      (7,3,2,6, 5, 0, 2),#top
+                      (0,4,5,1, 4, 5, 3),#bottom
+                      (1,2,3,0, 0, 1, 0),#front
+                      (6,5,4,7, 1, 3, 1))#back
         self.normals = ((0, 0, 1), #front
                         (0, 0, -1), #back
                         (0, 1, 0), #top
@@ -180,6 +180,15 @@ class Quad(Cube):
 
         glBegin(GL_QUADS)
         glNormal3f(0,1,0)
+        glTexCoord2f(0,1)
+        glVertex3f(-1,0,1)
+        glTexCoord2f(1,1)
+        glVertex3f(1, 0, 1)
+        glTexCoord2f(1, 0)
+        glVertex3f(1, 0, -1)
+        glTexCoord2f(0,0)
+        glVertex3f(-1, 0, -1)
+
         glTexCoord2f(0,0)
         glVertex3f(-1, 0, -1)
         glTexCoord2f(1, 0)
@@ -229,13 +238,22 @@ class Plane(Quad):
 
         glBegin(GL_QUADS)
         glNormal3f(0,1,0)
+        glTexCoord2f(0,self.tile)
+        glVertex3f(-1,0,1)
+        glTexCoord2f(self.tile,self.tile)
+        glVertex3f(1, 0, 1)
+        glTexCoord2f(self.tile, 0)
+        glVertex3f(1, 0, -1)
+        glTexCoord2f(0,0)
+        glVertex3f(-1, 0, -1)
+
         glTexCoord2f(0,0)
         glVertex3f(-1, 0, -1)
         glTexCoord2f(self.tile, 0)
         glVertex3f(1, 0, -1)
-        glTexCoord2f(self.tile, self.tile)
+        glTexCoord2f(self.tile,self.tile)
         glVertex3f(1, 0, 1)
-        glTexCoord2f(0, self.tile)
+        glTexCoord2f(0,self.tile)
         glVertex3f(-1,0,1)
         glEnd()
         self.display_list.end()

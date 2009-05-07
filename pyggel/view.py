@@ -182,6 +182,10 @@ def init(screen_size=None, screen_size_2d=None,
 
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
 
+    glFrontFace(GL_CCW)
+    glCullFace(GL_BACK)
+    glEnable(GL_CULL_FACE)
+
     screen.have_init = True
 
 def set_background_color(rgb=(0,0,0)):
