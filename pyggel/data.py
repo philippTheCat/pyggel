@@ -159,6 +159,57 @@ class VertexArray(object):
         glDisableClientState(GL_COLOR_ARRAY)
         glDisableClientState(GL_TEXTURE_COORD_ARRAY)
 
+class FrameBuffer(object):
+    def __init__(self, size=None, clear_color=(0,0,0,0)):
+        view.require_init()
+        if not FBO_AVAILABLE:
+            raise AttributeError("Frame buffer objects not available!")
+        if not size:
+            size = view.screen.screen_size
+        self.size = size
+        self.clear_color = clear_color
+
+        self.texture = create_empty_texture(self.size, self.clear_color)
+
+        self.rbuffer = glGenRenderbuffersEXT(1)
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT,
+                              self.rbuffer)
+        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
+                                 GL_RGBA4,
+                                 size[0],
+                                 size[1])
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0)
+
+        self.fbuffer = glGenFramebuffersEXT(1)
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
+                             self.fbuffer)
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+                                     GL_COLOR_ATTACHMENT0_EXT,
+                                     GL_RENDERBUFFER_EXT,
+                                     self.rbuffer)
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
+
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, self.fbuffer)
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                                  GL_COLOR_ATTACHMENT0_EXT,
+                                  GL_TEXTURE_2D,
+                                  self.texture.gl_tex,
+                                  0)
+
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
+
+    def enable(self):
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, self.fbuffer)
+        glDrawBuffers(1, [GL_COLOR_ATTACHMENT0_EXT])
+        r,g,b = self.clear_color[:3]
+        glClearColor(r, g, b, 1)
+        glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
+        glClearColor(*view.screen.clear_color)
+        
+    def disable(self):
+        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
+        glDrawBuffers(1, [GL_COLOR_ATTACHMENT0_EXT])
+
 def create_empty_texture(size=(2,2), color=(1,1,1,1)):
     """Create an empty data.Texture
        size must be a two part tuple representing the pixel size of the texture

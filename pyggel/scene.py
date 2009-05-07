@@ -31,12 +31,16 @@ class Scene(object):
         self.render2d = True
         self.render3d = True
 
+        self.render_buffer = None
+
         self.pick = False #can be true or false
 
     def render(self, camera=None):
         """Render all objects.
            camera must no or the camera object used to render the scene
            Returns None or picked object if Scene.pick is True and an object is actually touching the mouse."""
+        if self.render_buffer:
+            self.render_buffer.enable()
         view.set3d()
         pick = None
 
@@ -119,6 +123,9 @@ class Scene(object):
             if view.screen.lighting:
                 glEnable(GL_LIGHTING)
             glPopMatrix()
+
+        if self.render_buffer:
+            self.render_buffer.disable()
 
         return pick
 

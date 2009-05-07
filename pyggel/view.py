@@ -26,6 +26,8 @@ class _Screen(object):
         self.fog = True
         self.fog_color = (.5,.5,.5,.5)
 
+        self.clear_color = (0,0,0,0)
+
         self.cursor = None
         self.cursor_visible = True
         self.cursor_center = False
@@ -184,7 +186,10 @@ def init(screen_size=None, screen_size_2d=None,
 
 def set_background_color(rgb=(0,0,0)):
     """Set the background color (RGB 0-1) of the display."""
-    glClearColor(*rgb+(0,))
+    rgba = rgb+(0,)
+    glClearColor(*rgba)
+    screen.clear_color = rgba
+    
 
 def set_title(text="PYGGEL App"):
     pygame.display.set_caption(text)

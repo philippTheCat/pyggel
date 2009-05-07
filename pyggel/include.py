@@ -13,3 +13,9 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 import numpy
+
+try:
+    from OpenGL.GL.EXT.framebuffer_object import *
+    FBO_AVAILABLE = True
+except:
+    FBO_AVAILABLE = False
