@@ -164,8 +164,14 @@ class FrameBuffer(object):
         view.require_init()
         if not FBO_AVAILABLE:
             raise AttributeError("Frame buffer objects not available!")
-        if not size:
-            size = view.screen.screen_size
+
+        _x, _y = size
+        x = y = 2
+        while x < _x:
+            x *= 2
+        while y < _y:
+            y *= 2
+        size = x, y
 
         self.size = size
         self.clear_color = clear_color
@@ -176,7 +182,7 @@ class FrameBuffer(object):
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT,
                               self.rbuffer)
         glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-                                 GL_RGBA4,
+                                 GL_DEPTH_COMPONENT,
                                  size[0],
                                  size[1])
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0)
@@ -185,7 +191,7 @@ class FrameBuffer(object):
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
                              self.fbuffer)
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-                                     GL_COLOR_ATTACHMENT0_EXT,
+                                     GL_DEPTH_ATTACHMENT_EXT,
                                      GL_RENDERBUFFER_EXT,
                                      self.rbuffer)
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
@@ -215,12 +221,46 @@ class FrameBuffer(object):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glEnable(GL_DEPTH_TEST)
-        glPushMatrix()
         
     def disable(self):
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
         glDrawBuffers(1, [GL_COLOR_ATTACHMENT0_EXT])
-        glPopMatrix()
+
+class TextureBuffer(object):
+    def __init__(self, size=(512,512), clear_color=(0,0,0,0)):
+        _x, _y = size
+        x = y = 2
+        while x < _x:
+            x *= 2
+        while y < _y:
+            y *= 2
+        size = x, y
+
+        self.size = size
+        self.clear_color = clear_color
+
+        self.texture = create_empty_texture(self.size, self.clear_color)
+
+    def enable(self):
+        r,g,b = self.clear_color[:3]
+        glClearColor(r, g, b, 1)
+        glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
+        glClearColor(*view.screen.clear_color)
+
+        screen_size = self.size
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glViewport(0,0,*screen_size)
+        gluPerspective(45, 1.0*screen_size[0]/screen_size[1], 0.1, 100.0)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+        glEnable(GL_DEPTH_TEST)
+
+    def disable(self):
+        self.texture.bind()
+        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0,0,self.size[0], self.size[1], 0)
+
+        glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
 
 def create_empty_texture(size=(2,2), color=(1,1,1,1)):
     """Create an empty data.Texture
