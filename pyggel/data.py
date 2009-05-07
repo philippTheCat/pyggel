@@ -12,6 +12,7 @@ import view
 class Texture(object):
     """An object to load and store an OpenGL texture"""
     bound = None
+    _all_loaded = {}
     def __init__(self, filename, flip=0):
         """Create a texture
            flip indicates whether the texture data needs to be flipped - some formats need this
@@ -21,8 +22,6 @@ class Texture(object):
         self.flip = flip
 
         self.size = (0,0)
-
-        self.gl_tex = glGenTextures(1)
 
         if type(filename) is type(""):
             self._load_file()
@@ -42,12 +41,21 @@ class Texture(object):
 
     def _load_file(self):
         """Loads file"""
-        image = pygame.image.load(self.filename)
+        if not self.filename in self._all_loaded:
+            image = pygame.image.load(self.filename)
 
-        self._compile(image)
+            self._compile(image)
+        else:
+            tex = self._all_loaded[self.filename][0]
+
+            self.size = tex.size
+            self.gl_tex = tex.gl_tex
 
     def _compile(self, image):
         """Compiles image data into texture data"""
+
+        self.gl_tex = glGenTextures(1)
+
         size = self._get_next_biggest(*image.get_size())
 
         image = pygame.transform.scale(image, size)
@@ -80,10 +88,15 @@ class Texture(object):
 
     def __del__(self):
         """Clear the texture data"""
-        try:
-            glDeleteTextures([self.gl_tex])
-        except:
-            pass #already cleared...
+        if self.filename in self._all_loaded and\
+           self in self._all_loaded[self.filename]:
+            self._all_loaded[self.filename].remove(self)
+            if not self._all_loaded[self.filename]:
+                del self._all_loaded[self.filename]
+                try:
+                    glDeleteTextures([self.gl_tex])
+                except:
+                    pass #already cleared...
 
 
 class DisplayList(object):

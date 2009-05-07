@@ -14,6 +14,7 @@ import Image as pilImage
 
 class Image(object):
     """A 2d image object"""
+    _all_loaded = {}
     def __init__(self, filename, pos=(0,0),
                  rotation=(0,0,0), scale=1,
                  colorize=(1,1,1,1)):
@@ -28,9 +29,15 @@ class Image(object):
 
         self.pos = pos
 
+        loaded = False
+
         if type(filename) is type(""):
-            self._load_file()
-        elif isinstance(filename, type(self)):
+            if filename in self._all_loaded:
+                filename = self._all_loaded[filename]
+            else:
+                self._load_file()
+            loaded = True
+        if isinstance(filename, type(self)):
             self._pimage = filename._pimage
             self._pimage2 = filename._pimage2
             self._image_size = filename._image_size
@@ -40,7 +47,8 @@ class Image(object):
             self.display_list = filename.display_list
             self.texture = filename.texture
             self.offset = filename.offset
-        else:
+            loaded = True
+        if not loaded:
             self.compile_from_surface(filename)
             self.filename = None
 
@@ -89,6 +97,8 @@ class Image(object):
         self._texturize(self._pimage2)
         self.rect = self._pimage.get_rect()
         self._compile()
+
+        self._all_loaded[self.filename] = self
 
     def compile_from_surface(self, surf):
         """Prepare surf to be stored in a Texture and DisplayList"""
@@ -234,6 +244,7 @@ class Image(object):
 
 class Image3D(Image):
     """A billboarded 3d image"""
+    _all_loaded = {}
     def __init__(self, filename, pos=(0,0,0),
                  rotation=(0,0,0), scale=1,
                  colorize=(1,1,1,1)):
