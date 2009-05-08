@@ -217,13 +217,11 @@ class FrameBuffer(object):
         r,g,b = self.clear_color[:3]
         glClearColor(r, g, b, 1)
         glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
-        glClearColor(*view.screen.clear_color)
 
-        screen_size = self.size
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glViewport(0,0,*screen_size)
-        gluPerspective(45, 1.0*screen_size[0]/screen_size[1], 0.1, 100.0)
+        glViewport(0,0,*self.size)
+        gluPerspective(45, 1.0*self.size[0]/self.size[1], 0.1, 100.0)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glEnable(GL_DEPTH_TEST)
@@ -231,6 +229,7 @@ class FrameBuffer(object):
     def disable(self):
         """Turn off the buffer, swap rendering back to the display."""
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
+        glClearColor(*view.screen.clear_color)
 
 class TextureBuffer(object):
     """An object contains functions to render to a texture, using the main display.

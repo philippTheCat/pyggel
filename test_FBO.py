@@ -26,7 +26,7 @@ def main():
 
     my_scene = pyggel.scene.Scene()
     fbo_scene = pyggel.scene.Scene()
-    fbo_scene.render_buffer = pyggel.data.FrameBuffer(clear_color=(1,1,1))
+    fbo_scene.render_buffer = pyggel.data.FrameBuffer(clear_color=(1,0,0))
 
     tbo_scene = pyggel.scene.Scene()
     tbo_scene.render_buffer = pyggel.data.TextureBuffer(clear_color=(1,1,0))
