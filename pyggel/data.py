@@ -190,7 +190,6 @@ class FrameBuffer(object):
                                  GL_DEPTH_COMPONENT,
                                  size[0],
                                  size[1])
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0)
 
         self.fbuffer = glGenFramebuffersEXT(1)
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
@@ -199,15 +198,16 @@ class FrameBuffer(object):
                                      GL_DEPTH_ATTACHMENT_EXT,
                                      GL_RENDERBUFFER_EXT,
                                      self.rbuffer)
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
 
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, self.fbuffer)
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   GL_TEXTURE_2D,
                                   self.texture.gl_tex,
                                   0)
 
+        self.worked = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT
+
+        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0)
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
 
     def enable(self):
@@ -231,7 +231,6 @@ class FrameBuffer(object):
     def disable(self):
         """Turn off the buffer, swap rendering back to the display."""
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
-        glDrawBuffers(1, [GL_COLOR_ATTACHMENT0_EXT])
 
 class TextureBuffer(object):
     """An object contains functions to render to a texture, using the main display.
@@ -259,6 +258,7 @@ class TextureBuffer(object):
         self.clear_color = clear_color
 
         self.texture = create_empty_texture(self.size, self.clear_color)
+        self.worked = True
 
     def enable(self):
         """Turn on rendering to this buffer, clears display buffer and preps it for this object."""

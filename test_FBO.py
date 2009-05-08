@@ -31,6 +31,8 @@ def main():
     tbo_scene = pyggel.scene.Scene()
     tbo_scene.render_buffer = pyggel.data.TextureBuffer(clear_color=(1,1,0))
 
+    print fbo_scene.render_buffer.worked, tbo_scene.render_buffer.worked
+
     fbo_scene.add_3d(obj)
     tbo_scene.add_3d(obj)
     my_scene.add_3d((box, box2, obj))
