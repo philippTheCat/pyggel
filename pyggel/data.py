@@ -160,7 +160,12 @@ class VertexArray(object):
         glDisableClientState(GL_TEXTURE_COORD_ARRAY)
 
 class FrameBuffer(object):
+    """An object contains functions to render to a texture instead of to the main display.
+       This object renders using FBO's, which are not available to everyone, but they are far faster and more versatile."""
     def __init__(self, size=(512,512), clear_color=(0,0,0,0)):
+        """Create the FrameBuffer.
+           size must be the (x,y) size of the buffer, will round up to the next power of two
+           clear_color must be the (r,g,b) or (r,g,b,a) color of the background of the texture"""
         view.require_init()
         if not FBO_AVAILABLE:
             raise AttributeError("Frame buffer objects not available!")
@@ -206,6 +211,7 @@ class FrameBuffer(object):
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
 
     def enable(self):
+        """Turn this buffer on, swaps rendering to the texture instead of the display."""
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, self.fbuffer)
         glDrawBuffers(1, [GL_COLOR_ATTACHMENT0_EXT])
         r,g,b = self.clear_color[:3]
@@ -223,17 +229,30 @@ class FrameBuffer(object):
         glEnable(GL_DEPTH_TEST)
         
     def disable(self):
+        """Turn off the buffer, swap rendering back to the display."""
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
         glDrawBuffers(1, [GL_COLOR_ATTACHMENT0_EXT])
 
 class TextureBuffer(object):
+    """An object contains functions to render to a texture, using the main display.
+       This object renders using the main display, copying to the texture, and then clearing.
+       This object is considerably slower than teh FrameBuffer object, and less versatile,
+       because you cannot use these objects mid-render, if you do you will lose whatever was rendered before them!"""
     def __init__(self, size=(512,512), clear_color=(0,0,0,0)):
+        """Create the FrameBuffer.
+           size must be the (x,y) size of the buffer, will round up to the next power of two
+               if size is greater than the display size, it will be rounded down to the previous power of two
+           clear_color must be the (r,g,b) or (r,g,b,a) color of the background of the texture"""
         _x, _y = size
         x = y = 2
         while x < _x:
             x *= 2
         while y < _y:
             y *= 2
+        while x > view.screen.screen_size[0]:
+            x /= 2
+        while y > view.screen.screen_size[1]:
+            y /= 2
         size = x, y
 
         self.size = size
@@ -242,6 +261,7 @@ class TextureBuffer(object):
         self.texture = create_empty_texture(self.size, self.clear_color)
 
     def enable(self):
+        """Turn on rendering to this buffer, clears display buffer and preps it for this object."""
         r,g,b = self.clear_color[:3]
         glClearColor(r, g, b, 1)
         glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
@@ -257,6 +277,7 @@ class TextureBuffer(object):
         glEnable(GL_DEPTH_TEST)
 
     def disable(self):
+        """Turn of this buffer, and clear the display."""
         self.texture.bind()
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0,0,self.size[0], self.size[1], 0)
 
