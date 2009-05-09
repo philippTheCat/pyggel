@@ -213,7 +213,6 @@ class FrameBuffer(object):
     def enable(self):
         """Turn this buffer on, swaps rendering to the texture instead of the display."""
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, self.fbuffer)
-        glDrawBuffers(1, [GL_COLOR_ATTACHMENT0_EXT])
         r,g,b = self.clear_color[:3]
         glClearColor(r, g, b, 1)
         glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
