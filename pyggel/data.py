@@ -13,13 +13,11 @@ class Texture(object):
     """An object to load and store an OpenGL texture"""
     bound = None
     _all_loaded = {}
-    def __init__(self, filename, flip=0):
+    def __init__(self, filename):
         """Create a texture
-           flip indicates whether the texture data needs to be flipped - some formats need this
            filename can be be a filename for an image, or a pygame.Surface object"""
         view.require_init()
         self.filename = filename
-        self.flip = flip
 
         self.size = (0,0)
 
@@ -60,7 +58,7 @@ class Texture(object):
 
         image = pygame.transform.scale(image, size)
 
-        tdata = pygame.image.tostring(image, "RGBA", self.flip)
+        tdata = pygame.image.tostring(image, "RGBA", 1)
         
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
 
@@ -194,16 +192,15 @@ class FrameBuffer(object):
         self.fbuffer = glGenFramebuffersEXT(1)
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
                              self.fbuffer)
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-                                     GL_DEPTH_ATTACHMENT_EXT,
-                                     GL_RENDERBUFFER_EXT,
-                                     self.rbuffer)
-
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
                                   GL_COLOR_ATTACHMENT0_EXT,
                                   GL_TEXTURE_2D,
                                   self.texture.gl_tex,
                                   0)
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+                                     GL_DEPTH_ATTACHMENT_EXT,
+                                     GL_RENDERBUFFER_EXT,
+                                     self.rbuffer)
 
         self.worked = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT
 
@@ -275,15 +272,15 @@ class TextureBuffer(object):
     def enable(self):
         """Turn on rendering to this buffer, clears display buffer and preps it for this object."""
         r,g,b = self.clear_color[:3]
+
         glClearColor(r, g, b, 1)
         glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
         glClearColor(*view.screen.clear_color)
 
-        screen_size = self.size
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glViewport(0,0,*screen_size)
-        gluPerspective(45, 1.0*screen_size[0]/screen_size[1], 0.1, 100.0)
+        glViewport(0,0,*self.size)
+        gluPerspective(45, 1.0*self.size[0]/self.size[1], 0.1, 100.0)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         glEnable(GL_DEPTH_TEST)
