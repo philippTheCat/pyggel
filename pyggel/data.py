@@ -217,6 +217,7 @@ class FrameBuffer(object):
         glClearColor(r, g, b, 1)
         glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
 
+        glPushAttrib(GL_VIEWPORT_BIT)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         glViewport(0,0,*self.size)
@@ -229,6 +230,19 @@ class FrameBuffer(object):
         """Turn off the buffer, swap rendering back to the display."""
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0)
         glClearColor(*view.screen.clear_color)
+        glPopAttrib()
+
+    def __del__(self):
+        """Clean up..."""
+        try:
+            glDeleteFramebuffersEXT(1, [self.fbuffer])
+        except:
+            pass
+
+        try:
+            glDeleteRenderbuffersEXT(1, [self.rbuffer])
+        except:
+            pass
 
 class TextureBuffer(object):
     """An object contains functions to render to a texture, using the main display.
