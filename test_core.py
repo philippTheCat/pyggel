@@ -44,13 +44,16 @@ def main():
 
     img.blit(img2, (0, 0))
 
-    obj = pyggel.mesh.OBJ("data/bird_plane.obj", False)
+    obj = pyggel.mesh.OBJ("data/bird_plane.obj")
     obj.scale = .5
     obj2 = obj.copy()
     obj2.pos = (0,0,5)
 
     box = pyggel.geometry.Cube(5, texture=data.Texture("data/stickdude.png"))
     box.pos = (-5, 0, 0)
+
+    box2 = pyggel.geometry.Cube(5, texture=data.Texture("data/skybox.png"), mirror=False)
+    box2.pos = (5, 0, 0)
 
     my_scene = pyggel.scene.Scene()
     my_scene.pick = True
@@ -62,7 +65,7 @@ def main():
 
     my_scene.add_3d(obj)
     my_scene.add_3d(obj2)
-    my_scene.add_3d(box)
+    my_scene.add_3d((box, box2))
     for i in img3d:
         my_scene.add_3d(i)
     my_scene.add_3d(img5)

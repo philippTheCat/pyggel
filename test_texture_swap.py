@@ -44,7 +44,7 @@ def main():
 
     img.blit(img2, (0, 0))
 
-    obj = pyggel.mesh.OBJ("data/bird_plane.obj", False)
+    obj = pyggel.mesh.OBJ("data/bird_plane.obj")
     obj.scale = .5
     obj2 = obj.copy()
     obj2.pos = (0,0,5)

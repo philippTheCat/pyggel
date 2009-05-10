@@ -10,7 +10,7 @@ import os
 import image, view, data
 from data import blank_texture
  
-def OBJ(filename, swapyz=True, pos=(0,0,0),
+def OBJ(filename, pos=(0,0,0),
         rotation=(0,0,0), colorize=(1,1,1,1)):
     """Loads a Wavefront OBJ file. Returns a BasicMesh object representing the OBJ mesh."""
     view.require_init()
@@ -27,13 +27,9 @@ def OBJ(filename, swapyz=True, pos=(0,0,0),
         if not values: continue
         if values[0] == 'v':
             v = map(float, values[1:4])
-            if swapyz:
-                v = v[0], v[2], v[1]
             svertices.append(v)
         elif values[0] == 'vn':
             v = map(float, values[1:4])
-            if swapyz:
-                v = v[0], v[2], v[1]
             snormals.append(v)
         elif values[0] == 'vt':
             stexcoords.append(map(float, values[1:3]))

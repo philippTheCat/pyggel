@@ -113,13 +113,10 @@ def main():
            mesh = mesh.OBJ(filename, swapyz, pos, rotation, colorize)
                the pos, rotation and colorize args are the same as for geometry
                filename is the filename of the .obj object to load
-               swapyz indicates whether to swap the y and the z coordinates for the mesh - defaults to True
-                   the reason behind this is the way some modellers' environment is set up is different than PYGGEL,
-                   so you generally need to convert.
        mesh.OBJ returns a mesh.BasicMesh object, which has the exact same usage as geometry objects do."""
 
     #lets make a mesh!
-    mesh = pyggel.mesh.OBJ("data/bird_plane.obj", pos=(4, 6, 20), swapyz=False)
+    mesh = pyggel.mesh.OBJ("data/bird_plane.obj", pos=(4, 6, 20))
     #this OBJ file is actually in PYGGEL coords, so no swapping is needed
     scene.add_3d(mesh)
 

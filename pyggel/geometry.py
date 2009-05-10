@@ -49,23 +49,23 @@ class Cube(object):
 
         self.sides = ((7,4,0,3, 2, 2, 5),#left
                       (2,1,5,6, 3, 4, 4),#right
-                      (7,3,2,6, 5, 0, 2),#top
-                      (0,4,5,1, 4, 5, 3),#bottom
+                      (7,3,2,6, 5, 0, 3),#top
+                      (0,4,5,1, 4, 5, 2),#bottom
                       (3,0,1,2, 0, 1, 0),#front
                       (6,5,4,7, 1, 3, 1))#back
         self.normals = ((0, 0, 1), #front
                         (0, 0, -1), #back
-                        (0, 1, 0), #top
-                        (0, -1, 0), #bottom
+                        (0, -1, 0), #top
+                        (0, 1, 0), #bottom
                         (1, 0, 0), #right
                         (-1, 0, 0)) #left
 
-        self.split_coords = ((2,0),#top
+        self.split_coords = ((2,2),#top
                              (0,1),#back
                              (1,1),#left
                              (2,1),#front
                              (3,1),#right
-                             (2,2))#bottom
+                             (2,0))#bottom
 
         self.scale = 1
 
@@ -294,12 +294,6 @@ class Skybox(Cube):
            texture can be the same as a Cube, None, data.Texture, string filename or  list of 6 data.Texture objects
            colorize - the color of the Skybox"""
         Cube.__init__(self, 1, colorize=colorize, texture=texture, mirror=False)
-        self.sides = ((3,0,4,7, 2, 2, 5),#left
-                      (6,5,1,2, 3, 4, 4),#right
-                      (3,7,6,2, 5, 0, 2),#top
-                      (4,0,1,5, 4, 5, 3),#bottom
-                      (2,1,0,3, 0, 1, 0),#front
-                      (7,4,5,6, 1, 3, 1))#back
         self._compile()
 
     def render(self, camera):
@@ -307,6 +301,9 @@ class Skybox(Cube):
            camera is the camera object the scene is using to render the Skybox"""
         glDisable(GL_LIGHTING)
         glDepthMask(GL_FALSE)
+        gb_cull = glGetBooleanv(GL_CULL_FACE)
+        glDisable(GL_CULL_FACE)
+
         glPushMatrix()
         camera.set_skybox_data()
         Cube.render(self)
@@ -314,6 +311,8 @@ class Skybox(Cube):
         glDepthMask(GL_TRUE)
         if view.screen.lighting:
             glEnable(GL_LIGHTING)
+        if gb_cull:
+            glEnable(GL_CULL_FACE)
 
     def copy(self):
         """Return a copy of the Skybox - sharing the same data.DisplayList"""
@@ -412,14 +411,19 @@ class Skyball(Sphere):
            camera is the camera the scene is using"""
         glDisable(GL_LIGHTING)
         glDepthMask(GL_FALSE)
+        gb_cull = glGetBooleanv(GL_CULL_FACE)
+        glDisable(GL_CULL_FACE)
+
         glPushMatrix()
         camera.set_skybox_data()
-        glRotatef(90, 1, 0, 0)
+        glRotatef(-90, 1, 0, 0)
         Sphere.render(self)
         glPopMatrix()
         glDepthMask(GL_TRUE)
         if view.screen.lighting:
             glEnable(GL_LIGHTING)
+        if gb_cull:
+            glEnable(GL_CULL_FACE)
 
     def copy(self):
         """Return a copy of teh Skyball - sharing the same dadta.DisplayList"""

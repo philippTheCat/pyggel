@@ -15,7 +15,7 @@ def main():
     fbo_camera = pyggel.camera.LookAtCamera((0,0,0), distance=5)
     fbo_camera.rotx = -90
 
-    obj = pyggel.mesh.OBJ("data/bird_plane.obj", False)
+    obj = pyggel.mesh.OBJ("data/bird_plane.obj")
     obj.scale = .25
 
     box = pyggel.geometry.Cube(2.5, texture=None)

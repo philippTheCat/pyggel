@@ -46,7 +46,7 @@ def main():
     e.rotation=(90,0,0)
     f = pyggel.geometry.Sphere(1, pos=(3, 0, 0), texture=tex)
 
-    mesh = pyggel.mesh.OBJ("data/bird_plane.obj", pos=(5, 0, 0), swapyz=False)
+    mesh = pyggel.mesh.OBJ("data/bird_plane.obj", pos=(5, 0, 0))
 
     #Now look at this.
     #suppose we never wanted to modify these objects again? Their position, color, rotation, etc are all exactly where they need to be

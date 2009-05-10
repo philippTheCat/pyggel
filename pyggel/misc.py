@@ -170,6 +170,7 @@ class StaticObjectGroup(object):
         """Render the group.
            camera should be None or the camera the scene is using - only here for compatability"""
         self.gl_list.render()
+        data.Texture.bound = None
 
     def get_pos(self):
         """Return the position of the mesh"""
