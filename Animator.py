@@ -18,7 +18,7 @@ class ObjGroup(object):
 
         self.size = 0
 
-    def compile(self, vertices, normals, texcoords):
+    def compile(self, vertices, normals, texcoords, scale_factor):
         faces = []
         for face in self.faces:
             v,n,t = face
@@ -52,7 +52,6 @@ class ObjGroup(object):
         self.pos = (px,py,pz)
 
         final = []
-        sx = sy = sz = 0
         for face in faces:
             v,n,t = face
             nv = []
@@ -61,13 +60,14 @@ class ObjGroup(object):
                 a -= px
                 b -= py
                 c -= pz
-                if abs(a) > sx: sx = abs(a)
-                if abs(b) > sy: sy = abs(b)
-                if abs(c) > sz: sz = abs(c)
+                if a > 0: a += scale_factor
+                else: a -= scale_factor
+                if b > 0: b += scale_factor
+                else: b -= scale_factor
+                if c > 0: c += scale_factor
+                else: c -= scale_factor
                 nv.append((a,b,c))
             final.append((nv,n,t))
-
-        self.size = sx+.2, sy+.2, sz+.2
 
         #now build our display list!
         self.dlist = pyggel.data.DisplayList()
@@ -112,7 +112,7 @@ class Material(object):
             color += (1,)
         self.color = color
 
-def load_OBJ_for_manipulation(filename):
+def load_OBJ_for_manipulation(filename, scale_factor=0):
     view.require_init()
 
     objs = []
@@ -170,7 +170,7 @@ def load_OBJ_for_manipulation(filename):
             objs[-1].faces.append((face, norms, texcoords))
 
     for i in objs:
-        i.compile(vertices, normals, texcoords)
+        i.compile(vertices, normals, texcoords, scale_factor)
 
     return objs
 
@@ -187,14 +187,23 @@ def main():
                                   (0,0,0), True)
     scene.add_light(my_light)
 
-    scene.add_3d(load_OBJ_for_manipulation("data/bird_plane.obj"))
+    regulars = load_OBJ_for_manipulation("data/bird_plane.obj")
+    highlights = load_OBJ_for_manipulation("data/bird_plane.obj", .2)
+    mapping = {}
+    for i in zip(regulars, highlights):
+        reg, hig = i
+        hig.material.color = (.5,.5,.5,.5)
+##        hig.scale = 1.2
+        hig.visible = False
+        hig.pickable = False
+        mapping[reg] = hig
+    scene.add_3d(regulars)
+    scene.add_3d_blend(highlights)
 
-    cur_obj = None
-
-    pick_sphere = pyggel.geometry.Sphere(1, colorize=(.5,.5,.5,.5))
-    pick_sphere.visible = False
-    pick_sphere.pickable = False
-    scene.add_3d_blend(pick_sphere)
+##    pick_sphere = pyggel.geometry.Sphere(1, colorize=(.5,.5,.5,.5))
+##    pick_sphere.visible = False
+##    pick_sphere.pickable = False
+##    scene.add_3d_blend(pick_sphere)
 
     while 1:
         meh.update()
@@ -233,12 +242,16 @@ def main():
 
         cur_obj = scene.render(camera)
         if cur_obj:
-            pick_sphere.visible = True
-            x,y,z = cur_obj.pos
-            pick_sphere.pos = x,y,-z
-            pick_sphere.scale = cur_obj.size
+##            pick_sphere.visible = True
+##            x,y,z = cur_obj.pos
+##            pick_sphere.pos = x,y,-z
+##            pick_sphere.scale = cur_obj.size
+            for i in mapping.values():
+                i.visible = False
+            mapping[cur_obj].visible = True
         else:
-            pick_sphere.visible = False
+            for i in mapping.values():
+                i.visible = False
 
         pyggel.view.refresh_screen()
 
