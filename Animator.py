@@ -188,7 +188,7 @@ def main():
     scene.add_light(my_light)
 
     regulars = load_OBJ_for_manipulation("data/bird_plane.obj")
-    highlights = load_OBJ_for_manipulation("data/bird_plane.obj", .2)
+    highlights = load_OBJ_for_manipulation("data/bird_plane.obj", .1)
     mapping = {}
     for i in zip(regulars, highlights):
         reg, hig = i
