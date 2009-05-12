@@ -131,6 +131,7 @@ class BasicMesh(object):
         self.scale = scale
         self.colorize = colorize
         self.visible = True
+        self.pickable = True
 
     def get_dimensions(self):
         """Return the width/height/depth of the mesh"""

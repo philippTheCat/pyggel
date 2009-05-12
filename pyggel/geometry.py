@@ -72,6 +72,7 @@ class Cube(object):
         self.display_list = data.DisplayList()
 
         self.visible = True
+        self.pickable = True
 
         self._compile()
 
@@ -171,6 +172,7 @@ class Quad(Cube):
         self.display_list = data.DisplayList()
 
         self.visible = True
+        self.pickable = True
 
         self._compile()
 
@@ -347,6 +349,7 @@ class Sphere(object):
 
         self.display_list = data.DisplayList()
         self.visible = True
+        self.pickable = True
 
         self._compile()
 

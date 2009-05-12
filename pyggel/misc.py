@@ -151,6 +151,7 @@ class StaticObjectGroup(object):
         self.gl_list = data.DisplayList()
 
         self.visible = True
+        self.pickable = False
         self.pos = (0,0,0)
 
         self.compile()

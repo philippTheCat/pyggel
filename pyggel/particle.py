@@ -57,6 +57,7 @@ class Emitter3D(object):
         self.particle_type = Particle3D
 
         self.visible = True
+        self.pickable = False
 
     def get_dimensions(self):
         """Return the maximum dimensions (width/height/depth) of the emitter and particles."""
@@ -229,6 +230,7 @@ class EmitterPoint(object):
         self.vertex_array = data.VertexArray(GL_POINTS, self.behavior.max_particles)
 
         self.visible = True
+        self.pickable = False
         self.particle_type = ParticlePoint
 
     def get_dimensions(self):

@@ -247,6 +247,7 @@ class Image3D(Image):
            colorize is the color of the image"""
         Image.__init__(self, filename, pos, rotation,
                        scale, colorize)
+        self.pickable = True
 
     def get_dimensions(self):
         """Return a tuple of (1,1,1) signifying the 3d dimensions of teh image - used by the quad tree"""
@@ -597,6 +598,7 @@ class Animation3D(Animation):
            scale is the scale factor for the image
            colorize is the color of the image"""
         Animation.__init__(self, frames, pos, rotation, scale, colorize)
+        self.pickable = True
 
     def blit(self, *args, **kwargs):
         print "Animation3D does not support this function!"

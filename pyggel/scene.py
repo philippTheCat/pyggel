@@ -60,7 +60,7 @@ class Scene(object):
             for i in self.graph.render_3d:
                 if i.visible:
                     i.render(camera)
-                    if self.pick:
+                    if self.pick and i.pickable:
                         dep = glReadPixelsf(mpx, mpy, 1, 1, GL_DEPTH_COMPONENT)[0][0]
                         if dep < last_depth:
                             last_depth = dep
@@ -73,7 +73,7 @@ class Scene(object):
             for i in self.graph.render_3d_blend:
                 if i.visible:
                     i.render(camera)
-                    if self.pick:
+                    if self.pick and i.pickable:
                         r, g, b, a = glReadPixelsf(mpx, mpy, 1, 1, GL_RGBA)[0][0]
                         col = r,g,b,a
                         if col != last_color:
@@ -84,7 +84,7 @@ class Scene(object):
             for i in self.graph.render_3d_always:
                 if i.visible:
                     i.render(camera)
-                    if self.pick:
+                    if self.pick and i.pickable:
                         r, g, b, a = glReadPixelsf(mpx, mpy, 1, 1, GL_GBA)[0][0]
                         col = r,g,b,a
                         if col != last_color:
