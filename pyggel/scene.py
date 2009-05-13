@@ -85,7 +85,7 @@ class Scene(object):
                 if i.visible:
                     i.render(camera)
                     if self.pick and i.pickable:
-                        r, g, b, a = glReadPixelsf(mpx, mpy, 1, 1, GL_GBA)[0][0]
+                        r, g, b, a = glReadPixelsf(mpx, mpy, 1, 1, GL_RGBA)[0][0]
                         col = r,g,b,a
                         if col != last_color:
                             last_color = col
