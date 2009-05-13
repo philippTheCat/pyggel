@@ -82,8 +82,6 @@ class Emitter3D(object):
         """Render and update all particles.
            camera must be None of the camera the scene is using"""
         self.update()
-        if self.outline:
-            misc.outline(misc.OutlineGroup(self.particles, camera), self.outline_color, self.outline_size)
         for i in self.particles:
             i.render(camera)
 
@@ -284,8 +282,6 @@ class EmitterPoint(object):
         for i in self.particles:
             if i:
                 i.update()
-        if self.outline:
-            misc.outline(self.vertex_array, self.outline_color, self.outline_size)
         self.vertex_array.render()
 
 

@@ -190,7 +190,7 @@ class Image(object):
         glColor(*self.colorize)
         self.texture.bind()
         if self.outline:
-            misc.outline(self.display_list, self.outline_color, self.outline_size)
+            misc.outline(self.display_list, self.outline_color, self.outline_size, True)
         self.display_list.render()
         glPopMatrix()
         if self.to_be_blitted:
@@ -292,7 +292,7 @@ class Image3D(Image):
         glDisable(GL_LIGHTING)
         self.texture.bind()
         if self.outline:
-            misc.outline(self.display_list, self.outline_color, self.outline_size)
+            misc.outline(self.display_list, self.outline_color, self.outline_size, True)
         self.display_list.render()
         if view.screen.lighting:
             glEnable(GL_LIGHTING)

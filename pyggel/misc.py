@@ -18,7 +18,7 @@ class OutlineGroup(object):
         for i in self.group:
             i.render(*self.args)
 
-def outline(renderable, color, size):
+def outline(renderable, color, size, color4=False):
     glPushAttrib(GL_ALL_ATTRIB_BITS)
     glClearStencil(0)
     glClear(GL_STENCIL_BUFFER_BIT)
@@ -27,7 +27,10 @@ def outline(renderable, color, size):
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)
     data.blank_texture.bind()
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-    glColor3f(0.0, 0.0, 0.0)
+    if color4:
+        glColor4f(0.0, 0.0, 0.0, 0.0)
+    else:
+        glColor3f(0,0,0)
     renderable.render()
     glDisable(GL_LIGHTING)
 
@@ -36,7 +39,10 @@ def outline(renderable, color, size):
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
     glLineWidth(size)
-    glColor3f(*color)
+    if color4:
+        glColor4f(*color+(1,))
+    else:
+        glColor3f(*color)
     renderable.render()
 
     glPopAttrib()
