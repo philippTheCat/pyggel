@@ -10,6 +10,37 @@ import view, math3d, data
 
 import random
 
+class OutlineGroup(object):
+    def __init__(self, group, *args):
+        self.group = group
+        self.args = args
+    def render(self):
+        for i in self.group:
+            i.render(*self.args)
+
+def outline(renderable, color, size):
+    glPushAttrib(GL_ALL_ATTRIB_BITS)
+    glClearStencil(0)
+    glClear(GL_STENCIL_BUFFER_BIT)
+    glEnable(GL_STENCIL_TEST)
+    glStencilFunc(GL_ALWAYS, 1, 0xfff)
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)
+    data.blank_texture.bind()
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+    glColor3f(0.0, 0.0, 0.0)
+    renderable.render()
+    glDisable(GL_LIGHTING)
+
+    glStencilFunc(GL_NOTEQUAL, 1, 0xfff)
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+    glLineWidth(size)
+    glColor3f(*color)
+    renderable.render()
+
+    glPopAttrib()
+
 def test_safe(filename, acceptable_functions=[]):
     """tests all the function calls in a file against a set of acceptable ones.
        this function also does not allow importing of other modules.
@@ -152,6 +183,9 @@ class StaticObjectGroup(object):
 
         self.visible = True
         self.pickable = False
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
         self.pos = (0,0,0)
 
         self.compile()

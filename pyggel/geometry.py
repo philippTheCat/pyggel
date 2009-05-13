@@ -73,6 +73,9 @@ class Cube(object):
 
         self.visible = True
         self.pickable = True
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
         self._compile()
 
@@ -130,6 +133,8 @@ class Cube(object):
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
         self.texture.bind()
+        if self.outline:
+            misc.outline(self.display_list, self.outline_color, self.outline_size)
         self.display_list.render()
         glPopMatrix()
 
@@ -173,6 +178,9 @@ class Quad(Cube):
 
         self.visible = True
         self.pickable = True
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
         self._compile()
 
@@ -350,6 +358,9 @@ class Sphere(object):
         self.display_list = data.DisplayList()
         self.visible = True
         self.pickable = True
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
         self._compile()
 
@@ -386,6 +397,8 @@ class Sphere(object):
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
         self.texture.bind()
+        if self.outline:
+            misc.outline(self.display_list, self.outline_color, self.outline_size)
         self.display_list.render()
         glPopMatrix()
 

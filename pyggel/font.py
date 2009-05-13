@@ -6,7 +6,7 @@ The font module contains classes to display text images.
 """
 
 from include import *
-import image, view, data
+import image, view, data, misc
 
 class Font3D(object):
     """A font object used for rendering text to images"""
@@ -81,6 +81,9 @@ class FontImage(object):
         self._underline = underline
         self._italic = italic
         self._bold = bold
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
         self.pos = (0,0)
         self.rotation = (0,0,0)
@@ -372,6 +375,8 @@ class FontImage(object):
             g = self._compiled_glyphs
         else:
             g = self.glyphs
+        if self.outline:
+            misc.outline(misc.OutlineGroup(g), self.outline_color, self.outline_size)
         for glyph in g:
             glyph.render()
         glPopMatrix()
@@ -397,6 +402,10 @@ class MEFontImage(object):
         self._underline = underline
         self._italic = italic
         self._bold = bold
+
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
         self._linewrap = linewrap
 
@@ -570,6 +579,8 @@ class MEFontImage(object):
         except:
             glScalef(self.scale, self.scale, 1)
         downdent = 0
+        if self.outline:
+            misc.outline(misc.OutlineGroup(self.glyphs), self.outline_color, self.outline_size)
         for glyph in self.glyphs:
             glyph.render()
         glPopMatrix()

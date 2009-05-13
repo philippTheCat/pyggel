@@ -58,6 +58,9 @@ class Emitter3D(object):
 
         self.visible = True
         self.pickable = False
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
     def get_dimensions(self):
         """Return the maximum dimensions (width/height/depth) of the emitter and particles."""
@@ -79,6 +82,8 @@ class Emitter3D(object):
         """Render and update all particles.
            camera must be None of the camera the scene is using"""
         self.update()
+        if self.outline:
+            misc.outline(misc.OutlineGroup(self.particles, camera), self.outline_color, self.outline_size)
         for i in self.particles:
             i.render(camera)
 
@@ -231,6 +236,9 @@ class EmitterPoint(object):
 
         self.visible = True
         self.pickable = False
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
         self.particle_type = ParticlePoint
 
     def get_dimensions(self):
@@ -276,6 +284,8 @@ class EmitterPoint(object):
         for i in self.particles:
             if i:
                 i.update()
+        if self.outline:
+            misc.outline(self.vertex_array, self.outline_color, self.outline_size)
         self.vertex_array.render()
 
 

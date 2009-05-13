@@ -7,7 +7,7 @@ The mesh module contains mesh classes for different kinds of meshes, as well as 
 
 from include import *
 import os
-import image, view, data
+import image, view, data, misc
 from data import blank_texture
  
 def OBJ(filename, pos=(0,0,0),
@@ -132,6 +132,9 @@ class BasicMesh(object):
         self.colorize = colorize
         self.visible = True
         self.pickable = True
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
     def get_dimensions(self):
         """Return the width/height/depth of the mesh"""
@@ -179,6 +182,10 @@ class BasicMesh(object):
         except:
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
+
+        if self.outline:
+            misc.outline(misc.OutlineGroup([i[0] for i in self.gl_lists]),
+                         self.outline_color, self.outline_size)
 
         for i in self.gl_lists:
             i[1].bind()

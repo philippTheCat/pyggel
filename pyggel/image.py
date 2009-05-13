@@ -8,7 +8,7 @@ import time
 
 from include import *
 
-import view, data
+import view, data, misc
 
 import Image as pilImage
 
@@ -51,6 +51,9 @@ class Image(object):
         self.scale = scale
         self.colorize = colorize
         self.visible = True
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
     def copy(self):
         """Return a copy of the image - sharing the same data.DisplayList"""
@@ -186,6 +189,8 @@ class Image(object):
 
         glColor(*self.colorize)
         self.texture.bind()
+        if self.outline:
+            misc.outline(self.display_list, self.outline_color, self.outline_size)
         self.display_list.render()
         glPopMatrix()
         if self.to_be_blitted:
@@ -248,6 +253,9 @@ class Image3D(Image):
         Image.__init__(self, filename, pos, rotation,
                        scale, colorize)
         self.pickable = True
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
     def get_dimensions(self):
         """Return a tuple of (1,1,1) signifying the 3d dimensions of teh image - used by the quad tree"""
@@ -283,6 +291,8 @@ class Image3D(Image):
         glColor(*self.colorize)
         glDisable(GL_LIGHTING)
         self.texture.bind()
+        if self.outline:
+            misc.outline(self.display_list, self.outline_color, self.outline_size)
         self.display_list.render()
         if view.screen.lighting:
             glEnable(GL_LIGHTING)
@@ -429,6 +439,9 @@ class Animation(object):
 
         self.visible = True
         self.filename = None
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
     def render(self, camera=None):
         """Render the animation - this also keeps track of swapping frames when they have run for their duration.
@@ -456,6 +469,9 @@ class Animation(object):
         frame.pos = self.pos
         frame.rotation = self.rotation
         frame.scale = self.scale
+        frame.outline = self.outline
+        frame.outline_size = self.outline_size
+        frame.outline_color = self.outline_color
         if self.colorize:
             frame.colorize = self.colorize
         frame.render(camera)
@@ -599,6 +615,9 @@ class Animation3D(Animation):
            colorize is the color of the image"""
         Animation.__init__(self, frames, pos, rotation, scale, colorize)
         self.pickable = True
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
 
     def blit(self, *args, **kwargs):
         print "Animation3D does not support this function!"

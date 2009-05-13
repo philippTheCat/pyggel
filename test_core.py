@@ -146,9 +146,9 @@ def main():
 
         hit = my_scene.render(camera)
         if last_hit:
-            last_hit.colorize = (1,1,1,1)
+            last_hit.outline = False
         if hit:
-            hit.colorize = (1, 0, 0, 1)
+            hit.outline = True
         last_hit = hit
 
         mpx, mpy = pyggel.view.screen.get_mouse_pos()

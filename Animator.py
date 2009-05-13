@@ -13,7 +13,7 @@ class ObjGroup(object):
         self.dlist = None
         self.pickable = True
         self.outline = False
-        self.outline_size = 5
+        self.outline_size = 4
         self.outline_color=(1,0,0)
 
         self.pos = (0,0,0)
@@ -100,31 +100,7 @@ class ObjGroup(object):
         glRotatef(c, 0, 0, 1)
 
         if self.outline:
-            glPushAttrib(GL_ALL_ATTRIB_BITS)
-            glClearStencil(0)
-            glClear(GL_STENCIL_BUFFER_BIT)
-            glEnable(GL_STENCIL_TEST)
-            glStencilFunc(GL_ALWAYS, 1, 0xfff)
-            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)
-
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-            glColor3f(0.0, 0.0, 0.0)
-            self.dlist.render()
-            glDisable(GL_LIGHTING)
-
-            glStencilFunc(GL_NOTEQUAL, 1, 0xfff)
-            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)
-
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-            glLineWidth(self.outline_size)
-            glColor3f(*self.outline_color)
-            self.dlist.render()
-
-            glLineWidth(self.outline_size+2)
-            glColor3f(1,1,1)
-            self.dlist.render()
-
-            glPopAttrib()
+            misc.outline(self.dlist, self.outline_color, self.outline_size)
         glColor4f(*self.material.color)
         self.material.texture.bind()
         self.dlist.render()
