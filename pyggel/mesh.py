@@ -8,7 +8,6 @@ The mesh module contains mesh classes for different kinds of meshes, as well as 
 from include import *
 import os
 import image, view, data, misc
-from data import blank_texture
  
 def OBJ(filename, pos=(0,0,0),
         rotation=(0,0,0), colorize=(1,1,1,1)):
@@ -52,7 +51,7 @@ def OBJ(filename, pos=(0,0,0),
                     tex = data.Texture(os.path.join(path, values[1]))
                     smtl[mtl] = tex
                 elif values[0]=="Kd":
-                    tex = data.create_empty_texture(color=map(float, values[1:]))
+                    tex = data.BlankTexture(color=map(float, values[1:]))
                     smtl[mtl] = tex
         elif values[0] == 'f':
             face = []

@@ -25,7 +25,7 @@ def outline(renderable, color, size, color4=False):
     glEnable(GL_STENCIL_TEST)
     glStencilFunc(GL_ALWAYS, 1, 0xfff)
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE)
-    data.blank_texture.bind()
+    #BlankTexture().bind()
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
     if color4:
         glColor4f(0.0, 0.0, 0.0, 0.0)

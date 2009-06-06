@@ -80,7 +80,7 @@ def main():
 
     to_swap = [obj, box, img5]+img3d
 
-    swap_to_image = pyggel.data.create_empty_texture(color=(0,1,0,.75))
+    swap_to_image = pyggel.data.BlankTexture(color=(0,1,0,.75))
     for i in to_swap: #here are our objects we want to change around...
         if isinstance(i, pyggel.mesh.BasicMesh):
             #needs a little different from others!

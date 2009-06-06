@@ -7,7 +7,7 @@ The geometry module contains classes used to render 3d geometric primitives.
 
 from include import *
 import view, data, misc
-from data import blank_texture, Texture
+from data import Texture, BlankTexture
 
 class Cube(object):
     """A geometric cube that can be colored and textured"""
@@ -30,7 +30,7 @@ class Cube(object):
         self.pos = pos
         self.rotation = rotation
         if not texture:
-            texture = blank_texture
+            texture = BlankTexture()
         if type(texture) is type(""):
             texture = Texture(texture)
         self.texture = texture

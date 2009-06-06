@@ -110,7 +110,7 @@ class Material(object):
     def __init__(self, name):
         self.name = name
         self.color = (1,1,1,1)
-        self.texture = pyggel.data.blank_texture
+        self.texture = pyggel.data.BlankTexture()
 
     def set_color(self, color):
         if len(color) == 3:

@@ -40,7 +40,7 @@ class _Screen(object):
         self.title = None
 
         self.clips = [(0,0,self.screen_size[0],self.screen_size[1])]
-        glScissor(*self.clips[0])
+        #glScissor(*self.clips[0]) #fix this
 
     def set_size(self, size, size2d):
         """Set the screen size."""
@@ -54,7 +54,7 @@ class _Screen(object):
         self.clips = [] #clear!
         self.clips.append((0,0,size[0],size[1]))
         self.rect = pygame.rect.Rect(0,0,*size)
-        glScissor(*self.clips[0])
+        #glScissor(*self.clips[0]) #fix this
 
         return self.screen_size
 

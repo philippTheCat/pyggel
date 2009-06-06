@@ -25,10 +25,11 @@ class Texture(object):
             self._load_file()
         else:
             self._compile(filename)
-            self.filename = None
 
     def _get_next_biggest(self, x, y):
         """Get the next biggest power of two x and y sizes"""
+        if x == y == 1:
+            return x, y
         nw = 16
         nh = 16
         while nw < x:
@@ -72,6 +73,8 @@ class Texture(object):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
+        if type(self.filename) is type(""):
+            self._all_loaded[self.filename] = [self]
 
     def bind(self):
         """Binds the texture for usage"""
@@ -96,6 +99,37 @@ class Texture(object):
                 except:
                     pass #already cleared...
 
+
+class BlankTexture(Texture):
+    def __init__(self, size=(1,1), color=(1,1,1,1)):
+        """Create an empty data.Texture
+           size must be a two part tuple representing the pixel size of the texture
+           color must be a four-part tuple representing the (RGBA 0-1) color of the texture"""
+        view.require_init() # It seems to need init on python2.6
+        
+        self.size = size
+        self.filename = repr(size)+repr(color)
+        self.gl_tex = None
+        if self.filename in self._all_loaded:
+            tex = self._all_loaded[self.filename][0]
+
+            self.size = tex.size
+            self.gl_tex = tex.gl_tex
+        else:
+            i = pygame.Surface(size)
+            if len(color) == 4:
+                r, g, b, a = color
+            else:
+                r, g, b = color
+                a = 1
+            r *= 255
+            g *= 255
+            b *= 255
+            a *= 255
+            i.fill((r,g,b,a))
+            
+            self.gl_tex = glGenTextures(1)
+            self._compile(i)
 
 class DisplayList(object):
     """An object to compile and store an OpenGL display list"""
@@ -131,7 +165,7 @@ class VertexArray(object):
         if render_type is None:
             render_type = GL_QUADS
         self.render_type = render_type
-        self.texture = create_empty_texture()
+        self.texture = BlankTexture()
 
         self.max_size = max_size
 
@@ -179,8 +213,11 @@ class FrameBuffer(object):
         self.size = size
         self.clear_color = clear_color
 
-        self.texture = create_empty_texture(self.size, self.clear_color)
+        self.texture = BlankTexture(self.size, self.clear_color)
 
+        if bool(glGenRenderbuffersEXT):
+            print("glGenRenderbuffersEXT doesn't exist")
+            exit()
         self.rbuffer = glGenRenderbuffersEXT(1)
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT,
                               self.rbuffer)
@@ -291,25 +328,3 @@ class TextureBuffer(object):
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0,0,self.size[0], self.size[1], 0)
 
         glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
-
-def create_empty_texture(size=(2,2), color=(1,1,1,1)):
-    """Create an empty data.Texture
-       size must be a two part tuple representing the pixel size of the texture
-       color must be a four-part tuple representing the (RGBA 0-1) color of the texture"""
-    i = pygame.Surface(size)
-    if len(color) == 4:
-        r, g, b, a = color
-    else:
-        r, g, b = color
-        a = 1
-    r *= 255
-    g *= 255
-    b *= 255
-    a *= 255
-    i.fill((r,g,b,a))
-    return Texture(i)
-
-x = view.require_init #bypass the textures not wanting to load before init, blank texture doesn't require it...
-view.require_init = lambda: None
-blank_texture = create_empty_texture()
-view.require_init = x
