@@ -3,6 +3,40 @@ from pyggel import *
 
 import os
 
+class Bone(object):
+    def __init__(self, parent=None, mesh=None):
+        self.parent = parent
+        self.mesh = mesh
+        self.start_pos = (0,0,0)
+        self.end_pos = (0,0,0)
+        self.start_rotation = (0,0,0)
+
+        self.visible = True
+        self.pickable = True
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color=(1,0,0)
+
+        self.dlist = None
+
+    def compile(self):
+        sx, sy, sz = self.start_pos
+        ex, ey, ez = self.end_pos
+
+        verts = ([sx, sy, sz],
+                 [sx+.1, sy+.1, sz+.1],
+                 [ex, ey, ez],
+                 [ex+.1, ey+.1, ez+.1])
+
+        glBegin(GL_QUADS)
+        for i in verts:
+            glVertex3f(*i)
+        glEnd()
+
+    def render(self, camera=None):
+        glColor4f(1,1,1,1)
+        self.compile()
+
 class ObjGroup(object):
     def __init__(self, name):
         self.name = name
@@ -76,6 +110,9 @@ class ObjGroup(object):
         self.dlist = pyggel.data.DisplayList()
         self.dlist.begin()
 
+        minx = miny = minz = 0
+        maxx = maxy = maxz = 0
+
         for face in final:
             v, n, t = face
             glBegin(GL_POLYGON)
@@ -85,9 +122,18 @@ class ObjGroup(object):
                 if t[i]:
                     glTexCoord2fv(t[i])
                 glVertex3fv(v[i])
+                x, y, z = v[i]
+                minx = min((minx, x))
+                maxx = max((maxx, x))
+                miny = min((miny, y))
+                maxy = max((maxy, y))
+                minz = min((minz, z))
+                maxz = max((maxz, z))
             glEnd()
 
         self.dlist.end()
+
+        self.bone_points = (minx, miny, minz, maxx, maxy, maxz)
 
     def render(self, camera=None):
         glPushMatrix()
@@ -192,7 +238,18 @@ def main():
                                   (0,0,0), True)
     scene.add_light(my_light)
 
-    scene.add_3d(load_OBJ_for_manipulation("data/bird_plane.obj"))
+    objs = load_OBJ_for_manipulation("data/bird_plane.obj")
+    scene.add_3d(objs)
+
+    bones = []
+
+    for i in objs:
+        b = Bone(None, i)
+        scene.add_3d_always(b)
+        bones.append(b)
+
+    selected_obj = None
+    cur_obj = None
 
     while 1:
         meh.update()
@@ -226,6 +283,9 @@ def main():
             camera.posz -= .1
         if K_w in meh.keyboard.active:
             camera.posz += .1
+
+        if 1 in meh.mouse.hit:
+            selected_obj = cur_obj
 
         pyggel.view.clear_screen()
 

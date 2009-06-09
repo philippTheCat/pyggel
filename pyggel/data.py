@@ -13,7 +13,7 @@ class Texture(object):
     """An object to load and store an OpenGL texture"""
     bound = None
     _all_loaded = {}
-    def __init__(self, filename):
+    def __init__(self, filename=None):
         """Create a texture
            filename can be be a filename for an image, or a pygame.Surface object"""
         view.require_init()
@@ -44,11 +44,14 @@ class Texture(object):
             image = pygame.image.load(self.filename)
 
             self._compile(image)
+            if self.filename:
+                self._all_loaded[self.filename] = [self]
         else:
             tex = self._all_loaded[self.filename][0]
 
             self.size = tex.size
             self.gl_tex = tex.gl_tex
+            self._all_loaded[self.filename].append(self)
 
     def _compile(self, image):
         """Compiles image data into texture data"""
@@ -73,8 +76,6 @@ class Texture(object):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
-        if type(self.filename) is type(""):
-            self._all_loaded[self.filename] = [self]
 
     def bind(self):
         """Binds the texture for usage"""
@@ -101,6 +102,7 @@ class Texture(object):
 
 
 class BlankTexture(Texture):
+    _all_loaded = {}
     def __init__(self, size=(1,1), color=(1,1,1,1)):
         """Create an empty data.Texture
            size must be a two part tuple representing the pixel size of the texture
@@ -115,6 +117,7 @@ class BlankTexture(Texture):
 
             self.size = tex.size
             self.gl_tex = tex.gl_tex
+            self._all_loaded[self.filename].append(self)
         else:
             i = pygame.Surface(size)
             if len(color) == 4:
@@ -130,6 +133,8 @@ class BlankTexture(Texture):
             
             self.gl_tex = glGenTextures(1)
             self._compile(i)
+
+            self._all_loaded[self.filename] = [self]
 
 class DisplayList(object):
     """An object to compile and store an OpenGL display list"""
@@ -215,7 +220,7 @@ class FrameBuffer(object):
 
         self.texture = BlankTexture(self.size, self.clear_color)
 
-        if bool(glGenRenderbuffersEXT):
+        if not bool(glGenRenderbuffersEXT):
             print("glGenRenderbuffersEXT doesn't exist")
             exit()
         self.rbuffer = glGenRenderbuffersEXT(1)
@@ -303,7 +308,7 @@ class TextureBuffer(object):
         self.size = size
         self.clear_color = clear_color
 
-        self.texture = create_empty_texture(self.size, self.clear_color)
+        self.texture = BlankTexture(self.size, self.clear_color)
         self.worked = True
 
     def enable(self):
