@@ -138,22 +138,22 @@ class Player(GameObject):
 class Gun(GameObject):
     
     def __init__(self, game, player):
-        height = -0.15
+        height = -0.25
         GameObject.__init__(self, game, obj=pyggel.mesh.OBJ("data/gun.obj", colorize=[0.2, 0.2, 0.2, 1]), 
                             pos=[10, 15], rotation=0, height=height)
         self.player = player
         self.obj.scale = 0.65
-        self.rotate_to(90, 0, 0)
+        self.rotate_to(0, 0, 0)
         self.scene.add_3d(self.obj)
         self.update_pos()
         self.old_y = height
     
     def update_pos(self):
-        self.rotate_to(90, 0, self.player.rotation)
+        self.rotate_to(0, -self.player.rotation, 0)
         self.update_obj()
         self.pos = list(self.player.pos)
-        self.move(0.25, (0, -self.player.rotation-90))
-        self.move(1.3, (0, -self.player.rotation))
+        self.move(0.175, (0, -self.player.rotation-90))
+        self.move(1.0, (0, -self.player.rotation))
         self.update_obj()
 
 class Shot(GameObject):
@@ -186,7 +186,7 @@ class RoboBaddie(GameObject):
     
     def __init__(self, game, pos):
         if not self.main_obj:
-            self.main_obj = pyggel.mesh.OBJ("data/robo.obj", pos=pos, rotation=[270, 0, 0], colorize=[0.3, 0.4, 0.5, 1])
+            self.main_obj = pyggel.mesh.OBJ("data/robo.obj", pos=pos, colorize=[0.3, 0.4, 0.5, 1])
         obj = self.main_obj.copy()
         GameObject.__init__(self, game, obj=obj, pos=pos, rotation=0, height=-0.2)
         self.obj.scale = 2.0
@@ -203,9 +203,8 @@ class RoboBaddie(GameObject):
             self.obj.colorize = [1, 0, 0, 1]
         else:
             self.obj.colorize = [0.3, 0.4, 0.5, 1]
-        self.rotate_to(270, 0, self.obj.rotation[2]+3)
-        self.old_pos = list(self.pos)
-        self.move(0.1, (0, self.obj.rotation[2]))
+        self.rotate_to(0, self.obj.rotation[1]+3, 0)
+        self.move(0.1, (0, 180+self.obj.rotation[1]))
     
     def kill(self):
         if self.alive():

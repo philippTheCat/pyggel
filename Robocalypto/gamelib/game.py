@@ -175,18 +175,11 @@ class Game(object):
         if self.frame > 360:
             self.frame = 0
         
-        #Cap the FPS so the FPS runs smoothly. DOUBLE MEANING! Bwahaha!
-        self.clock.tick(999)
-##        print self.clock.get_fps()
+        self.clock.tick(60)
 
         s = "AMMO: %s\nScore: %s\nLives: %s\nFPS: %s"%(self.player.ammo, self.player.score,
                                                        self.player.lives, int(self.clock.get_fps()))
         self.text1.text = s
-##        p = self.text1.pos
-##        self.scene.remove_2d(self.text1)
-##        self.text1 = self.font.make_text_image(s, (0, 255, 0))
-##        self.text1.pos = p
-##        self.scene.add_2d(self.text1)
         
         self.update_camera_pos()
         for o in self.objects:
@@ -219,19 +212,17 @@ class Game(object):
             for w in self.walls:
                 if collidepoint(w.pos, wr):
                     collidables.append(w)
-            for i in xrange(10):
-                line[0] += math.sin(math.radians(b.obj.rotation[2]))*1
-                line[1] += math.cos(math.radians(b.obj.rotation[2]))*1
-                r2 = [self.player.pos[0] - 5, self.player.pos[1] - 5, 10, 10]
-                if collidepoint(line, r2):
-                    home_in = True
-                    break
+            line[0] += math.sin(math.radians(b.obj.rotation[1]))*1
+            line[1] += math.cos(math.radians(b.obj.rotation[1]))*1
+            r2 = [self.player.pos[0] - 5, self.player.pos[1] - 5, 10, 10]
+            if collidepoint(line, r2):
+                home_in = True
             if collidepoint(self.player.pos, r) or home_in:
                 x = self.player.pos[0] - b.pos[0]
                 y = self.player.pos[1] - b.pos[1]
                 angle = math.atan2(-y, x)
-                angle = 270.0 - (angle * 180.0)/math.pi
-                b.obj.rotation = (b.obj.rotation[0], b.obj.rotation[1], angle)
+                angle = 90-(angle * 180.0)/math.pi
+                b.obj.rotation = (b.obj.rotation[0], angle, b.obj.rotation[2])
             for w in collidables:
                 r = [w.pos[0]-3.0, w.pos[1]-3.0, 6.0, 6.0]
                 b.wall_collide(r)
