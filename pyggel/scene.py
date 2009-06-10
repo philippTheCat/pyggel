@@ -33,7 +33,7 @@ class Scene(object):
 
         self.pick = False #can be true or false
 
-    def render(self, camera=None):
+    def render(self, camera=None, pick_pos=None):
         """Render all objects.
            camera must no or the camera object used to render the scene
            Returns None or picked object if Scene.pick is True and an object is actually touching the mouse."""
@@ -43,8 +43,12 @@ class Scene(object):
             view.set3d()
         pick = None
 
-        mpx, mpy = view.screen.get_mouse_pos()
-        mpy = view.screen.screen_size[1] - mpy
+        if pick_pos == None:
+            mpx, mpy = view.screen.get_mouse_pos()
+            mpy = view.screen.screen_size[1] - mpy
+        else:
+            mpx, mpy = pick_pos
+            mpy = view.screen.screen_size[1] - mpy
         last_depth = 1
 
         my_lights = list(all_lights)
