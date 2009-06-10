@@ -57,7 +57,7 @@ def level_parse(game, scene):
             
             #Walls
             if column == 1:
-                box = pyggel.geometry.Cube(5, texture=[data.Texture("data/%s" % random.choice(["wall.png", "door.png", "wall.png", "wall.png"]))]*6)
+                box = pyggel.geometry.Cube(5, texture=data.Texture("data/%s" % random.choice(["wall.png", "door.png", "wall.png", "wall.png"])))
                 box.pos=(x*5,0,y*5)
                 static.append(box)
                 walls.append(Wall(game, [box.pos[0], box.pos[2]]))

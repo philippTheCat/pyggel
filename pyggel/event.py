@@ -24,13 +24,19 @@ class Keyboard(object):
         self.hit = []
         self.held = []
 
+    def get_ident(self, event):
+        try:
+            return str(event.unicode)
+        except:
+            return event.unicode
+
     def do_active_hit(self, event):
-        self.hook[event.key] = str(event.unicode)
+        self.hook[event.key] = self.get_ident(event)
         if not event.key in self.active:
             self.active.append(event.key)
-            self.active.append(str(event.unicode))
+            self.active.append(self.get_ident(event))
             self.hit.append(event.key)
-            self.hit.append(str(event.unicode))
+            self.hit.append(self.get_ident(event))
 
     def do_keyup(self, event):
         if event.key in self.active:
@@ -152,7 +158,7 @@ class Handler(object):
                update - called at end of grabbing events/firing callbacks.
            function must be a python function or method that accepts the proper args for each event,
            event args are:
-               keydown, keyup, keyhold: key->Pygame event key, string->the "string" of the key
+               keydown, keyup, keyhold: key->Pygame event key, string->the Python str of the key, or the unicode of the key
                    string will be the key pressed, ie, the a key is "a" (or "A" with shift/caps)
                mousedown, mouseup, mousehold: button->Pygame event button, string-> the "name" of the button
                    string will be "left", "right", "middle", "wheel-up", "wheel-down", or "extra-N" where N is the Pygame event button
@@ -174,7 +180,8 @@ class Handler(object):
                 return None
             self.keyboard.do_active_hit(event)
 
-            self.dispatch.fire("keydown", event.key, str(event.unicode))
+            self.dispatch.fire("keydown", event.key,
+                               self.keyboard.get_ident(event))
 
         elif event.type == KEYUP:
             x = self.keyboard.do_keyup(event)
