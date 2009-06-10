@@ -40,7 +40,7 @@ class _Screen(object):
         self.title = None
 
         self.clips = [(0,0,self.screen_size[0],self.screen_size[1])]
-        #glScissor(*self.clips[0]) #fix this
+        #glScissor(*self.clips[0]) #necessary?
 
     def set_size(self, size, size2d):
         """Set the screen size."""
@@ -54,7 +54,7 @@ class _Screen(object):
         self.clips = [] #clear!
         self.clips.append((0,0,size[0],size[1]))
         self.rect = pygame.rect.Rect(0,0,*size)
-        #glScissor(*self.clips[0]) #fix this
+        glScissor(*self.clips[0])
 
         return self.screen_size
 
@@ -128,7 +128,6 @@ def init(screen_size=None, screen_size_2d=None,
        decorated indicates whether the display window should have a border and top bar or not"""
     if screen_size and not screen_size_2d:
         screen_size_2d = screen_size
-    screen_size = screen.set_size(screen_size, screen_size_2d)
 
     if use_psyco:
         try:
@@ -185,7 +184,7 @@ def init(screen_size=None, screen_size_2d=None,
     glFrontFace(GL_CCW)
     glCullFace(GL_BACK)
     glEnable(GL_CULL_FACE)
-
+    screen_size = screen.set_size(screen_size, screen_size_2d)
     screen.have_init = True
 
 def set_background_color(rgb=(0,0,0)):
