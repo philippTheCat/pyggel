@@ -9,6 +9,7 @@ from include import *
 import view, math3d, data
 
 import random
+from scene import BaseSceneObject
 
 class OutlineGroup(object):
     def __init__(self, group, *args):
@@ -177,22 +178,18 @@ class ObjectInstance(object):
         l = []; [l.extend(i) for i in self._groups]
         return self in l
 
-class StaticObjectGroup(object):
+class StaticObjectGroup(BaseSceneObject):
     """A class that takes a list of renderable objects (that won't ever change position, rotation, etc.
            This includes Image3D's - as they require a dynamic look-up of the camera to billboard correctly)
        and compiles them into a single data.DisplayList so that rendering is much faster."""
     def __init__(self, objects=[]):
         """Create the group.
            objects must be a list of renderable objects"""
+        BaseSceneObject.__init__(self)
+
         self.objects = objects
         self.gl_list = data.DisplayList()
-
-        self.visible = True
         self.pickable = False
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
-        self.pos = (0,0,0)
 
         self.compile()
 

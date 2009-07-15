@@ -8,6 +8,7 @@ The mesh module contains mesh classes for different kinds of meshes, as well as 
 from include import *
 import os
 import image, view, data, misc
+from scene import BaseSceneObject
  
 def OBJ(filename, pos=(0,0,0),
         rotation=(0,0,0), colorize=(1,1,1,1)):
@@ -109,7 +110,7 @@ def OBJ(filename, pos=(0,0,0),
 
     return BasicMesh(lists, pos, rotation, verts, 1, colorize)
 
-class BasicMesh(object):
+class BasicMesh(BaseSceneObject):
     """A basic, static (non-animated) mesh class."""
     def __init__(self, lists, pos=(0,0,0),
                  rotation=(0,0,0), verts=[],
@@ -121,7 +122,7 @@ class BasicMesh(object):
            verts is a list of vertices in the mesh
            scale must be a number or three part tuple representing the scale value of the mesh
            colorize is a 4 part tuple representing the (RGBA 0-1) color of the mesh"""
-        view.require_init()
+        BaseSceneObject.__init__(self)
 
         self.gl_lists = lists
         self.pos = pos
@@ -129,11 +130,6 @@ class BasicMesh(object):
         self.verts = verts
         self.scale = scale
         self.colorize = colorize
-        self.visible = True
-        self.pickable = True
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
     def get_dimensions(self):
         """Return the width/height/depth of the mesh"""

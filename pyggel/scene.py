@@ -8,6 +8,39 @@ The scene module contains classes used to represent an entire group of renderabl
 from include import *
 import camera, view, misc
 from light import all_lights
+from data import BlankTexture
+
+class BaseSceneObject(object):
+    """A simple object that provides the basic functionality to be added to a scene."""
+    def __init__(self):
+        """Create the object."""
+
+        view.require_init() #always!
+        self.texture = BlankTexture()
+        self.display_list = None
+        self.visible = True
+        self.pickable = True
+
+        self.outline = False
+        self.outline_size = 4
+        self.outline_color = (1,0,0)
+
+    def get_dimensions(self):
+        """Return the size of the object..."""
+        return 1,1,1
+
+    def get_pos(self):
+        return 0,0,0
+
+    def render(self, camera=None):
+        """Called by the scene to render the object."""
+        pass
+
+    def copy(self):
+        return BaseSceneObject()
+
+    def get_scale(self):
+        return 1,1,1
 
 class Tree(object):
     """A simple class used to keep track of all objects in a scene."""

@@ -8,8 +8,9 @@ The geometry module contains classes used to render 3d geometric primitives.
 from include import *
 import view, data, misc
 from data import Texture, BlankTexture
+from scene import BaseSceneObject
 
-class Cube(object):
+class Cube(BaseSceneObject):
     """A geometric cube that can be colored and textured"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
                  colorize=(1,1,1,1), texture=None, mirror=True):
@@ -25,15 +26,15 @@ class Cube(object):
                    blank, blank, top, blank,
                    back, left, front, right,
                    blank, blank, bottom, blank"""
-        view.require_init()
+        BaseSceneObject.__init__(self)
+
         self.size = size
         self.pos = pos
         self.rotation = rotation
-        if not texture:
-            texture = BlankTexture()
         if type(texture) is type(""):
             texture = Texture(texture)
-        self.texture = texture
+        if texture:
+            self.texture = texture
         self.colorize = colorize
 
         self.mirror = mirror
@@ -70,12 +71,6 @@ class Cube(object):
         self.scale = 1
 
         self.display_list = data.DisplayList()
-
-        self.visible = True
-        self.pickable = True
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
         self._compile()
 
@@ -150,7 +145,7 @@ class Cube(object):
         try: return self.scale[0], self.scale[1], self.scale[2]
         except: return self.scale, self.scale, self.scale
 
-class Quad(Cube):
+class Quad(Cube, BaseSceneObject):
     """A simple 3d square object."""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
                  colorize=(1,1,1,1), texture=None):
@@ -161,26 +156,19 @@ class Quad(Cube):
            colorize is the color of the quad
            texture can be None, a string filename of an image to load or a data.Texture object - entire texture is mapped to the face"""
 
-        view.require_init()
+        BaseSceneObject.__init__(self)
         self.size = size
         self.pos = pos
         self.rotation = rotation
-        if not texture:
-            texture = blank_texture
         if type(texture) is type(""):
             texture = Texture(texture)
-        self.texture = texture
+        if texture:
+            self.texture = texture
         self.colorize = colorize
 
         self.scale = 1
 
         self.display_list = data.DisplayList()
-
-        self.visible = True
-        self.pickable = True
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
         self._compile()
 
@@ -331,7 +319,7 @@ class Skybox(Cube):
         n.display_list = self.display_list
         return n
 
-class Sphere(object):
+class Sphere(BaseSceneObject):
     """A geometric Sphere object that can be colored and textured"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
                  colorize=(1,1,1,1), texture=None, detail=30):
@@ -342,25 +330,20 @@ class Sphere(object):
            colorize is the color of the sphere
            texture can be None, a string filename of an image to load or a data.Texture object that will be mapped to the sphere
            detail is the level of detail for the Sphere, higher = a more smooth sphere"""
-        view.require_init()
+        BaseSceneObject.__init__(self)
+
         self.size = size
         self.pos = pos
         self.rotation = rotation
         self.colorize = colorize
-        if not texture:
-            texture = blank_texture
         if type(texture) is type(""):
             texture = Texture(texture)
-        self.texture = texture
+        if texture:
+            self.texture = texture
         self.detail = detail
         self.scale = 1
 
         self.display_list = data.DisplayList()
-        self.visible = True
-        self.pickable = True
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
         self._compile()
 

@@ -7,6 +7,7 @@ The font module contains classes to display text images.
 
 from include import *
 import image, view, data, misc
+from scene import BaseSceneObject
 
 class Font3D(object):
     """A font object used for rendering text to images"""
@@ -62,7 +63,7 @@ class Font3D(object):
             return image.Image3D(a, colorize=color)
 
 
-class FontImage(object):
+class FontImage(BaseSceneObject):
     """A font image that renders fast, but changing text is slow."""
     def __init__(self, font, text, color=(1,1,1,1), linewrap=None, underline=False, italic=False, bold=False):
         """Create the font image
@@ -74,6 +75,8 @@ class FontImage(object):
            underline must be True/False - whether the text is underlined or not
            italic must be True/False - whether the text is italic or not
            bold must be True/False - whether the text is bold or not"""
+        BaseSceneObject.__init__(self)
+
         self._font = font
         self._text = text
         self._color = color
@@ -81,16 +84,12 @@ class FontImage(object):
         self._underline = underline
         self._italic = italic
         self._bold = bold
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
         self.pos = (0,0)
         self.rotation = (0,0,0)
 
         self.size = (0,0)
         self.scale = 1
-        self.visible = True
 
         self._compiled = False
         self._compiled_list = None
@@ -381,7 +380,7 @@ class FontImage(object):
             glyph.render()
         glPopMatrix()
 
-class MEFontImage(object):
+class MEFontImage(BaseSceneObject):
     """A font image that renders more slowly, but is very fast to change text"""
     def __init__(self, font, text="", color=(1,1,1,1), linewrap=None,
                  underline=False, italic=False, bold=False):
@@ -394,18 +393,15 @@ class MEFontImage(object):
            underline must be True/False - whether the text is underlined or not
            italic must be True/False - whether the text is italic or not
            bold must be True/False - whether the text is bold or not"""
+        BaseSceneObject.__init__(self)
+
         self._font = font
         self.rotation = (0,0,0)
         self.scale = 1
-        self.visible = True
 
         self._underline = underline
         self._italic = italic
         self._bold = bold
-
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
         self._linewrap = linewrap
 

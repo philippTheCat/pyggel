@@ -8,6 +8,7 @@ A simple fire effect is included.
 
 from include import *
 import data, image, misc, data
+from scene import BaseSceneObject
 
 import random
 import numpy
@@ -45,22 +46,20 @@ class Particle3D(object):
         """Destroy the particle."""
         self.parent.particles.remove(self)
 
-class Emitter3D(object):
+class Emitter3D(BaseSceneObject):
     """A simple Particle3D emitter."""
     def __init__(self, behavior, pos=(0,0,0)):
         """Create the emitter.
            behavior must be the behavior class (not instance) that will control how the emitter and particles will behave
            pos must be a three-part tuple of the position of the emitter"""
+        BaseSceneObject.__init__(self)
+
         self.pos = pos
         self.behavior = behavior(self)
         self.particles = []
         self.particle_type = Particle3D
 
-        self.visible = True
         self.pickable = False
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
     def get_dimensions(self):
         """Return the maximum dimensions (width/height/depth) of the emitter and particles."""
@@ -218,12 +217,14 @@ class ParticlePoint(object):
         self.parent.vertex_array.colors[self.index][2] = b
         self.parent.vertex_array.colors[self.index][3] = a
 
-class EmitterPoint(object):
+class EmitterPoint(BaseSceneObject):
     """A more complex particle emitter, that stores all particles in a vertex array."""
     def __init__(self, behavior, pos=(0,0,0)):
         """Create the emitter.
            behavior must be the behavior class (not instance) that will control how the emitter and particles will behave
            pos must be a three-part tuple of the position of the emitter"""
+        BaseSceneObject.__init__(self)
+
         self.pos = pos
         self.behavior = behavior(self)
         self.particles = numpy.empty(self.behavior.max_particles, dtype=object)
@@ -232,11 +233,7 @@ class EmitterPoint(object):
 
         self.vertex_array = data.VertexArray(GL_POINTS, self.behavior.max_particles)
 
-        self.visible = True
         self.pickable = False
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
         self.particle_type = ParticlePoint
 
     def get_dimensions(self):

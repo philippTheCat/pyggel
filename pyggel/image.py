@@ -11,8 +11,9 @@ from include import *
 import view, data, misc
 
 import Image as pilImage
+from scene import BaseSceneObject
 
-class Image(object):
+class Image(BaseSceneObject):
     """A 2d image object"""
     def __init__(self, filename, pos=(0,0),
                  rotation=(0,0,0), scale=1,
@@ -23,7 +24,8 @@ class Image(object):
            rotation is the 3d rotation of the image
            scale is the scale factor for the image
            colorize is the color of the image"""
-        view.require_init()
+        BaseSceneObject.__init__(self)
+
         self.filename = filename
 
         self.pos = pos
@@ -50,10 +52,6 @@ class Image(object):
         self.rotation = rotation
         self.scale = scale
         self.colorize = colorize
-        self.visible = True
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
     def copy(self):
         """Return a copy of the image - sharing the same data.DisplayList"""
@@ -252,10 +250,6 @@ class Image3D(Image):
            colorize is the color of the image"""
         Image.__init__(self, filename, pos, rotation,
                        scale, colorize)
-        self.pickable = True
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
     def get_dimensions(self):
         """Return a tuple of (1,1,1) signifying the 3d dimensions of teh image - used by the quad tree"""
@@ -410,7 +404,7 @@ def create_empty_image3d(size=(2,2), color=(1,1,1,1)):
     i.fill((255,255,255,255))
     return Image3D(i, colorize=color)
 
-class Animation(object):
+class Animation(BaseSceneObject):
     """A simple object used to store, manipulate, animate and render a bunch of frames of 2d Image obejcts."""
     def __init__(self, frames=[], pos=(0,0),
                  rotation=(0,0,0), scale=1,
@@ -421,7 +415,8 @@ class Animation(object):
            rotation is the 3d rotation of the image
            scale is the scale factor for the image
            colorize is the color of the image"""
-        view.require_init()
+        BaseSceneObject.__init__(self)
+
         self.frames = frames
 
         self.pos = pos
@@ -437,11 +432,7 @@ class Animation(object):
         self.reversed = False
         self.looping = True
 
-        self.visible = True
         self.filename = None
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
     def render(self, camera=None):
         """Render the animation - this also keeps track of swapping frames when they have run for their duration.
@@ -614,10 +605,6 @@ class Animation3D(Animation):
            scale is the scale factor for the image
            colorize is the color of the image"""
         Animation.__init__(self, frames, pos, rotation, scale, colorize)
-        self.pickable = True
-        self.outline = False
-        self.outline_size = 4
-        self.outline_color=(1,0,0)
 
     def blit(self, *args, **kwargs):
         print "Animation3D does not support this function!"

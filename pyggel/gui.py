@@ -11,6 +11,8 @@ import time
 import image as _image
 import os
 
+from scene import BaseSceneObject
+
 tdef = "theme"
 class Theme(object):
     """A class used to create/load themes and content for widgets."""
@@ -362,12 +364,14 @@ class Packer(object):
                 newh = h
             i.force_pos_update(pos)
 
-class App(object):
+class App(BaseSceneObject):
     """A simple Application class, to hold and control all widgets."""
     def __init__(self, event_handler):
         """Create the App.
            event_handler must be the event.Handler object that the gui will use to get events,
                sets event_handler's current gui to this App"""
+        BaseSceneObject.__init__(self)
+
         self.event_handler = event_handler
         self.event_handler.gui = self
         self.event_handler.all_guis.append(self)
@@ -380,8 +384,6 @@ class App(object):
         self.theme = Theme(self)
 
         self.packer = Packer(self, size=view.screen.screen_size_2d)
-
-        self.visible = True
 
         self.pos = (0,0)
         self.size = view.screen.screen_size_2d
