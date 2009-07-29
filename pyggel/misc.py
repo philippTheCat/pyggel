@@ -319,6 +319,6 @@ class BatchVertObject(BaseSceneObject):
         glColor(*self.colorize)
         self.texture.bind()
         if self.outline:
-            misc.outline(self.display_list, self.outline_color, self.outline_size)
+            outline(self.display_list, self.outline_color, self.outline_size)
         self.display_list.render()
         glPopMatrix()
