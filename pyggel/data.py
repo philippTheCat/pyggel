@@ -333,3 +333,20 @@ class TextureBuffer(object):
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0,0,self.size[0], self.size[1], 0)
 
         glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
+
+class Material(object):
+    def __init__(self, name):
+        self.name = name
+        self.color = (1,1,1,1)
+        self.texture = BlankTexture()
+
+    def set_color(self, color):
+        if len(color) == 3:
+            color += (1,)
+        self.color = color
+
+    def copy(self):
+        a = Material(self.name)
+        a.color = self.color
+        a.texture = self.texture
+        return a

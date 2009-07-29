@@ -25,22 +25,48 @@ class BaseSceneObject(object):
         self.outline_size = 4
         self.outline_color = (1,0,0)
 
+        self.pos = (0,0,0)
+        self.rotation = (0,0,0)
+        self.scale = (0,0,0)
+
     def get_dimensions(self):
         """Return the size of the object..."""
         return 1,1,1
 
     def get_pos(self):
-        return 0,0,0
+        """Return the pos of the object..."""
+        return self.pos
 
     def render(self, camera=None):
-        """Called by the scene to render the object."""
+        """Called by the scene to render the object..."""
         pass
 
     def copy(self):
+        """Return a copy of the object..."""
         return BaseSceneObject()
 
     def get_scale(self):
-        return 1,1,1
+        """Return the scale of the object..."""
+        try:
+            return self.scale[0], self.scale[1], self.scale[2]
+        except:
+            return self.scale, self.scale, self.scale
+
+    def rotate(self, x, y, z):
+        """Add x,y,z to the current rotation x,y,z of object."""
+        a,b,c = self.rotation
+        a += x
+        b += y
+        c += z
+        self.rotation = a,b,c
+
+    def move(self, x, y, z):
+        """Add x,y,z to the current pos x,y,z of object."""
+        a,b,c = self.pos
+        a += x
+        b += y
+        c += z
+        self.pos = a,b,c
 
 class Tree(object):
     """A simple class used to keep track of all objects in a scene."""

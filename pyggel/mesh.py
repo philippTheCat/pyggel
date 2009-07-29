@@ -9,51 +9,47 @@ from include import *
 import os
 import image, view, data, misc
 from scene import BaseSceneObject
- 
-def OBJ(filename, pos=(0,0,0),
-        rotation=(0,0,0), colorize=(1,1,1,1)):
-    """Loads a Wavefront OBJ file. Returns a BasicMesh object representing the OBJ mesh."""
-    view.require_init()
-    svertices = []
-    snormals = []
-    stexcoords = []
-    sfaces = []
 
-    material = None
-    smtl = None
+def OBJ(filename, pos=(0,0,0), rotation=(0,0,0), colorize=(1,1,1,1)):
+    view.require_init()
+
+    objs = []
+    mtls = {}
+
+    vertices = []
+    normals = []
+    texcoords = []
+
     for line in open(filename, "r"):
         if line.startswith('#'): continue
         values = line.split()
         if not values: continue
-        if values[0] == 'v':
-            v = map(float, values[1:4])
-            svertices.append(v)
+        if values[0] == "o":
+            objs.append(ObjGroup(values[1]))
+        elif values[0] == 'v':
+            vertices.append(map(float, values[1:4]))
         elif values[0] == 'vn':
-            v = map(float, values[1:4])
-            snormals.append(v)
+            normals.append(map(float, values[1:4]))
         elif values[0] == 'vt':
-            stexcoords.append(map(float, values[1:3]))
+            texcoords.append(map(float, values[1:3]))
         elif values[0] in ('usemtl', 'usemat'):
-            material = values[1]
+            objs[-1].material = mtls[values[1]]
         elif values[0] == 'mtllib':
             path = os.path.split(filename)[0]
-            smtl = {}
-            mtl = None
+            cur_mtl = None
             for line in open(os.path.join(path, values[1]), "r"):
                 if line.startswith('#'): continue
                 values = line.split()
                 if not values: continue
                 if values[0] == 'newmtl':
-                    smtl[values[1]] = None
-                    mtl = values[1]
-                elif mtl is None:
+                    cur_mtl = data.Material(values[1])
+                    mtls[cur_mtl.name] = cur_mtl
+                elif cur_mtl is None:
                     raise ValueError, "mtl file doesn't start with newmtl stmt"
                 elif values[0] == 'map_Kd':
-                    tex = data.Texture(os.path.join(path, values[1]))
-                    smtl[mtl] = tex
+                    cur_mtl.texture = data.Texture(os.path.join(path, values[1]))
                 elif values[0]=="Kd":
-                    tex = data.BlankTexture(color=map(float, values[1:]))
-                    smtl[mtl] = tex
+                    cur_mtl.set_color(map(float, values[1:]))
         elif values[0] == 'f':
             face = []
             texcoords = []
@@ -69,98 +65,157 @@ def OBJ(filename, pos=(0,0,0),
                     norms.append(int(w[2]))
                 else:
                     norms.append(0)
-            sfaces.append((face, norms, texcoords, material))
+            objs[-1].faces.append((face, norms, texcoords))
 
+    fin = []
+    for i in objs:
+        fin.append(i.compile(vertices, normals, texcoords))
 
-    faces_ordered_by_material = {}
-    for face in sfaces:
-        v, n, t, m = face
-        if m in faces_ordered_by_material:
-            faces_ordered_by_material[m].append(face)
-        else:
-            faces_ordered_by_material[m] = [face]
+    return BasicMesh(fin, pos, rotation, 1, colorize)
+ 
+class ObjGroup(object):
+    def __init__(self, name):
+        self.name = name
+        self.faces = []
+        self.material = None
 
-    lists = []
-    for i in faces_ordered_by_material:
-        sfaces = faces_ordered_by_material[i]
+        self.dlist = None
 
-        material = smtl[i]
+    def compile(self, vertices, normals, texcoords):
+        faces = []
+        for face in self.faces:
+            v,n,t = face
+            uv, un, ut = [], [], []
+            for i in xrange(len(v)):
+                if n[i] > 0:
+                    un.append(normals[n[i]-1])
+                else:
+                    un.append(None)
 
-        gl_list = data.DisplayList()
-        gl_list.begin()
-        current_tex = None
-        for face in sfaces:
-            vertices, normals, texture_coords, _m = face
+                if t[i] > 0:
+                    ut.append(texcoords[t[i]-1])
+                else:
+                    ut.append(None)
+                uv.append(vertices[v[i]-1])
+            faces.append((uv, un, ut))
+
+        final = []
+        for face in faces:
+            v,n,t = face
+            nv = []
+            for i in v:
+                a,b,c = i
+                nv.append((a,b,c))
+            final.append((nv,n,t))
+
+        #now build our display list!
+        dlist = data.DisplayList()
+        dlist.begin()
+
+        minx = miny = minz = 0
+        maxx = maxy = maxz = 0
+
+        for face in final:
+            v, n, t = face
             glBegin(GL_POLYGON)
-            for i in xrange(len(vertices)):
-                if normals[i] > 0:
-                    glNormal3fv(snormals[normals[i] - 1])
-                if texture_coords[i] > 0:
-                    glTexCoord2fv(stexcoords[texture_coords[i] - 1])
-                glVertex3fv(svertices[vertices[i] - 1])
+            for i in xrange(len(v)):
+                if n[i]:
+                    glNormal3fv(n[i])
+                if t[i]:
+                    glTexCoord2fv(t[i])
+                glVertex3fv(v[i])
+                x, y, z = v[i]
+                minx = min((minx, x))
+                maxx = max((maxx, x))
+                miny = min((miny, y))
+                maxy = max((maxy, y))
+                minz = min((minz, z))
+                maxz = max((maxz, z))
             glEnd()
-        gl_list.end()
 
-        lists.append([gl_list, material])
+        dlist.end()
 
-    verts = []
-    for i in sfaces:
-        for x in i[0]:
-            verts.append(svertices[x-1])
+        return CompiledGroup(self.name, self.material, dlist, (minx,miny,minz, maxx, maxy, maxz))
 
-    return BasicMesh(lists, pos, rotation, verts, 1, colorize)
+class CompiledGroup(BaseSceneObject):
+    def __init__(self, name, material, dlist, dimensions):
+        BaseSceneObject.__init__(self)
+        self.name = name
+        self.material = material
+        self.display_list = dlist
+        self.dimensions = dimensions
+
+    def get_dimensions(self):
+        d = self.dimensions
+        return abs(d[0]-d[3]), abs(d[1]-d[4]), abs(d[2]-d[5])
+
+    def render(self, camera=None):
+        glPushMatrix()
+
+        x,y,z = self.pos
+        glTranslatef(x,y,z)
+        a, b, c = self.rotation
+        glRotatef(a, 1, 0, 0)
+        glRotatef(b, 0, 1, 0)
+        glRotatef(c, 0, 0, 1)
+
+        if self.outline:
+            misc.outline(self.dlist, self.outline_color, self.outline_size)
+        glColor4f(*self.material.color)
+        self.material.texture.bind()
+        self.display_list.render()
+        glPopMatrix()
+
+    def copy(self):
+        new = CompiledGroup(str(self.name),
+                             self.material.copy(),
+                             self.display_list,
+                             self.dimensions)
+        new.pos = self.pos
+        new.rotation = self.rotation
+        new.scale = self.scale
+
+        new.visible = self.visible
+        new.pickable = self.pickable
+
+        new.outline = self.outline
+        new.outline_size = self.outline_size
+        new.outline_color = self.outline_color
+        return new
 
 class BasicMesh(BaseSceneObject):
-    """A basic, static (non-animated) mesh class."""
-    def __init__(self, lists, pos=(0,0,0),
-                 rotation=(0,0,0), verts=[],
+    def __init__(self, objs, pos=(0,0,0), rotation=(0,0,0),
                  scale=1, colorize=(1,1,1,1)):
-        """Create the mesh object
-           lists is a list of [data.DisplayList, texture] objects holding the 3d rendering of the mesh
-           pos must be a three-part tuple representing the position of the mesh
-           rotation must be a three-part tuple representing the rotation of the mesh
-           verts is a list of vertices in the mesh
-           scale must be a number or three part tuple representing the scale value of the mesh
-           colorize is a 4 part tuple representing the (RGBA 0-1) color of the mesh"""
         BaseSceneObject.__init__(self)
 
-        self.gl_lists = lists
+        self.objs = objs
         self.pos = pos
         self.rotation = rotation
-        self.verts = verts
         self.scale = scale
         self.colorize = colorize
 
     def get_dimensions(self):
-        """Return the width/height/depth of the mesh"""
-        x = []
-        y = []
-        z = []
-        for i in self.verts:
-            x.append(i[0])
-            y.append(i[1])
-            z.append(i[2])
+        """Return the width, height and depth of the mesh..."""
+        minx = miny = minz = 0
+        maxx = maxy = maxz = 0
+        for i in self.objs:
+            d = i.dimensions
+            minx = min(minx, d[0])
+            maxx = max(maxx, d[3])
+            miny = min(minx, d[1])
+            maxy = max(maxx, d[4])
+            minz = min(minx, d[2])
+            maxz = max(maxx, d[5])
 
-        x.append(abs(min(x)))
-        y.append(abs(min(y)))
-        z.append(abs(min(z)))
-
-        return max(x), max(y), max(z)
-
-    def get_pos(self):
-        """Return the position of the mesh"""
-        return self.pos
-
-    def get_scale(self):
-        """Return the scale of the object."""
-        try: return self.scale[0], self.scale[1], self.scale[2]
-        except: return self.scale, self.scale, self.scale
+        return abs(minx-maxx), abs(miny-maxy), abs(minz-maxz)
 
     def copy(self):
         """Return a copy of the mesh, sharing the same data.DisplayList"""
-        return BasicMesh(self.gl_lists, list(self.pos),
-                         list(self.rotation), list(self.verts),
-                         self.scale, list(self.colorize))
+        new_objs = []
+        for i in self.objs:
+            new_objs.append(i.copy())
+        new = BasicMesh(new_objs, self.pos, self.rotation, self.scale, self.colorize)
+        return new
 
     def render(self, camera=None):
         """Render the mesh
@@ -179,10 +234,25 @@ class BasicMesh(BaseSceneObject):
         glColor(*self.colorize)
 
         if self.outline:
-            misc.outline(misc.OutlineGroup([i[0] for i in self.gl_lists]),
+            new = []
+            for i in self.objs:
+                x = i.copy()
+                x.material = data.Material("blank")
+                x.material.set_color(self.outline_color)
+                x.outline = False
+                new.append(x)
+            misc.outline(misc.OutlineGroup(new),
                          self.outline_color, self.outline_size)
 
-        for i in self.gl_lists:
-            i[1].bind()
-            i[0].render()
+        for i in self.objs:
+            old = tuple(i.material.color)
+            r,g,b,a = old
+            r2,g2,b2,a2 = self.colorize
+            r *= r2
+            g *= g2
+            b *= b2
+            a = a2
+            i.material.color = r,g,b,a
+            i.render(camera)
+            i.material.color = old
         glPopMatrix()

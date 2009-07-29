@@ -17,7 +17,7 @@ def main():
 
     """Now, handling 3d elements is a lot like handling 2d ones, in fact there are 3d fonts and images,
            with exactly the same api just having a 3d position instead of 2d!
-       For 3d, you basically have Meshes, geometrix shapes and 3d images/fonts.
+       For 3d, you basically have Meshes, geometric shapes and 3d images/fonts.
 
        So, let's make all those same 2d elements from the last tutorial into 3d!"""
 
@@ -107,10 +107,10 @@ def main():
 
     """Ok, so you want more than just blocks and balls?
        Good, now we'll show you how you can import 3d models into PYGGEL.
-       NOTE: for now there is only a loader for OBJ files, but more loaders are planned for the next release...
+       NOTE: for now there is only a loader for OBJ files, but more loaders are planned for the next release(s)...
 
        Loading a mesh is quite simple:
-           mesh = mesh.OBJ(filename, swapyz, pos, rotation, colorize)
+           mesh = mesh.OBJ(filename, pos, rotation, colorize)
                the pos, rotation and colorize args are the same as for geometry
                filename is the filename of the .obj object to load
        mesh.OBJ returns a mesh.BasicMesh object, which has the exact same usage as geometry objects do."""

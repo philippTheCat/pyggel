@@ -81,14 +81,17 @@ def main():
     to_swap = [obj, box, img5]+img3d
 
     swap_to_image = pyggel.data.BlankTexture(color=(0,1,0,.75))
+    swap_material = pyggel.data.Material("blank")
+    swap_material.set_color((0,1,0,.75))
     for i in to_swap: #here are our objects we want to change around...
         if isinstance(i, pyggel.mesh.BasicMesh):
             #needs a little different from others!
-            current = i.gl_lists
             new = []
-            for x in current:
-                new.append([x[0], swap_to_image]) #this is because the mesh stores a list of [display list, texture] objects!
-            i.swap_texs = [current, new] #this value can be whatever you want!
+            for x in i.objs:
+                a = x.copy()
+                a.material = swap_material
+                new.append(a)
+            i.swap_texs = [i.objs, new] #this value can be whatever you want!
         else:
             i.swap_texs = [i.texture, swap_to_image]
         i.current_swap_tex = 0 #because it is!
@@ -158,7 +161,7 @@ def main():
             for i in to_swap: #time to apply those texture swaps!
                 i.current_swap_tex = abs(i.current_swap_tex - 1)
                 if isinstance(i, pyggel.mesh.BasicMesh):
-                    i.gl_lists = i.swap_texs[i.current_swap_tex]
+                    i.objs = i.swap_texs[i.current_swap_tex]
                 else:
                     i.texture = i.swap_texs[i.current_swap_tex]
 
