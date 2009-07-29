@@ -217,3 +217,108 @@ class StaticObjectGroup(BaseSceneObject):
 def save_screenshot(filename):
     """Save a screenshot to filename"""
     pygame.image.save(pygame.display.get_surface(), filename)
+
+def test_clockwise3d(verts):
+    if len(verts) < 2:
+        return True
+    tot = 0
+    for x in xrange(len(verts)):
+        a = verts[x]
+        if x+1 == len(verts):
+            b = verts[-1]
+        else:
+            b = verts[x+1]
+
+        tot += (b[0]-a[0]) * (b[1]+a[1])
+
+    return tot >= 0
+
+def make_order_right3d(verts):
+    if test_clockwise3d(verts):
+        new = list(verts)
+        new.reverse()
+        return new
+    return list(verts)
+
+class BatchVertObject(BaseSceneObject):
+    def __init__(self, verts=[], texture=None, texcs=[], colorize=(1,1,1,1), scale=1,
+                 pos=(0,0,0), rotation=(0,0,0), fix_order=True, usage=GL_POLYGON):
+        BaseSceneObject.__init__(self)
+
+        self.verts = verts
+        if texture:
+            self.texture = texture
+        if texcs:
+            self.texcs = texcs
+        else:
+            self.texcs = [(0,0)]*len(self.verts)
+        self.colorize = colorize
+        self.scale = scale
+
+        self.pos = pos
+        self.rotation = rotation
+
+        self.usage = usage
+
+        self.display_list = data.DisplayList()
+        self._compile(fix_order)
+
+    def _compile(self, fix_order):
+        if not self.verts:
+            return
+        self.display_list.begin()
+
+        norms = []
+
+        if fix_order and test_clockwise3d(self.verts):
+            new = list(self.verts)
+            new.reverse()
+            self.verts = new
+            new = list(self.texcs)
+            new.reverse()
+            self.texcs = new
+
+            n = 0
+            while len(self.verts) % 3:
+                self.verts.append(self.verts[n])
+                self.texcs.append(self.texcs[n])
+                n += 1
+
+            for i in xrange(0, len(self.verts), 3):
+                norms.append(math3d.calcTriNormal(self.verts[i],
+                                                  self.verts[i+1],
+                                                  self.verts[i+2]))
+
+        glBegin(self.usage)
+        if norms:
+            for i in xrange(len(norms)):
+                x = i * 3
+                glNormal3f(*norms[i])
+                for j in xrange(x, x+3):
+                    glTexCoord2f(*self.texcs[j])
+                    glVertex3f(*self.verts[j])
+        else:
+            for i in xrange(len(self.verts)):
+                glTexCoord2f(*self.texcs[i])
+                glVertex3f(*self.verts[i])
+        glEnd()
+        self.display_list.end()
+
+    def render(self, camera=None):
+        glPushMatrix()
+        x, y, z = self.pos
+        glTranslatef(x, y, -z)
+        a, b, c = self.rotation
+        glRotatef(a, 1, 0, 0)
+        glRotatef(b, 0, 1, 0)
+        glRotatef(c, 0, 0, 1)
+        try:
+            glScalef(*self.scale)
+        except:
+            glScalef(self.scale, self.scale, self.scale)
+        glColor(*self.colorize)
+        self.texture.bind()
+        if self.outline:
+            misc.outline(self.display_list, self.outline_color, self.outline_size)
+        self.display_list.render()
+        glPopMatrix()

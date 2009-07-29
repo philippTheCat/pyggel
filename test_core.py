@@ -55,6 +55,11 @@ def main():
     box2 = pyggel.geometry.Cube(5, texture=data.Texture("data/skybox.png"), mirror=False)
     box2.pos = (5, 0, 0)
 
+    verts = [(0,0,0),
+             (0,1,0),
+             (1,0,0)]
+    batch = pyggel.misc.BatchVertObject(verts)
+
     my_scene = pyggel.scene.Scene()
     my_scene.pick = True
     my_scene.add_2d(img)
@@ -65,7 +70,7 @@ def main():
 
     my_scene.add_3d(obj)
     my_scene.add_3d(obj2)
-    my_scene.add_3d((box, box2))
+    my_scene.add_3d((box, box2, batch))
     for i in img3d:
         my_scene.add_3d(i)
     my_scene.add_3d(img5)
