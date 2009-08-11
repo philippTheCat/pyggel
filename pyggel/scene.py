@@ -29,6 +29,8 @@ class BaseSceneObject(object):
         self.rotation = (0,0,0)
         self.scale = (0,0,0)
 
+        self.dead_remove_from_scene = False
+
     def get_dimensions(self):
         """Return the size of the object..."""
         return 1,1,1
@@ -121,6 +123,8 @@ class Scene(object):
                 i.shine()
             glEnable(GL_ALPHA_TEST)
             for i in self.graph.render_3d:
+                if i.dead_remove_from_scene:
+                    self.graph.render_3d.remove(i)
                 if i.visible:
                     i.render(camera)
                     if self.pick and i.pickable:
@@ -134,6 +138,8 @@ class Scene(object):
             last_color = r,g,b,a
             glDepthMask(GL_FALSE)
             for i in self.graph.render_3d_blend:
+                if i.dead_remove_from_scene:
+                    self.graph.render_3d_blend.remove(i)
                 if i.visible:
                     i.render(camera)
                     if self.pick and i.pickable:
@@ -145,6 +151,8 @@ class Scene(object):
             glDepthMask(GL_TRUE)
             glDisable(GL_DEPTH_TEST)
             for i in self.graph.render_3d_always:
+                if i.dead_remove_from_scene:
+                    self.graph.render_3d_always.remove(i)
                 if i.visible:
                     i.render(camera)
                     if self.pick and i.pickable:
@@ -168,6 +176,8 @@ class Scene(object):
             glScalef(rx, ry, 1)
             glDisable(GL_LIGHTING)
             for i in self.graph.render_2d:
+                if i.dead_remove_from_scene:
+                    self.graph.render_2d.remove(i)
                 if i.visible: i.render()
             if view.screen.lighting:
                 glEnable(GL_LIGHTING)

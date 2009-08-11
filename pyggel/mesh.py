@@ -7,9 +7,10 @@ The mesh module contains mesh classes for different kinds of meshes, as well as 
 
 from include import *
 import os
-import image, view, data, misc
+import image, view, data, misc, math3d
 from scene import BaseSceneObject
 import time
+import random
 
 def OBJ(filename, pos=(0,0,0), rotation=(0,0,0), colorize=(1,1,1,1)):
     view.require_init()
@@ -263,6 +264,41 @@ class BasicMesh(BaseSceneObject):
             i.render(camera)
             i.material.color = old
         glPopMatrix()
+
+
+class Exploder(BaseSceneObject):
+    def __init__(self, root_mesh, speed, frame_duration=10):
+        BaseSceneObject.__init__(self)
+
+        self.root_mesh = root_mesh
+        self.angles = {}
+        self.rots = {}
+        for i in self.root_mesh.get_names():
+            self.angles[i] = (random.randint(0,360),
+                              random.randint(0,360),
+                              random.randint(0,360))
+            self.rots[i] = (random.randint(-5, 5),
+                            random.randint(-5, 5),
+                            random.randint(-5, 5))
+
+        self.speed = speed
+        self.age = 0
+        self.frame_duration = frame_duration
+
+    def render(self, camera=None):
+        for i in self.root_mesh.objs:
+            i.pos = math3d.move_with_rotation(i.pos, self.angles[i.name], self.speed)
+            a,b,c = i.rotation
+            d,e,f = self.rots[i.name]
+            a += d
+            b += e
+            c += f
+            i.rotation = (a,b,c)
+        self.root_mesh.render(camera)
+
+        self.age += 1
+        if self.age >= self.frame_duration:
+            self.dead_remove_from_scene = True
 
 class AnimationCommand(object):
     def __init__(self, frames=1, commands=[],

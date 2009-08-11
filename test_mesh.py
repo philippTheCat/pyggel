@@ -15,7 +15,6 @@ def main():
 
     obj = pyggel.mesh.OBJ("data/bird_plane.obj")
     obj.scale = .5
-    print obj.get_names()
 
     Tree = pyggel.mesh.ChildTree()
     root = "cylinder1"
@@ -44,10 +43,13 @@ def main():
     ani = pyggel.mesh.Animation(obj, Tree, {"flap":Flap})
     ani.action = "flap"
 
+    exp = pyggel.mesh.Exploder(obj.copy(), .025, 1000)
+
     my_scene = pyggel.scene.Scene()
     my_scene.pick = True
 ##    my_scene.add_3d(obj)
     my_scene.add_3d(ani)
+    my_scene.add_3d(exp)
 
     my_scene.add_light(my_light)
 
