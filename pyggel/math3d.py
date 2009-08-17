@@ -28,6 +28,11 @@ def get_distance(a, b):
     """Return the distance between two points"""
     return Vector(a).distance(Vector(b))
 
+def safe_div(a, b):
+    if a and b:
+        return a/b
+    return 0
+
 class Vector(object):
     """A simple, 3d Vector class"""
     ctype = "Vector"
@@ -135,7 +140,7 @@ class Vector(object):
 
     def angle(self, other):
         """Return the angle between this vector and another"""
-        return math.acos(self.dot(other))
+        return math.acos(self.normalize().dot(other.normalize()))
 
     def __sub__(self, other):
         """Return a Vector representing this Vector subtracting other Vector"""

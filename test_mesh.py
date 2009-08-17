@@ -12,6 +12,7 @@ def main():
                                   (0,0,0), True)
 
     camera = pyggel.camera.LookAtCamera((0,0,0), distance=10)
+    camera.roty = 180
 
     obj = pyggel.mesh.OBJ("data/bird_plane.obj")
     obj.scale = .5
@@ -25,6 +26,7 @@ def main():
     Tree.add_object(head, root)
     Tree.add_object(tail, root)
     Tree.add_object(wings, root)
+    Tree.root = root #important!
 
     Flap = pyggel.mesh.FramedAnimationCommand(10,
                     #mesh    pos      rot     scale
@@ -43,6 +45,7 @@ def main():
 
     ani = pyggel.mesh.FramedAnimation(obj, Tree, {"flap":Flap})
     ani.action = "flap"
+    ani.pos = (-3,0,0)
 
     Flap2 = pyggel.mesh.InterpAnimationCommand(
                     [(wings,(0,0,0),(0,0,30),(0,0,0),0,.5),
@@ -62,15 +65,16 @@ def main():
 
     ani2 = pyggel.mesh.InterpAnimation(obj, Tree, {"flap":Flap2})
     ani2.action = "flap"
+    ani2.pos = (3,0,0)
 
-    exp = pyggel.mesh.Exploder(obj.copy(), .025, 1000)
+    exp = pyggel.mesh.Exploder(obj.copy(), .025, 250)
 
     my_scene = pyggel.scene.Scene()
     my_scene.pick = True
-##    my_scene.add_3d(obj)
-##    my_scene.add_3d(ani)
+    my_scene.add_3d(obj)
+    my_scene.add_3d(ani)
     my_scene.add_3d(ani2)
-##    my_scene.add_3d(exp)
+    my_scene.add_3d(exp)
 
     my_scene.add_light(my_light)
 

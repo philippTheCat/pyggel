@@ -11,6 +11,7 @@ import image, view, data, misc, math3d
 from scene import BaseSceneObject
 import time
 import random
+import math
 
 def OBJ(filename, pos=(0,0,0), rotation=(0,0,0), colorize=(1,1,1,1)):
     view.require_init()
@@ -117,6 +118,8 @@ class ObjGroup(object):
         minx = miny = minz = 0
         maxx = maxy = maxz = 0
 
+        avgx, avgy, avgz = 0,0,0
+
         for face in final:
             v, n, t = face
             glBegin(GL_POLYGON)
@@ -127,6 +130,9 @@ class ObjGroup(object):
                     glTexCoord2fv(t[i])
                 glVertex3fv(v[i])
                 x, y, z = v[i]
+                avgx += x
+                avgy += y
+                avgz += z
                 minx = min((minx, x))
                 maxx = max((maxx, x))
                 miny = min((miny, y))
@@ -135,17 +141,24 @@ class ObjGroup(object):
                 maxz = max((maxz, z))
             glEnd()
 
+        avgx = math3d.safe_div(float(avgx), len(final))
+        avgy = math3d.safe_div(float(avgy), len(final))
+        avgz = math3d.safe_div(float(avgz), len(final))
+
         dlist.end()
 
-        return CompiledGroup(self.name, self.material, dlist, (minx,miny,minz, maxx, maxy, maxz))
+        return CompiledGroup(self.name, self.material, dlist, (minx,miny,minz, maxx, maxy, maxz),
+                             (avgx, avgy, avgz))
 
 class CompiledGroup(BaseSceneObject):
-    def __init__(self, name, material, dlist, dimensions):
+    def __init__(self, name, material, dlist, dimensions, pos):
         BaseSceneObject.__init__(self)
         self.name = name
         self.material = material
         self.display_list = dlist
         self.dimensions = dimensions
+
+        self.base_pos = pos
 
     def get_dimensions(self):
         d = self.dimensions
@@ -172,7 +185,8 @@ class CompiledGroup(BaseSceneObject):
         new = CompiledGroup(str(self.name),
                              self.material.copy(),
                              self.display_list,
-                             self.dimensions)
+                             self.dimensions,
+                            self.base_pos)
         new.pos = self.pos
         new.rotation = self.rotation
         new.scale = self.scale
@@ -220,10 +234,13 @@ class BasicMesh(BaseSceneObject):
         return new
 
     def get_names(self):
-        names = []
+        return [i.name for i in self.objs]
+
+    def get_obj_by_name(self, name):
         for i in self.objs:
-            names.append(i.name)
-        return names
+            if i.name == name:
+                return i
+        return None
 
     def render(self, camera=None):
         """Render the mesh
@@ -274,12 +291,19 @@ class Exploder(BaseSceneObject):
         self.angles = {}
         self.rots = {}
         for i in self.root_mesh.get_names():
-            self.angles[i] = (random.randint(0,360),
-                              random.randint(0,360),
-                              random.randint(0,360))
-            self.rots[i] = (random.randint(-5, 5),
-                            random.randint(-5, 5),
-                            random.randint(-5, 5))
+            a = math3d.Vector(self.root_mesh.get_obj_by_name(i).base_pos)
+            x, y, z = a.x, a.y, a.z
+            if x == y == z == 0:
+                x, y, z = misc.randfloat(-1,1), misc.randfloat(-1,1), misc.randfloat(-1,1)
+            else:
+                a = a.normalize()
+                x, y, z = a.x, a.y, a.z
+
+            y += misc.randfloat(1.5,2.5)
+            self.angles[i] = x+misc.randfloat(-1,1), y+misc.randfloat(-1,1), z+misc.randfloat(-1,1)
+            self.rots[i] = (misc.randfloat(-10, 10),
+                            misc.randfloat(-10, 10),
+                            misc.randfloat(-10, 10))
 
         self.speed = speed
         self.age = 0
@@ -287,12 +311,19 @@ class Exploder(BaseSceneObject):
 
     def render(self, camera=None):
         for i in self.root_mesh.objs:
-            i.pos = math3d.move_with_rotation(i.pos, self.angles[i.name], self.speed)
+            a, b, c = i.pos
+            d,e,f = self.angles[i.name]
+            a += d *self.speed
+            b += e *self.speed
+            c += f *self.speed
+            i.pos = a, b, c
+            e -= .015
+            self.angles[i.name] = d,e,f
             a,b,c = i.rotation
             d,e,f = self.rots[i.name]
-            a += d
-            b += e
-            c += f
+            a += d *self.speed*2
+            b += e *self.speed*2
+            c += f *self.speed*2
             i.rotation = (a,b,c)
         self.root_mesh.render(camera)
 
@@ -492,11 +523,6 @@ class InterpAnimationCommand(object):
             new.append(a[i]+(b[i]*amount))
         return new
 
-    def safe_div(self, a, b):
-        if a and b:
-            return a/b
-        return 0
-
     def get_change(self, obj_name=None):
         age = time.time() - self.time_stamp
         if age >= self.duration:
@@ -513,7 +539,7 @@ class InterpAnimationCommand(object):
                     rot = self.merge(rot, command[2])
                     sca = self.merge(sca, command[3])
                 elif command[4] <= age <= command[5]: #now we have to figure out how much to merge!
-                    mult = self.safe_div(float(age-command[4]), (command[5]-command[4]))
+                    mult = math3d.safe_div(float(age-command[4]), (command[5]-command[4]))
                     pos = self.merge(pos, command[1], mult)
                     rot = self.merge(rot, command[2], mult)
                     sca = self.merge(sca, command[3], mult)
