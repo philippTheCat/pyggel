@@ -14,6 +14,9 @@ import random
 import math
 
 def OBJ(filename, pos=(0,0,0), rotation=(0,0,0), colorize=(1,1,1,1)):
+    """Load a WaveFront OBJ mesh.
+       filename must be the filename of the mesh to load
+       pos/rotation/colorize are the starting attributes of the mesh object."""
     view.require_init()
 
     objs = []
@@ -77,7 +80,9 @@ def OBJ(filename, pos=(0,0,0), rotation=(0,0,0), colorize=(1,1,1,1)):
     return BasicMesh(fin, pos, rotation, 1, colorize)
  
 class ObjGroup(object):
+    """Class to keep track of an objects verts and such while being loaded."""
     def __init__(self, name):
+        """name is the name of the object."""
         self.name = name
         self.faces = []
         self.material = None
@@ -85,6 +90,8 @@ class ObjGroup(object):
         self.dlist = None
 
     def compile(self, vertices, normals, texcoords):
+        """Compile the ObjGroup into a CompiledGroup for rendering/using.
+           vertices/normals/texcoords are a list of all attributes in the mesh file, fo reference"""
         faces = []
         for face in self.faces:
             v,n,t = face
@@ -151,7 +158,14 @@ class ObjGroup(object):
                              (avgx, avgy, avgz))
 
 class CompiledGroup(BaseSceneObject):
+    """The core object in a mesh, each mesh object (head, torso, w/e) has one of these.
+       It has it's own attributes for pos/rotation/etc. and also is affected by the parent mesh's."""
     def __init__(self, name, material, dlist, dimensions, pos):
+        """Create the Group
+           name is the name of the object
+           material is the data.Material object the group uses
+           dlist is the display list of the object
+           dimensions/pos are the size/center of the vertices in the object."""
         BaseSceneObject.__init__(self)
         self.name = name
         self.material = material
@@ -161,10 +175,13 @@ class CompiledGroup(BaseSceneObject):
         self.base_pos = pos
 
     def get_dimensions(self):
+        """Return the dimensions of the object."""
         d = self.dimensions
         return abs(d[0]-d[3]), abs(d[1]-d[4]), abs(d[2]-d[5])
 
     def render(self, camera=None):
+        """Render the object.
+           camera must be None of the camera object the scene is using to render."""
         glPushMatrix()
 
         x,y,z = self.pos
@@ -182,6 +199,7 @@ class CompiledGroup(BaseSceneObject):
         glPopMatrix()
 
     def copy(self):
+        """Return a copy of the object."""
         new = CompiledGroup(str(self.name),
                              self.material.copy(),
                              self.display_list,
@@ -200,8 +218,12 @@ class CompiledGroup(BaseSceneObject):
         return new
 
 class BasicMesh(BaseSceneObject):
+    """Core mesh class, contains several objects representing the objects in the mesh."""
     def __init__(self, objs, pos=(0,0,0), rotation=(0,0,0),
                  scale=1, colorize=(1,1,1,1)):
+        """Create the mesh object
+           objs must be a lit of the CompiledGroup objects of the mesh
+           pos/rotation/scale/colorize attributes of the mesh"""
         BaseSceneObject.__init__(self)
 
         self.objs = objs
@@ -234,9 +256,11 @@ class BasicMesh(BaseSceneObject):
         return new
 
     def get_names(self):
+        """Return the names of all the objects in the mesh."""
         return [i.name for i in self.objs]
 
     def get_obj_by_name(self, name):
+        """Return the CompiledGroup object reprensting the object <name>"""
         for i in self.objs:
             if i.name == name:
                 return i
@@ -284,7 +308,12 @@ class BasicMesh(BaseSceneObject):
 
 
 class Exploder(BaseSceneObject):
-    def __init__(self, root_mesh, speed, frame_duration=10):
+    """A simple class to explode/dismember a mesh object."""
+    def __init__(self, root_mesh, speed=0.025, frame_duration=10):
+        """Create the exploder
+           root_mesh must be a BasicMesh object to explode
+           speed is how fast you want each piece to move/rotate
+           frame_duration is how many times it will update before dying"""
         BaseSceneObject.__init__(self)
 
         self.root_mesh = root_mesh
@@ -310,6 +339,8 @@ class Exploder(BaseSceneObject):
         self.frame_duration = frame_duration
 
     def render(self, camera=None):
+        """Update and render the explosion
+           camera must be None or the camera the scene is using."""
         for i in self.root_mesh.objs:
             a, b, c = i.pos
             d,e,f = self.angles[i.name]
@@ -332,8 +363,16 @@ class Exploder(BaseSceneObject):
             self.dead_remove_from_scene = True
 
 class FramedAnimationCommand(object):
+    """A command for a FramedAnimation object."""
     def __init__(self, frames=1, commands=[],
                  frame_duration=1):
+        """Create the command
+            frames are the number of frames in the animation
+            commands are a list of commands, specified like this:
+                commands = [{obj_name:[(pos), (rotation), (scale)]}]
+                Where each item in commands is what each named object does that frame, ie
+                mesh[obj_name].pos = commands[frame][obj_name][0]
+            frame_duration is how many updates each frame lasts"""
 
         self.frames = frames
         self.commands = commands
@@ -343,6 +382,7 @@ class FramedAnimationCommand(object):
         self.frame_duration = frame_duration
 
     def update(self):
+        """Update the the animation, switching to the correct current frame."""
         if time.time() - self.frame_start_time >= self.frame_duration:
             self.frame_start_time = time.time()
             self.cur_frame += 1
@@ -350,6 +390,7 @@ class FramedAnimationCommand(object):
                 self.cur_frame = 0
 
     def get_change(self, obj_name=None):
+        """Return what obj_name should be doing in the current frame."""
         if not obj_name in self.commands[self.cur_frame]:
             return (0,0,0), (0,0,0), (1,1,1) #pos, rot, scale
 
