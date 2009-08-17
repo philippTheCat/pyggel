@@ -92,12 +92,6 @@ def main():
         if meh.quit:
             pyggel.quit()
             return None
-        if "right" in meh.mouse.hit:
-            cur = view.screen.cursor
-            if cur.running:
-                cur.pause()
-            else:
-                cur.play()
 
         if K_LEFT in meh.keyboard.active:
             camera.roty -= .5
