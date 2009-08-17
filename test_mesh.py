@@ -80,10 +80,6 @@ def main():
 
     clock = pygame.time.Clock()
 
-    rot = 0
-
-    last_hit = None
-
     meh = pyggel.event.Handler()
     meh.bind_to_event(" ", lambda a,b: pyggel.misc.save_screenshot("Test.png"))
 
@@ -96,12 +92,6 @@ def main():
         if meh.quit:
             pyggel.quit()
             return None
-        if "left" in meh.mouse.hit:
-            if img.get_rect().collidepoint(pyggel.view.screen.get_mouse_pos2d()):
-                if img.to_be_blitted:
-                    img.clear_blits()
-                else:
-                    img.blit(img2, (0,0))
         if "right" in meh.mouse.hit:
             cur = view.screen.cursor
             if cur.running:
@@ -138,12 +128,7 @@ def main():
 
         pyggel.view.clear_screen()
 
-        hit = my_scene.render(camera)
-        if last_hit:
-            last_hit.outline = False
-        if hit:
-            hit.outline = True
-        last_hit = hit
+        my_scene.render(camera)
 
         mpx, mpy = pyggel.view.screen.get_mouse_pos()
 
