@@ -335,17 +335,22 @@ class TextureBuffer(object):
         glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
 
 class Material(object):
+    """A simple class to store a color and texture for an object."""
     def __init__(self, name):
+        """Create the material
+           name is the name of the material"""
         self.name = name
         self.color = (1,1,1,1)
         self.texture = BlankTexture()
 
     def set_color(self, color):
+        """Set color of material."""
         if len(color) == 3:
             color += (1,)
         self.color = color
 
     def copy(self):
+        """Copy material."""
         a = Material(self.name)
         a.color = self.color
         a.texture = self.texture
