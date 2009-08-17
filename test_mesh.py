@@ -18,15 +18,16 @@ def main():
 
     Tree = pyggel.mesh.ChildTree()
     root = "cylinder1"
-    head = "sphere2"
-    tail = "sphere2_copy3"
+    tail = "sphere2"
+    head = "sphere2_copy3"
     wings = "cube4"
     Tree.add_object(root)
     Tree.add_object(head, root)
     Tree.add_object(tail, root)
     Tree.add_object(wings, root)
 
-    Flap = pyggel.mesh.AnimationCommand(10,
+    Flap = pyggel.mesh.FramedAnimationCommand(10,
+                    #mesh    pos      rot     scale
                     [{wings:[(0,0,0),(0,0,0),(1,1,1)]},
                      {wings:[(0,0,0),(0,0,10),(1,1,1)]},
                      {wings:[(0,0,0),(0,0,20),(1,1,1)]},
@@ -40,16 +41,36 @@ def main():
                      {wings:[(0,0,0),(0,0,-40),(1,1,1)]}],
                                         0.1)
 
-    ani = pyggel.mesh.Animation(obj, Tree, {"flap":Flap})
+    ani = pyggel.mesh.FramedAnimation(obj, Tree, {"flap":Flap})
     ani.action = "flap"
+
+    Flap2 = pyggel.mesh.InterpAnimationCommand(
+                    [(wings,(0,0,0),(0,0,30),(0,0,0),0,.5),
+                     (wings,(0,0,0),(0,0,-60),(0,0,0),.5,1.5),
+                     (wings,(0,0,0),(0,0,30),(0,0,0),1.5,2),
+
+##                     (root,(0,0,0),(0,0,30),(0,0,0),0,.5),
+##                     (root,(0,0,0),(0,0,-60),(0,0,0),.5,1.5),
+##                     (root,(0,0,0),(0,0,30),(0,0,0),1.5,2),
+
+                     (tail,(0,0,1),(0,0,0),(0,0,1),0,1),
+                     (tail,(0,0,-1),(0,0,0),(0,0,-1),1,2),
+
+                     (head,(0,0,0),(0,0,360),(0,1,0),0,1),
+                     (head,(0,0,0),(0,0,-360),(0,-1,0),1,2)],
+                                        2)
+
+    ani2 = pyggel.mesh.InterpAnimation(obj, Tree, {"flap":Flap2})
+    ani2.action = "flap"
 
     exp = pyggel.mesh.Exploder(obj.copy(), .025, 1000)
 
     my_scene = pyggel.scene.Scene()
     my_scene.pick = True
 ##    my_scene.add_3d(obj)
-    my_scene.add_3d(ani)
-    my_scene.add_3d(exp)
+##    my_scene.add_3d(ani)
+    my_scene.add_3d(ani2)
+##    my_scene.add_3d(exp)
 
     my_scene.add_light(my_light)
 

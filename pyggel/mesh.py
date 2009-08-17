@@ -300,7 +300,7 @@ class Exploder(BaseSceneObject):
         if self.age >= self.frame_duration:
             self.dead_remove_from_scene = True
 
-class AnimationCommand(object):
+class FramedAnimationCommand(object):
     def __init__(self, frames=1, commands=[],
                  frame_duration=1):
 
@@ -352,7 +352,7 @@ class ChildTree(object):
         parents.reverse()
         return parents
 
-class Animation(BaseSceneObject):
+class FramedAnimation(BaseSceneObject):
     def __init__(self, root_mesh, child_tree, commands={}):
         BaseSceneObject.__init__(self)
 
@@ -368,7 +368,7 @@ class Animation(BaseSceneObject):
         self.action = None
 
     def copy(self):
-        new = Animation(self.root_mesh, self.child_tree, self.commands)
+        new = FramedAnimation(self.root_mesh, self.child_tree, self.commands)
         new.pos = self.pos
         new.rotation = self.rotation
         new.scale = self.scale
@@ -474,5 +474,161 @@ class Animation(BaseSceneObject):
                 glPopMatrix()
             glPopMatrix()
 
-                
+
+class InterpAnimationCommand(object):
+    def __init__(self, commands=[], duration=1): #duration=seconds
+
+        self.commands = commands
+        self.duration = duration
+
+        self.reset()
+
+    def reset(self):
+        self.time_stamp = time.time()
+
+    def merge(self, a, b, amount=1):
+        new = []
+        for i in xrange(len(a)):
+            new.append(a[i]+(b[i]*amount))
+        return new
+
+    def safe_div(self, a, b):
+        if a and b:
+            return a/b
+        return 0
+
+    def get_change(self, obj_name=None):
+        age = time.time() - self.time_stamp
+        if age >= self.duration:
+            self.reset()
+            age = 0
+
+        pos = [0,0,0]
+        rot = [0,0,0]
+        sca = [1,1,1]
+        for command in self.commands:
+            if command[0] == obj_name:
+                if command[5] <= age: #just apply fully!
+                    pos = self.merge(pos, command[1])
+                    rot = self.merge(rot, command[2])
+                    sca = self.merge(sca, command[3])
+                elif command[4] <= age <= command[5]: #now we have to figure out how much to merge!
+                    mult = self.safe_div(float(age-command[4]), (command[5]-command[4]))
+                    pos = self.merge(pos, command[1], mult)
+                    rot = self.merge(rot, command[2], mult)
+                    sca = self.merge(sca, command[3], mult)
+
+        return pos, rot, sca
+
+class InterpAnimation(FramedAnimation):
+    def __init__(self, root_mesh, child_tree, commands={}):
+        FramedAnimation.__init__(self, root_mesh, child_tree, commands)
+
+    def copy(self):
+        new = InterpAnimation(self.root_mesh, self.child_tree, self.commands)
+        new.pos = self.pos
+        new.rotation = self.rotation
+        new.scale = self.scale
+        new.colorize = self.colorize
+        new.action = self.action
+        return new
+
+    def get_obj_by_name(self, name):
+        for i in self.root_mesh.objs:
+            if i.name == name:
+                return i
+        return None
+
+    def render(self, camera=None):
+        use_ani = False
+        if self.action:
+            try:
+                self.commands[self.action]
+##                self.commands[self.action].update()
+                use_ani = True
+            except:
+                print "action:", self.action, "does not exist!"
+
+        glPushMatrix()
+        x,y,z = self.pos
+        glTranslatef(x,y,-z)
+        a, b, c = self.rotation
+        glRotatef(a, 1, 0, 0)
+        glRotatef(b, 0, 1, 0)
+        glRotatef(c, 0, 0, 1)
+        try:
+            glScalef(*self.scale)
+        except:
+            glScalef(self.scale, self.scale, self.scale)
+        glColor(*self.colorize)
+
+        if not use_ani:
+            if self.outline:
+                new = []
+                for i in self.objs:
+                    x = i.copy()
+                    x.material = data.Material("blank")
+                    x.material.set_color(self.outline_color)
+                    x.outline = False
+                    new.append(x)
+                misc.outline(misc.OutlineGroup(new),
+                             self.outline_color, self.outline_size)
+
+            for i in self.objs:
+                old = tuple(i.material.color)
+                r,g,b,a = old
+                r2,g2,b2,a2 = self.colorize
+                r *= r2
+                g *= g2
+                b *= b2
+                a = a2
+                i.material.color = r,g,b,a
+                i.render(camera)
+                i.material.color = old
+            glPopMatrix()
+
+        else:
+            command = self.commands[self.action]
+
+            #TODO: add outlining to active models?
+
+            for i in self.child_tree.all_objs:
+                glPushMatrix()
+                obj = self.get_obj_by_name(i)
+                for x in self.child_tree.get_parents(i):
+                    pos, rot, sca = command.get_change(x)
+                    glTranslatef(pos[0], pos[1], -pos[2])
+                    a, b, c = rot
+                    glRotatef(a, 1, 0, 0)
+                    glRotatef(b, 0, 1, 0)
+                    glRotatef(c, 0, 0, 1)
+                    try:
+                        glScalef(*sca)
+                    except:
+                        glScalef(sca,sca,sca)
+
+                pos, rot, sca = command.get_change(i)
+                glTranslatef(pos[0], pos[1], -pos[2])
+                a, b, c = rot
+                glRotatef(a, 1, 0, 0)
+                glRotatef(b, 0, 1, 0)
+                glRotatef(c, 0, 0, 1)
+                try:
+                    glScalef(*sca)
+                except:
+                    glScalef(sca,sca,sca)
+
+
+                old = tuple(obj.material.color)
+                r,g,b,a = old
+                r2,g2,b2,a2 = self.colorize
+                r *= r2
+                g *= g2
+                b *= b2
+                a = a2
+                obj.material.color = r,g,b,a
+                obj.render(camera)
+                obj.material.color = old
+                glPopMatrix()
+            glPopMatrix()
         
