@@ -28,26 +28,26 @@ def main():
     Tree.add_object(wings, root)
     Tree.root = root #important!
 
-    Flap = pyggel.mesh.FramedAnimationCommand(10,
-                    #mesh    pos      rot     scale
-                    [{wings:[(0,0,0),(0,0,0),(1,1,1)]},
-                     {wings:[(0,0,0),(0,0,10),(1,1,1)]},
-                     {wings:[(0,0,0),(0,0,20),(1,1,1)]},
-                     {wings:[(0,0,0),(0,0,30),(1,1,1)]},
-                     {wings:[(0,0,0),(0,0,40),(1,1,1)]},
+##    Flap = pyggel.mesh.FramedAnimationCommand(10,
+##                    #mesh    pos      rot     scale
+##                    [{wings:[(0,0,0),(0,0,0),(1,1,1)]},
+##                     {wings:[(0,0,0),(0,0,10),(1,1,1)]},
+##                     {wings:[(0,0,0),(0,0,20),(1,1,1)]},
+##                     {wings:[(0,0,0),(0,0,30),(1,1,1)]},
+##                     {wings:[(0,0,0),(0,0,40),(1,1,1)]},
+##
+##                     {wings:[(0,0,0),(0,0,0),(1,1,1)]},
+##                     {wings:[(0,0,0),(0,0,-10),(1,1,1)]},
+##                     {wings:[(0,0,0),(0,0,-20),(1,1,1)]},
+##                     {wings:[(0,0,0),(0,0,-30),(1,1,1)]},
+##                     {wings:[(0,0,0),(0,0,-40),(1,1,1)]}],
+##                                        0.1)
+##
+##    ani = pyggel.mesh.FramedAnimation(obj, Tree, {"flap":Flap})
+##    ani.action = "flap"
+##    ani.pos = (-3,0,0)
 
-                     {wings:[(0,0,0),(0,0,0),(1,1,1)]},
-                     {wings:[(0,0,0),(0,0,-10),(1,1,1)]},
-                     {wings:[(0,0,0),(0,0,-20),(1,1,1)]},
-                     {wings:[(0,0,0),(0,0,-30),(1,1,1)]},
-                     {wings:[(0,0,0),(0,0,-40),(1,1,1)]}],
-                                        0.1)
-
-    ani = pyggel.mesh.FramedAnimation(obj, Tree, {"flap":Flap})
-    ani.action = "flap"
-    ani.pos = (-3,0,0)
-
-    Flap2 = pyggel.mesh.InterpAnimationCommand(
+    Flap2 = pyggel.mesh.AnimationCommand(
                     [(wings,(0,0,0),(0,0,30),(0,0,0),0,.5),
                      (wings,(0,0,0),(0,0,-60),(0,0,0),.5,1.5),
                      (wings,(0,0,0),(0,0,30),(0,0,0),1.5,2),
@@ -63,9 +63,9 @@ def main():
                      (head,(0,0,0),(0,0,-360),(0,-1,0),1,2)],
                                         2)
 
-    ani2 = pyggel.mesh.InterpAnimation(obj, Tree, {"flap":Flap2})
-    ani2.action = "flap"
-    ani2.pos = (3,0,0)
+    ani = pyggel.mesh.Animation(obj, Tree, {"flap":Flap2})
+    ani.action = "flap"
+    ani.pos = (3,0,0)
 
     exp = pyggel.mesh.Exploder(obj.copy(), .025, 250)
 
@@ -73,7 +73,6 @@ def main():
     my_scene.pick = True
     my_scene.add_3d(obj)
     my_scene.add_3d(ani)
-    my_scene.add_3d(ani2)
     my_scene.add_3d(exp)
 
     my_scene.add_light(my_light)

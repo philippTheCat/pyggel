@@ -81,7 +81,7 @@ class Vector(object):
             cos = Cos(rad)
             sin = Sin(rad)
 
-            op = self.copy()
+            op = vec2.copy()
 
             vec2.y = cos * op.y - sin * op.z
             vec2.z = sin * op.y + cos * op.z
@@ -91,7 +91,7 @@ class Vector(object):
             cos = Cos(rad)
             sin = Sin(rad)
 
-            op = self.copy()
+            op = vec2.copy()
 
             vec2.x = cos * op.x - sin * op.z
             vec2.z = sin * op.x + cos * op.z
@@ -101,7 +101,7 @@ class Vector(object):
             cos = Cos(rad)
             sin = Sin(rad)
 
-            op = self.copy()
+            op = vec2.copy()
 
             vec2.x = cos * op.x - sin * op.y
             vec2.y = sin * op.x + cos * op.y
