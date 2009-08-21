@@ -7,20 +7,27 @@ class Bone(object):
     def __init__(self, start, end, anchor=0):
         self._start = start
         self._end = end
-        self._anchor_val = anchor
-        self._anchor = self.merge(self.dif3(self._end, self._start, anchor), self._start)
+        self._anchor = anchor
 
         self.cur_start = self._start
         self.cur_end = self._end
-        self.cur_anchor = self._anchor
 
         self.children = []
 
         self.rotation = (0,0,0)
+        self.movement = (0,0,0)
         self.scale = (1,1,1)
 
+    def get_anchor(self):
+        a,b,c = self.cur_end
+        d,e,f = self.cur_start
+        a2 = (a - d)*self._anchor + d
+        b2 = (b - e)*self._anchor + e
+        c2 = (c - f)*self._anchor + f
+        return a2,b2,c2
+
     def copy(self):
-        new = Bone(self._start, self._end, self._anchor_val)
+        new = Bone(self._start, self._end, self._anchor)
         new.cur_start = self.cur_start
         new.cur_end = self.cur_end
         new.cur_anchor = self.cur_anchor
@@ -45,15 +52,19 @@ class Bone(object):
         return dif
 
     def move(self, x,y,z):
-        self.cur_start = self.merge(self.cur_start, (x,y,z))
-        self.cur_end = self.merge(self.cur_end, (x,y,z))
-        self.cur_anchor = self.merge(self.cur_anchor, (x,y,z))
-        for i in self.children:
-            i.move(x,y,z)
+        self.movement = self.merge(self.movement, (x,y,z))
 
-    def rotate(self, x, y, z, anchor=None):
+    def rotate(self, x, y, z):
+        self.rotation = self.merge(self.rotation, (x,y,z))
+
+    def push_rotation(self, rot=None, anchor=None):
         if not anchor:
-            anchor = self.cur_anchor
+            anchor = self.get_anchor()
+        if not rot:
+            x,y,z = self.rotation
+        else:
+            x,y,z = rot
+
         vec1 = pyggel.math3d.Vector(anchor)
         vec2 = pyggel.math3d.Vector(self.cur_start)
         vec3 = pyggel.math3d.Vector(self.cur_end)
@@ -64,14 +75,16 @@ class Bone(object):
         self.cur_start = new1.get_pos()
         self.cur_end = new2.get_pos()
 
-        if not anchor == self.cur_anchor:
-            vec4 = pyggel.math3d.Vector(self.cur_anchor)
-            new3 = vec4.rotate(vec1, (-x, y, z))
-            self.cur_anchor = new3.get_pos()
-        self.rotation = self.merge(self.rotation, (x,y,z))
-
         for i in self.children:
-            i.rotate(x,y,z, anchor)
+            i.push_rotation((x,y,z), anchor)
+
+    def push_move(self, pos=None):
+        if not pos:
+            pos = self.movement
+        self.cur_start = self.merge(pos, self.cur_start)
+        self.cur_end = self.merge(pos, self.cur_end)
+        for i in self.children:
+            i.push_move(pos)
 
     def scaled(self, x,y,z):
         self.scale = self.merge(self.scale, (x,y,z))
@@ -90,10 +103,14 @@ class Bone(object):
 
     def reset(self):
         self.rotation = (0,0,0)
+        self.movement = (0,0,0)
         self.cur_start = self._start
         self.cur_end = self._end
-        self.cur_anchor = self._anchor
         self.scale = (1,1,1)
+
+    def push(self):
+        self.push_rotation()
+        self.push_move()
 
 class CoreAnimationCommand(object):
     def __init__(self, obj, val, start, end):
@@ -159,9 +176,6 @@ class Action(object):
 
     def reset(self, skeleton):
         self.start()
-        if skeleton:
-            for i in self.commands:
-                i.reset(skeleton)
 
     def start(self):
         self.tstamp_start = time.time()
@@ -173,11 +187,11 @@ class Action(object):
         if age >= self.duration:
             age = self.duration
         for i in self.commands:
-            i.update(skeleton, self.tstamp_last, age)
+            i.update(skeleton, self.tstamp_last-self.tstamp_start, age)
         self.tstamp_last = age
         if age == self.duration:
             if self.reset_when_done:
-                self.reset(skeleton)
+                self.reset()
             self.finished_frame = True
 
 class Skeleton(object):
@@ -203,6 +217,10 @@ class Skeleton(object):
     def reset(self):
         for i in self.bones:
             self.bones[i].reset()
+
+    def push(self):
+        for i in self.bones:
+            self.bones[i].push()
 
 class Animation(object):
     def __init__(self, mesh, skeleton, commands):
@@ -240,6 +258,8 @@ class Animation(object):
                     if not self.loop:
                         self.action = None
 
+        self.skeleton.push()
+
         glPushMatrix()
         x,y,z = self.pos
         glTranslatef(x,y,-z)
@@ -253,27 +273,6 @@ class Animation(object):
             glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
 
-##        if not use_ani:
-##            for i in self.mesh.objs:
-##                old = tuple(i.material.color)
-##                r,g,b,a = old
-##                r2,g2,b2,a2 = self.colorize
-##                r *= r2
-##                g *= g2
-##                b *= b2
-##                a = a2
-##                i.material.color = r,g,b,a
-##                i.render(camera)
-##                i.material.color = old
-##            glPopMatrix()
-
-##        if use_ani:
-##            command = self.commands[self.action]
-##            command.update(self.skeleton)
-##            if command.finished_frame:
-##                if not self.loop:
-##                    self.action = None
-
         #TODO: add outlining to active models?
 
         for i in self.mesh.objs:
@@ -282,17 +281,28 @@ class Animation(object):
                 bone = self.skeleton.bones[i.name]
                 npos = bone.get_center()
                 x, y, z = bone.rotation
-                z = -z
-                nrot = x, y, z
+                nrot = x, y, -z
                 nsca = bone.scale
 
                 i.pos = npos
                 i.rotation = nrot
                 i.scale = nsca
 
+            old = tuple(i.material.color)
+            r,g,b,a = old
+            r2,g2,b2,a2 = self.colorize
+            r *= r2
+            g *= g2
+            b *= b2
+            a *= a2
+            i.material.color = r,g,b,a
             i.render(camera)
+            i.material.color = old
 
             i.pos, i.rotation, i.scale = _pos, _rot, _sca
+        glPopMatrix()
+
+        self.skeleton.reset()
 
 def main():
     pyggel.view.init(screen_size=(800,600), screen_size_2d=(640, 480))
@@ -314,48 +324,31 @@ def main():
     skel = Skeleton()
     skel.add_bone(root.name, (0,0,root.side("back")), (0,0,root.side("front")))
     skel.add_bone(tail.name, (0,0,tail.side("front")), (0,0,tail.side("back")), root.name)
-    skel.add_bone(head.name, (0,0,head.side("back")), (0,0,head.side("front")), root.name, 0.1)
+    skel.add_bone(head.name, (0,0,head.side("back")), (0,0,head.side("front")), root.name, 0.25)
     skel.add_bone(wings.name, (wings.side("left"),0,0), (wings.side("right"),0,0), root.name, 0.5)
 
-    action = Action(2, [RotateTo(wings.name, (0,0,45),0,.5),
-                        RotateTo(wings.name, (0,0,-45),.5,1.5),
+    action = Action(2, [RotateTo(wings.name, (0,25,45),0,.5),
+                        RotateTo(wings.name, (0,-25,-45),.5,1.5),
                         RotateTo(wings.name, (0,0,0),1.5,2),
                         ScaleTo(tail.name, (1.25,1.25,1.25), 0, 1),
                         ScaleTo(tail.name, (1,1,1), 1, 2),
                         RotateTo(head.name, (0,15,0),0,.25),
                         RotateTo(head.name, (0,-15,0),.25,.75),
-                        RotateTo(head.name, (0,0,0),.75,1),
-
-                        RotateTo("weapon_left", (0,0,90), 0, .5),
-                        RotateTo("weapon_left", (0,0,-90), .5, 1.5),
-                        RotateTo("weapon_left", (0,0,0), 1.5, 2),
-                        RotateTo("weapon_right", (0,0,90), 0, .5),
-                        RotateTo("weapon_right", (0,0,-90), .5, 1.5),
-                        RotateTo("weapon_right", (0,0,0), 1.5, 2),
-
-                        RotateTo("weapon_right_2", (0,0,90), 0, .5),
-                        RotateTo("weapon_right_2", (0,0,-90), .5, 1.5),
-                        RotateTo("weapon_right_2", (0,0,0), 1.5, 2),
-                        RotateTo("weapon_left_2", (0,0,90), 0, .5),
-                        RotateTo("weapon_left_2", (0,0,-90), .5, 1.5),
-                        RotateTo("weapon_left_2", (0,0,0), 1.5, 2)])
+                        RotateTo(head.name, (0,0,0),.75,1)])
     head_left = Action(1, [RotateTo(head.name, (0,45,0),0,1)])
     head_right = Action(1, [RotateTo(head.name, (0,-45,0), 0,1)])
     head_up = Action(1, [RotateTo(head.name, (45,0,0),0,1)])
     head_down = Action(1, [RotateTo(head.name, (-45,0,0),0,1)])
-    head_center = Action(1, [RotateTo(head.name, (0,0,0),0,1)])
-    head_test = Action(5, [RotateTo(head.name, (45,0,0),0,1),
-##                           RotateTo(head.name, (0,45,0),1,2),
-##                           RotateTo(head.name, (-45,0,0),2,3),
-                           RotateTo(head.name, (0,-45,0),3,4),
-                           RotateTo(head.name, (0,0,0),4,5)])
+    head_test = Action(5, [RotateTo(head.name, (0,0,45),0,1),
+                           RotateTo(head.name, (0,-45,0),2,3),
+                           RotateTo(head.name, (0,0,0),4,5),
+                           RotateTo(tail.name, (0,0,360), 0,5)])
     ani = Animation(obj, skel, {"1":head_left,
                                 "2":head_right,
                                 "3":head_up,
                                 "4":head_down,
-                                "5":head_center,
-                                "6":action,
-                                "7":head_test})
+                                "5":action,
+                                "6":head_test})
 
     #Let's make some connections here:
     new_obj = head.copy()
@@ -375,12 +368,12 @@ def main():
                   (wings.side("left")-new_obj2.side("width")*2,0,0), new_obj2.name)
     ani.mesh.objs.append(new_obj3)
 
-##    new_obj4 = head.copy()
-##    new_obj4.name = "weapon_right_2"
-##    skel.add_bone(new_obj4.name,
-##                  (wings.side("right")+new_obj.side("width"),0,0),
-##                  (wings.side("right")+new_obj.side("width")*2,0,0), new_obj.name)
-##    ani.mesh.objs.append(new_obj4)
+    new_obj4 = head.copy()
+    new_obj4.name = "weapon_right_2"
+    skel.add_bone(new_obj4.name,
+                  (wings.side("right")+new_obj.side("width"),0,0),
+                  (wings.side("right")+new_obj.side("width")*2,0,0), new_obj.name)
+    ani.mesh.objs.append(new_obj4)
 
     clock = pygame.time.Clock()
 
@@ -428,13 +421,6 @@ def main():
                 ani.do(i, False, False, False)
         if "r" in meh.keyboard.hit:
             ani.do(None, False, True, True)
-
-##        obj = skel.bones[head.name]
-##        n = obj.dif3(obj._start,obj.cur_start), obj.dif3(obj._end, obj.cur_end)#, obj.rotation
-##        n = obj.rotation, obj.e
-##        if n != last:
-##            print n
-##            last = n
 
         pyggel.view.clear_screen()
 
