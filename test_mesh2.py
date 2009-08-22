@@ -67,18 +67,13 @@ def main():
     skel.add_bone(new_obj2.name, (wings.side("left"),0,0), (wings.side("left")-new_obj2.side("width"),0,0), wings.name)
     ani.mesh.objs.append(new_obj2)
 
-    new_obj3 = wings.copy()
-    new_obj3.name = "weapon_right_right"
-    skel.add_bone(new_obj3.name, (wings.side("right")+new_obj3.side("width"),0,0), (wings.side("right")+new_obj3.side("width")+new_obj.side("width"),0,0), new_obj.name)
-    ani.mesh.objs.append(new_obj3)
-    new_obj4 = wings.copy()
-    new_obj4.name = "weapon_left_left"
-    skel.add_bone(new_obj4.name, (wings.side("left")-new_obj4.side("width"),0,0), (wings.side("left")-new_obj2.side("width")-new_obj4.side("width"),0,0), new_obj2.name)
-    ani.mesh.objs.append(new_obj4)
-
     ani2 = ani.copy()
     ani2.do("5", True)
     ani2.pos = (0,0,-10)
+
+    my_scene = pyggel.scene.Scene()
+    my_scene.add_3d(ani)
+    my_scene.add_3d(ani2)
 
     clock = pygame.time.Clock()
 
@@ -88,7 +83,7 @@ def main():
     last = None
 
     while 1:
-        clock.tick(999)
+        clock.tick(60)
         pyggel.view.set_title("FPS: %s"%clock.get_fps())
 
         meh.update()
@@ -128,11 +123,8 @@ def main():
         pyggel.view.clear_screen()
 
         pyggel.view.set3d()
-        camera.push()
 
-        ani.render()
-        ani2.render()
+        my_scene.render(camera)
 
-        camera.pop()
         pyggel.view.refresh_screen()
 main()

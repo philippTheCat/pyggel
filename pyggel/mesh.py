@@ -654,7 +654,8 @@ class Animation(BaseSceneObject):
         self.skeleton = skeleton
         self.commands = commands
 
-        self.do()
+        self.action = None
+        self.loop = True
 
         self.pos = (0,0,0)
         self.rotation = (0,0,0)
@@ -665,11 +666,18 @@ class Animation(BaseSceneObject):
         """Start an animation action
            action is the name of the action in the commands list
            loop is whether to replay the animation after finishing or not"""
-        self.action = action
+        if not action == self.action:
+            self.action = action
+            if self.action in self.commands:
+                self.commands[self.action].start()
         self.loop = loop
 
+    def is_idle(self):
+        """Returns whether any animation action is currently running."""
         if self.action in self.commands:
-            self.commands[self.action].start()
+            if self.commands[self.action].finished_frame and (not self.loop):
+                return False
+        return True
 
     def copy(self):
         """Return a copy of the Animation."""
