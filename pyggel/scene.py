@@ -27,7 +27,7 @@ class BaseSceneObject(object):
 
         self.pos = (0,0,0)
         self.rotation = (0,0,0)
-        self.scale = (0,0,0)
+        self.scale = (1,1,1)
 
         self.dead_remove_from_scene = False
 

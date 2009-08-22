@@ -74,6 +74,7 @@ def main():
     my_scene = pyggel.scene.Scene()
     my_scene.add_3d(ani)
     my_scene.add_3d(ani2)
+    my_scene.add_light(my_light)
 
     clock = pygame.time.Clock()
 
