@@ -102,6 +102,7 @@ class Texture(object):
 
 
 class BlankTexture(Texture):
+    """A cached, blank texture."""
     _all_loaded = {}
     def __init__(self, size=(1,1), color=(1,1,1,1)):
         """Create an empty data.Texture
