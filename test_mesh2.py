@@ -359,7 +359,8 @@ def main():
     head_test = Action(5, [RotateTo(head.name, (0,0,45),0,1),
                            RotateTo(head.name, (0,-45,0),2,3),
                            RotateTo(head.name, (0,0,0),4,5),
-                           RotateTo(tail.name, (0,0,360), 0,5)])
+                           RotateTo(tail.name, (0,0,360), 0,5),
+                           RotateTo(wings.name, (0,0,720),0,5)])
     ani = Animation(obj, skel, {"1":head_left,
                                 "2":head_right,
                                 "3":head_up,
