@@ -351,7 +351,14 @@ def main():
                         ScaleTo(tail.name, (1,1,1), 1, 2),
                         RotateTo(head.name, (0,15,0),0,.25),
                         RotateTo(head.name, (0,-15,0),.25,.75),
-                        RotateTo(head.name, (0,0,0),.75,1)])
+                        RotateTo(head.name, (0,0,0),.75,1),
+
+                        RotateTo("weapon_right", (0,0,-45),0,.5),
+                        RotateTo("weapon_right", (0,0,45),.5,1.5),
+                        RotateTo("weapon_right", (0,0,0),1.5,2),
+                        RotateTo("weapon_left", (0,0,-45),0,.5),
+                        RotateTo("weapon_left", (0,0,45),.5,1.5),
+                        RotateTo("weapon_left", (0,0,0),1.5,2)])
     head_left = Action(1, [RotateTo(head.name, (0,45,0),0,1)])
     head_right = Action(1, [RotateTo(head.name, (0,-45,0), 0,1)])
     head_up = Action(1, [RotateTo(head.name, (45,0,0),0,1)])
