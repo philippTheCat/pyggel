@@ -15,6 +15,7 @@ class Bone(object):
         self.children = []
 
         self.rotation = (0,0,0)
+        self.mod_rotation = (0,0,0)
         self.movement = (0,0,0)
         self.scale = (1,1,1)
 
@@ -26,17 +27,20 @@ class Bone(object):
         c2 = (c - f)*self._anchor + f
         return a2,b2,c2
 
+    def get_rotation(self):
+        return self.merge(self.rotation, self.mod_rotation)
+
     def copy(self):
         new = Bone(self._start, self._end, self._anchor)
         new.cur_start = self.cur_start
         new.cur_end = self.cur_end
-        new.cur_anchor = self.cur_anchor
 
         for i in self.children:
             new.children.append(i.copy())
 
         new.rotation = self.rotation
         new.scale = self.scale
+        new.movement = self.movement
         return new
 
     def merge(self, a, b, amount=1):
@@ -64,6 +68,7 @@ class Bone(object):
             x,y,z = self.rotation
         else:
             x,y,z = rot
+            self.mod_rotation = self.merge(self.mod_rotation, (x,y,z))
 
         vec1 = pyggel.math3d.Vector(anchor)
         vec2 = pyggel.math3d.Vector(self.cur_start)
@@ -103,6 +108,7 @@ class Bone(object):
 
     def reset(self):
         self.rotation = (0,0,0)
+        self.mod_rotation = (0,0,0)
         self.movement = (0,0,0)
         self.cur_start = self._start
         self.cur_end = self._end
@@ -211,7 +217,7 @@ class Skeleton(object):
     def copy(self):
         new = Skeleton()
         for i in self.bones:
-            new[i] = self.bones[i].copy()
+            new.bones[i] = self.bones[i].copy()
         return new
 
     def reset(self):
@@ -245,6 +251,17 @@ class Animation(object):
 
         if self.action in self.commands:
             self.commands[self.action].start()
+
+    def copy(self):
+        new = Animation(self.mesh, self.skeleton.copy(), self.commands)
+        new.pos = self.pos
+        new.rotation = self.rotation
+        new.scale = self.scale
+        new.colorize = self.colorize
+        new.action = self.action
+        new.loop = self.loop
+        new.reset_when_done = self.reset_when_done
+        return new
 
     def render(self, camera=None):
         use_ani = False
@@ -280,7 +297,7 @@ class Animation(object):
             if i.name in self.skeleton.bones:
                 bone = self.skeleton.bones[i.name]
                 npos = bone.get_center()
-                x, y, z = bone.rotation
+                x, y, z = bone.get_rotation()
                 nrot = x, y, -z
                 nsca = bone.scale
 
@@ -327,8 +344,8 @@ def main():
     skel.add_bone(head.name, (0,0,head.side("back")), (0,0,head.side("front")), root.name, 0.25)
     skel.add_bone(wings.name, (wings.side("left"),0,0), (wings.side("right"),0,0), root.name, 0.5)
 
-    action = Action(2, [RotateTo(wings.name, (0,25,45),0,.5),
-                        RotateTo(wings.name, (0,-25,-45),.5,1.5),
+    action = Action(2, [RotateTo(wings.name, (0,0,45),0,.5),
+                        RotateTo(wings.name, (0,0,-45),.5,1.5),
                         RotateTo(wings.name, (0,0,0),1.5,2),
                         ScaleTo(tail.name, (1.25,1.25,1.25), 0, 1),
                         ScaleTo(tail.name, (1,1,1), 1, 2),
@@ -351,28 +368,22 @@ def main():
                                 "6":head_test})
 
     #Let's make some connections here:
-    new_obj = head.copy()
+    new_obj = wings.copy()
     new_obj.name = "weapon_right"
     skel.add_bone(new_obj.name, (wings.side("right"),0,0), (wings.side("right")+new_obj.side("width"),0,0), wings.name)
     ani.mesh.objs.append(new_obj)
-    new_obj2 = head.copy()
+    new_obj2 = wings.copy()
     new_obj2.name = "weapon_left"
     skel.add_bone(new_obj2.name, (wings.side("left"),0,0), (wings.side("left")-new_obj2.side("width"),0,0), wings.name)
     ani.mesh.objs.append(new_obj2)
 
-    #and connect a new item to each of those too!
-    new_obj3 = head.copy()
-    new_obj3.name = "weapon_left_2"
-    skel.add_bone(new_obj3.name,
-                  (wings.side("left")-new_obj2.side("width"),0,0),
-                  (wings.side("left")-new_obj2.side("width")*2,0,0), new_obj2.name)
+    new_obj3 = wings.copy()
+    new_obj3.name = "weapon_right_right"
+    skel.add_bone(new_obj3.name, (wings.side("right")+new_obj3.side("width"),0,0), (wings.side("right")+new_obj3.side("width")+new_obj.side("width"),0,0), new_obj.name)
     ani.mesh.objs.append(new_obj3)
-
-    new_obj4 = head.copy()
-    new_obj4.name = "weapon_right_2"
-    skel.add_bone(new_obj4.name,
-                  (wings.side("right")+new_obj.side("width"),0,0),
-                  (wings.side("right")+new_obj.side("width")*2,0,0), new_obj.name)
+    new_obj4 = wings.copy()
+    new_obj4.name = "weapon_left_left"
+    skel.add_bone(new_obj4.name, (wings.side("left")-new_obj4.side("width"),0,0), (wings.side("left")-new_obj2.side("width")-new_obj4.side("width"),0,0), new_obj2.name)
     ani.mesh.objs.append(new_obj4)
 
     clock = pygame.time.Clock()
