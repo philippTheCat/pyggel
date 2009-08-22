@@ -334,14 +334,49 @@ class BasicMesh(BaseSceneObject):
 
 class Exploder(BaseSceneObject):
     """A simple class to explode/dismember a mesh object."""
-    def __init__(self, root_mesh, speed=0.025, frame_duration=10):
+    def __init__(self, root_mesh, speed=0.025, frame_duration=10,
+                 kill_when_finished=True):
         """Create the exploder
            root_mesh must be a BasicMesh object to explode
            speed is how fast you want each piece to move/rotate
-           frame_duration is how many times it will update before dying"""
+           frame_duration is how many times it will update before dying
+           kill_when_finished indicates whether the exploder should be removed
+                              from the scene when it ends"""
         BaseSceneObject.__init__(self)
 
+        self.kill_when_finished = kill_when_finished
+
         self.root_mesh = root_mesh
+        self.angles = {}
+        self.rots = {}
+        for i in self.root_mesh.get_names():
+            a = math3d.Vector(self.root_mesh.get_obj_by_name(i).base_pos)
+            x, y, z = a.x, a.y, a.z
+            if x == y == z == 0:
+                x, y, z = misc.randfloat(-2,2), misc.randfloat(0,2), misc.randfloat(-2,2)
+            else:
+                a = a.normalize()
+                x, y, z = a.x, a.y, a.z
+
+            y += misc.randfloat(1.5,2.5)
+            self.angles[i] = x+misc.randfloat(-1,1), y+misc.randfloat(-1,1), z+misc.randfloat(-1,1)
+            self.rots[i] = (misc.randfloat(-10, 10),
+                            misc.randfloat(-10, 10),
+                            misc.randfloat(-10, 10))
+
+        self.root_vals = {}
+        for i in self.root_mesh.get_names():
+            self.root_vals[i] = (self.root_mesh.get_obj_by_name(i).pos,
+                                 self.root_mesh.get_obj_by_name(i).rotation)
+
+        self.speed = speed
+        self.age = 0
+        self.frame_duration = frame_duration
+        self.dead = False
+        self.down_delta = 0
+
+    def reset(self):
+        """Reset he explosion to run again!"""
         self.angles = {}
         self.rots = {}
         for i in self.root_mesh.get_names():
@@ -359,33 +394,42 @@ class Exploder(BaseSceneObject):
                             misc.randfloat(-10, 10),
                             misc.randfloat(-10, 10))
 
-        self.speed = speed
+        for i in self.root_vals:
+            self.root_mesh.get_obj_by_name(i).pos = self.root_vals[i][0]
+            self.root_mesh.get_obj_by_name(i).rotation = self.root_vals[i][1]
+
         self.age = 0
-        self.frame_duration = frame_duration
+        self.dead = False
+        self.down_delta = 0
 
     def render(self, camera=None):
         """Update and render the explosion
            camera must be None or the camera the scene is using."""
-        for i in self.root_mesh.objs:
-            a, b, c = i.pos
-            d,e,f = self.angles[i.name]
-            a += d *self.speed
-            b += e *self.speed
-            c += f *self.speed
-            i.pos = a, b, c
-            e -= .015
-            self.angles[i.name] = d,e,f
-            a,b,c = i.rotation
-            d,e,f = self.rots[i.name]
-            a += d *self.speed*2
-            b += e *self.speed*2
-            c += f *self.speed*2
-            i.rotation = (a,b,c)
+        if self.age <= self.frame_duration:
+            for i in self.root_mesh.objs:
+                a, b, c = i.pos
+                d,e,f = self.angles[i.name]
+                a += d *self.speed
+                b += e *self.speed
+                c += f *self.speed
+                i.pos = a, b, c
+                e -= self.down_delta
+                self.down_delta += self.speed / self.frame_duration / 2
+                self.angles[i.name] = d,e,f
+                a,b,c = i.rotation
+                d,e,f = self.rots[i.name]
+                a += d *self.speed*2
+                b += e *self.speed*2
+                c += f *self.speed*2
+                i.rotation = (a,b,c)
         self.root_mesh.render(camera)
 
-        self.age += 1
         if self.age >= self.frame_duration:
-            self.dead_remove_from_scene = True
+            if self.kill_when_finished:
+                self.dead_remove_from_scene = True
+            self.dead = True
+        else:
+            self.age += 1
 
 
 class Bone(object):

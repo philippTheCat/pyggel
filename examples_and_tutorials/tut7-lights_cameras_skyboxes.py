@@ -138,10 +138,10 @@ def main():
                         pyggel.mesh.RotateTo("weapon_left", (0,0,0),1.5,2)])
 
     ani = pyggel.mesh.Animation(mesh, skel, {"move":action})
-    ani.pos=(8,0,00)
+    ani.pos=(0,0,8)
     ani.rotation = (0,180,0) #so it faces us!
     ani.do("move")
-##    scene.add_3d(ani)
+    scene.add_3d(ani)
 
     """Alright, now that our 3d scene is lit and looks decent,
        let's add a skybox so we don't have that pesky blackness everywhere...
