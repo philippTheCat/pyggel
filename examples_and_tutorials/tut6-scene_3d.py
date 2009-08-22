@@ -120,6 +120,90 @@ def main():
     #this OBJ file is actually in PYGGEL coords, so no swapping is needed
     scene.add_3d(mesh)
 
+    """Alright, so a static mesh isn't gonna do you a lot of good now is it?
+       So, let's animate it!
+       NOTE: the animation uses the named objects in an OBJ file.
+       Creating an animation is fairly straight forward:
+           First, you have to create the skeleton representing the mesh parts
+           Second you need to defeine the animation
+           Lastly you create the animation object itself."""
+
+    #ok, so let's define the names of our mesh parts:
+    root = mesh.get_obj_by_name("cylinder1")
+    tail = mesh.get_obj_by_name("sphere2")
+    head = mesh.get_obj_by_name("sphere2_copy3")
+    wings = mesh.get_obj_by_name("cube4")
+    #Normally you will want to name the parts something more generic, like root, head, etc.
+
+    #Now create the skeleton:
+    skel = pyggel.mesh.Skeleton()
+    #let's add some the bones to it then!
+    #add_bone requires at least 3 arguments:
+    #   name - the name of the mesh objext this bone represents
+    #   start - the xyz start position of the bone
+    #   end - the xyz end position of the bone
+    #Also, the add_bone can take two optional arguments:
+    #   root_name - any bone other than root must be attached to another bone,
+    #               this can be the root bone or another child
+    #   anchor - a value ranging from 0 to 1,
+    #            indicating where the rotate point between the start/end of the bone is
+    #            0 equals the start point, 1 equals the end point and 0.5 equals the center
+    skel.add_bone(root.name,
+                  (0,0,root.side("back")),
+                  (0,0,root.side("front")))
+    skel.add_bone(tail.name,
+                  (0,0,tail.side("front")),
+                  (0,0,tail.side("back")),
+                  root.name)
+    skel.add_bone(head.name,
+                  (0,0,head.side("back")),
+                  (0,0,head.side("front")),
+                  root.name,
+                  0.25)
+    skel.add_bone(wings.name,
+                  (wings.side("left"),0,0),
+                  (wings.side("right"),0,0),
+                  root.name,
+                  0.5)
+
+    #Alrighty, now for our action!
+    #actions are incredibly simple to understand
+    #the first argument is the duration (in seconds) the entire action takes
+    #the second is a list of command objects
+    #There are three kinds of action commands:
+    #   RotateTo, MoveTo and ScaleTo
+    #each one works on an interpolation scheme, by the end of the commands run-time,
+    #the bone values will match the command.
+    #Each takes 3 arguments:
+    #   name - the name of the bone and mesh object this action affects
+    #   val - the ending value of the action - ie, rotation for RotateTo, movement for MoveTo, etc.
+    #   start_time - how many seconds into the action this command starts
+    #   end_time - how many seconds into the action this command ends
+    action = pyggel.mesh.Action(2, [pyggel.mesh.RotateTo(wings.name, (0,0,45),0,.5),
+                        pyggel.mesh.RotateTo(wings.name, (0,0,-45),.5,1.5),
+                        pyggel.mesh.RotateTo(wings.name, (0,0,0),1.5,2),
+                        pyggel.mesh.ScaleTo(tail.name, (1.25,1.25,1.25), 0, 1),
+                        pyggel.mesh.ScaleTo(tail.name, (1,1,1), 1, 2),
+                        pyggel.mesh.RotateTo(head.name, (0,15,0),0,.25),
+                        pyggel.mesh.RotateTo(head.name, (0,-15,0),.25,.75),
+                        pyggel.mesh.RotateTo(head.name, (0,0,0),.75,1),
+
+                        #you can also define animations for non-existing mesh parts,
+                        #so you can later add those parts
+                        pyggel.mesh.RotateTo("weapon_right", (0,0,-45),0,.5), 
+                        pyggel.mesh.RotateTo("weapon_right", (0,0,45),.5,1.5),
+                        pyggel.mesh.RotateTo("weapon_right", (0,0,0),1.5,2),
+                        pyggel.mesh.RotateTo("weapon_left", (0,0,-45),0,.5),
+                        pyggel.mesh.RotateTo("weapon_left", (0,0,45),.5,1.5),
+                        pyggel.mesh.RotateTo("weapon_left", (0,0,0),1.5,2)])
+
+    #Alright, now for the animation object
+    ani = pyggel.mesh.Animation(mesh, skel, {"move":action})
+    ani.pos=(1,-2,10)
+    ani.rotation = (0,180,0) #so it faces us!
+    ani.do("move") #do takes two args: name of action, and loop = True/False
+    scene.add_3d(ani)
+
     """And there we go, you have some geometry, a mesh, some 3d images/text and that is the basis for almost every scene in PYGGEL!"""
 
     clock = pygame.time.Clock() #pyggel automatically imports OpenGL/Pygame

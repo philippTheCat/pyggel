@@ -95,6 +95,54 @@ def main():
     mesh = pyggel.mesh.OBJ("data/bird_plane.obj", pos=(5, 0, 0))
     scene.add_3d(mesh)
 
+    root = mesh.get_obj_by_name("cylinder1")
+    tail = mesh.get_obj_by_name("sphere2")
+    head = mesh.get_obj_by_name("sphere2_copy3")
+    wings = mesh.get_obj_by_name("cube4")
+
+    skel = pyggel.mesh.Skeleton()
+    skel.add_bone(root.name,
+                  (0,0,root.side("back")),
+                  (0,0,root.side("front")))
+    skel.add_bone(tail.name,
+                  (0,0,tail.side("front")),
+                  (0,0,tail.side("back")),
+                  root.name)
+    skel.add_bone(head.name,
+                  (0,0,head.side("back")),
+                  (0,0,head.side("front")),
+                  root.name,
+                  0.25)
+    skel.add_bone(wings.name,
+                  (wings.side("left"),0,0),
+                  (wings.side("right"),0,0),
+                  root.name,
+                  0.5)
+
+    action = pyggel.mesh.Action(2, [pyggel.mesh.RotateTo(wings.name, (0,0,45),0,.5),
+                        pyggel.mesh.RotateTo(wings.name, (0,0,-45),.5,1.5),
+                        pyggel.mesh.RotateTo(wings.name, (0,0,0),1.5,2),
+                        pyggel.mesh.ScaleTo(tail.name, (1.25,1.25,1.25), 0, 1),
+                        pyggel.mesh.ScaleTo(tail.name, (1,1,1), 1, 2),
+                        pyggel.mesh.RotateTo(head.name, (0,15,0),0,.25),
+                        pyggel.mesh.RotateTo(head.name, (0,-15,0),.25,.75),
+                        pyggel.mesh.RotateTo(head.name, (0,0,0),.75,1),
+
+                        #you can also define animations for non-existing mesh parts,
+                        #so you can later add those parts
+                        pyggel.mesh.RotateTo("weapon_right", (0,0,-45),0,.5), 
+                        pyggel.mesh.RotateTo("weapon_right", (0,0,45),.5,1.5),
+                        pyggel.mesh.RotateTo("weapon_right", (0,0,0),1.5,2),
+                        pyggel.mesh.RotateTo("weapon_left", (0,0,-45),0,.5),
+                        pyggel.mesh.RotateTo("weapon_left", (0,0,45),.5,1.5),
+                        pyggel.mesh.RotateTo("weapon_left", (0,0,0),1.5,2)])
+
+    ani = pyggel.mesh.Animation(mesh, skel, {"move":action})
+    ani.pos=(8,0,00)
+    ani.rotation = (0,180,0) #so it faces us!
+    ani.do("move")
+##    scene.add_3d(ani)
+
     """Alright, now that our 3d scene is lit and looks decent,
        let's add a skybox so we don't have that pesky blackness everywhere...
 
