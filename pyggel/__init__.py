@@ -3,7 +3,7 @@ pyggle.__init__
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 """
 
-PYGGEL_VERSION = "0.08-alpha4"
+PYGGEL_VERSION = "0.08-alpha4b"
 from include import *
 
 import mesh, view, image, camera, math3d, light
