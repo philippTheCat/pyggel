@@ -2,7 +2,7 @@
 
 import sys, os
 
-sys.path.append(os.path.split(sys.path[0])[0])
+sys.path.insert(0, os.path.split(sys.path[0])[0])
 
 import pyggel
 

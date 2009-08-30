@@ -30,7 +30,7 @@ def OBJ(filename, pos=(0,0,0), rotation=(0,0,0), colorize=(1,1,1,1)):
         if line.startswith('#'): continue
         values = line.split()
         if not values: continue
-        if values[0] == "o":
+        if values[0] in ("o","g"):
             objs.append(ObjGroup(values[1]))
         elif values[0] == 'v':
             vertices.append(map(float, values[1:4]))
