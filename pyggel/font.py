@@ -97,62 +97,62 @@ class FontImage(BaseSceneObject):
 
         self.rebuild_glyphs()
 
-    def getfont(self):
+    def get_font(self):
         """Return font object used to create this image."""
         return self._font
-    def setfont(self, font):
+    def set_font(self, font):
         """Set font object used to create this image - rebuilds text with new font."""
         self._font = font
         self.rebuild_glyphs()
-    def gettext(self):
+    def get_text(self):
         """Returns text."""
         return self._text
-    def settext(self, text):
+    def set_text(self, text):
         """Sets text and updates image."""
         self._text = text
         self.rebuild_glyphs()
-    def getcolor(self):
+    def get_color(self):
         """Returns color."""
         return self._color
-    def setcolor(self, color):
+    def set_color(self, color):
         """Sets color and updates image."""
         self._color = color
         self.rebuild_glyphs()
-    def getlinewrap(self):
+    def get_linewrap(self):
         """Return linewrap."""
         return self._linewrap
-    def setlinewrap(self, linewrap):
+    def set_linewrap(self, linewrap):
         """Sets linewrap and updates image."""
         self._linewrap = linewrap
         self.rebuild_glyphs()
-    def getunderline(self):
+    def get_underline(self):
         """Return underline."""
         return self._underline
-    def setunderline(self, underline):
+    def set_underline(self, underline):
         """Sets underline and updates image."""
         self._underline = underline
         self.rebuild_glyphs()
-    def getitalic(self):
+    def get_italic(self):
         """Returns italic."""
         return self._italic
-    def setitalic(self, italic):
+    def set_italic(self, italic):
         """Sets italic and updates image."""
         self._italic = italic
         self.rebuild_glyphs()
-    def getbold(self):
+    def get_bold(self):
         """Returns bold."""
         return self._bold
-    def setbold(self, bold):
+    def set_bold(self, bold):
         """Sets bold and updates image."""
         self._bold = bold
         self.rebuild_glyphs()
-    underline = property(getunderline, setunderline)
-    italic = property(getitalic, setitalic)
-    bold = property(getbold, setbold)
-    font = property(getfont, setfont)
-    text = property(gettext, settext)
-    color = property(getcolor, setcolor)
-    linewrap = property(getlinewrap, setlinewrap)
+    underline = property(get_underline, set_underline)
+    italic = property(get_italic, set_italic)
+    bold = property(get_bold, set_bold)
+    font = property(get_font, set_font)
+    text = property(get_text, set_text)
+    color = property(get_color, set_color)
+    linewrap = property(get_linewrap, set_linewrap)
 
     def compile(self):
         """Compile the text so rendering is even fast, but text/color/etc. is even slower."""
@@ -487,30 +487,30 @@ class MEFontImage(BaseSceneObject):
         self.set_col(self._color)
     text = property(get_text, set_text)
 
-    def getunderline(self):
+    def get_underline(self):
         """Return underline."""
         return self._underline
-    def setunderline(self, underline):
+    def set_underline(self, underline):
         """Sets underline and updates image."""
         self._underline = underline
         self.set_text(self._text)
-    def getitalic(self):
+    def get_italic(self):
         """Returns italic."""
         return self._italic
-    def setitalic(self, italic):
+    def set_italic(self, italic):
         """Sets italic and updates image."""
         self._italic = italic
         self.set_text(self._text)
-    def getbold(self):
+    def get_bold(self):
         """Returns bold."""
         return self._bold
-    def setbold(self, bold):
+    def set_bold(self, bold):
         """Sets bold and updates image."""
         self._bold = bold
         self.set_text(self._text)
-    underline = property(getunderline, setunderline)
-    italic = property(getitalic, setitalic)
-    bold = property(getbold, setbold)
+    underline = property(get_underline, set_underline)
+    italic = property(get_italic, set_italic)
+    bold = property(get_bold, set_bold)
 
     def get_col(self):
         """Returns color."""
