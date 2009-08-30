@@ -474,6 +474,7 @@ class MEFontImage(BaseSceneObject):
                 i.pos = (indent, downdent)
                 g.append(i)
                 indent += i.get_width()
+        self._width = max((self._width, indent))
         self._height = downdent
         if self.underline:
             size = int(self.font.size / 10)
