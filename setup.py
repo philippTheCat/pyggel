@@ -4,8 +4,8 @@ To install simply run from the commandline: python setup.py install
 To build a windows installer run: python setup.py bdist_wininst
 """
 
-from distutils.core import setup
-import pyggel, os, sys, fnmatch
+from setuptools import setup
+import os, sys, fnmatch #, pyggel
 
 ## Code borrowed from wxPython's setup and config files
 ## Thanks to Robin Dunn for the suggestion.
@@ -49,16 +49,18 @@ def find_data_files(srcdir, *wildcards, **kw):
 ## This is a list of files to install, and where:
 ## Make sure the MANIFEST.in file points to all the right 
 ## directories too.
-files = find_data_files('examples_and_tutorials/', '*.*')
+files = find_data_files('examples_and_tutorials', '*.*')
+robofiles = find_data_files('Robocalypto', '*.*')
 
 setup(name='pyggel',
-      version=pyggel.get_version(),
+      version="0.08-alpha4b", #pyggel.get_version(),
       description='PYthon Graphical Game Engine and Libraries',
       author='Matt Roe',
       author_email='RoeBros@gmail.com',
       maintainer='Robert Ramsay',
       maintainer_email='durandal@gmail.com',
+      install_requires=['pyopengl','PIL','pygame','numpy'],
       url='http://pyggel.googlecode.com/',
       packages = ['pyggel'],
-      data_files = files
+      data_files = files + robofiles
       )
