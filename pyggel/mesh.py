@@ -161,6 +161,9 @@ class ObjGroup(object):
 
         dlist.end()
 
+        if self.material == None:
+            self.material = data.Material("null")
+
         return CompiledGroup(self.name, self.material, dlist, (minx,miny,minz, maxx, maxy, maxz),
                              (avgx, avgy, avgz))
 
