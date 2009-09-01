@@ -187,6 +187,8 @@ class StaticObjectGroup(BaseSceneObject):
            objects must be a list of renderable objects"""
         BaseSceneObject.__init__(self)
 
+        if not hasattr(objects, "__iter__"):
+            objects = [objects]
         self.objects = objects
         self.gl_list = data.DisplayList()
         self.pickable = False
@@ -207,8 +209,21 @@ class StaticObjectGroup(BaseSceneObject):
     def render(self, camera=None):
         """Render the group.
            camera should be None or the camera the scene is using - only here for compatability"""
+        glPushMatrix()
+        x,y,z = self.pos
+        glTranslatef(x,y,-z)
+        a, b, c = self.rotation
+        glRotatef(a, 1, 0, 0)
+        glRotatef(b, 0, 1, 0)
+        glRotatef(c, 0, 0, 1)
+        try:
+            glScalef(*self.scale)
+        except:
+            glScalef(self.scale, self.scale, self.scale)
+
         self.gl_list.render()
         data.Texture.bound = None
+        glPopMatrix()
 
     def get_pos(self):
         """Return the position of the mesh"""
