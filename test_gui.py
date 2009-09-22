@@ -13,6 +13,8 @@ def swap_apps(new):
 def main():
     pyggel.init(screen_size_2d=(600, 400))
 
+    pyggel.view.set_debug(False)
+
     scene = pyggel.scene.Scene()
 
     eh = pyggel.event.Handler()

@@ -250,13 +250,17 @@ def set_fog_depth(min=10, max=125):
     glFogf(GL_FOG_START, min)
     glFogf(GL_FOG_END, max)
 
+def quickCheckError(*args, **kwargs):
+    return None
+safeCheckError = oglError.ErrorChecker._registeredChecker
+
 def set_debug(boolean):
     """Enable/Disable OpenGL debugging - specifically, this turns on/off calling of glGetError after every call."""
     screen.debug = boolean
     if boolean:
-        oglError.ErrorChecker.registerChecker(None)
+        oglError.ErrorChecker._registeredChecker = safeCheckError
     else:
-        oglError.ErrorChecker.registerChecker(lambda:None)
+        oglError.ErrorChecker._registeredChecker = quickCheckError
 
 def toggle_debug():
     """Toggle OpenGL debugging."""
