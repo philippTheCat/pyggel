@@ -86,8 +86,9 @@ class Mouse(object):
     def do_buttonup(self, event):
         """Remove a button from active list."""
         if event.button in self.active:
-            name = self.get_name(event.button)
             self.active.remove(event.button)
+        name = self.get_name(event.button)
+        if name in self.active:
             self.active.remove(name)
 
 class Dispatcher(object):

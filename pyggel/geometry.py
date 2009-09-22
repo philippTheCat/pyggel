@@ -10,10 +10,12 @@ import view, data, misc
 from data import Texture, BlankTexture
 from scene import BaseSceneObject
 
+
 class Cube(BaseSceneObject):
     """A geometric cube that can be colored and textured"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
-                 colorize=(1,1,1,1), texture=None, mirror=True):
+                 colorize=(1,1,1,1), texture=None, mirror=True,
+                 hide_faces=[]):
         """Create a cube
            size is the absolute size of the cube
            pos is the position of the cube
@@ -25,8 +27,12 @@ class Cube(BaseSceneObject):
                if False, the Texture is considered a cube map, like this:
                    blank, blank, top, blank,
                    back, left, front, right,
-                   blank, blank, bottom, blank"""
+                   blank, blank, bottom, blank
+           hide_faces must be a list of the sides of the cube not to add:
+               acceptable values are left, right, top, bottom, back, front"""
         BaseSceneObject.__init__(self)
+
+        self.hide_faces = hide_faces
 
         self.size = size
         self.pos = pos
@@ -35,6 +41,8 @@ class Cube(BaseSceneObject):
             texture = Texture(texture)
         if texture:
             self.texture = texture
+        else:
+            self.texture = BlankTexture()
         self.colorize = colorize
 
         self.mirror = mirror
@@ -48,12 +56,25 @@ class Cube(BaseSceneObject):
                       (1, 1, -1),#bottomrightback
                       (-1, 1, -1))#bottomleftback
 
-        self.sides = ((7,4,0,3, 2, 2, 5),#left
+        sides = ((7,4,0,3, 2, 2, 5),#left
                       (2,1,5,6, 3, 4, 4),#right
                       (7,3,2,6, 5, 0, 3),#top
                       (0,4,5,1, 4, 5, 2),#bottom
                       (3,0,1,2, 0, 1, 0),#front
                       (6,5,4,7, 1, 3, 1))#back
+        self.sides = []
+        if not "left" in hide_faces:
+            self.sides.append(sides[0])
+        if not "right" in hide_faces:
+            self.sides.append(sides[1])
+        if not "top" in hide_faces:
+            self.sides.append(sides[2])
+        if not "bottom" in hide_faces:
+            self.sides.append(sides[3])
+        if not "front" in hide_faces:
+            self.sides.append(sides[4])
+        if not "back" in hide_faces:
+            self.sides.append(sides[5])
         self.normals = ((0, 0, 1), #front
                         (0, 0, -1), #back
                         (0, -1, 0), #top
@@ -89,6 +110,8 @@ class Cube(BaseSceneObject):
         ox = .25
         oy = .33
         last_tex = None
+
+        glBegin(GL_QUADS)
         for i in self.sides:
             ix = 0
             x, y = self.split_coords[i[5]]
@@ -99,8 +122,6 @@ class Cube(BaseSceneObject):
             else:
                 coords = ((x+ox, y+oy), (x+ox, y), (x, y), (x, y+oy))
 
-            glBegin(GL_QUADS)
-
             glNormal3f(*self.normals[i[6]])
 
             for x in i[:4]:
@@ -108,7 +129,7 @@ class Cube(BaseSceneObject):
                 a, b, c = self.corners[x]
                 glVertex3f(a,b,c)
                 ix += 1
-            glEnd()
+        glEnd()
         self.display_list.end()
 
     def render(self, camera=None):
@@ -123,9 +144,11 @@ class Cube(BaseSceneObject):
         glRotatef(c, 0, 0, 1)
         glScalef(.5*self.size,.5*self.size,.5*self.size)
         try:
-            glScalef(*self.scale)
+            if not self.scale == (1,1,1):
+                glScalef(*self.scale)
         except:
-            glScalef(self.scale, self.scale, self.scale)
+            if not self.scale == 1:
+                glScalef(self.scale, self.scale, self.scale)
         glColor(*self.colorize)
         self.texture.bind()
         if self.outline:
@@ -135,7 +158,7 @@ class Cube(BaseSceneObject):
 
     def copy(self):
         """Return a copy of the quad - uses the same display list"""
-        n = Cube(self.size, self.pos, self.rotation, self.colorize, self.texture)
+        n = Cube(self.size, self.pos, self.rotation, self.colorize, self.texture, self.mirror, self.hide_faces)
         n.display_list = self.display_list
         n.scale = self.scale
         return n
@@ -148,13 +171,14 @@ class Cube(BaseSceneObject):
 class Quad(Cube, BaseSceneObject):
     """A simple 3d square object."""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
-                 colorize=(1,1,1,1), texture=None):
+                 colorize=(1,1,1,1), texture=None, hide_faces=[]):
         """Create the Quad
            size is the quad
            pos is the position of the quad
            rotation is the rotation of the quad
            colorize is the color of the quad
-           texture can be None, a string filename of an image to load or a data.Texture object - entire texture is mapped to the face"""
+           texture can be None, a string filename of an image to load or a data.Texture object - entire texture is mapped to the face
+           hide_faces are the same as for Cube, except only front and back are allowed"""
 
         BaseSceneObject.__init__(self)
         self.size = size
@@ -164,11 +188,15 @@ class Quad(Cube, BaseSceneObject):
             texture = Texture(texture)
         if texture:
             self.texture = texture
+        else:
+            self.texture = BlankTexture()
         self.colorize = colorize
 
         self.scale = 1
 
         self.display_list = data.DisplayList()
+
+        self.hide_faces = hide_faces
 
         self._compile()
 
@@ -178,23 +206,24 @@ class Quad(Cube, BaseSceneObject):
 
         glBegin(GL_QUADS)
         glNormal3f(0,1,0)
-        glTexCoord2f(1,0)
-        glVertex3f(-1,0,1)
-        glTexCoord2f(0,0)
-        glVertex3f(1, 0, 1)
-        glTexCoord2f(0,1)
-        glVertex3f(1, 0, -1)
-        glTexCoord2f(1,1)
-        glVertex3f(-1, 0, -1)
-
-        glTexCoord2f(1,1)
-        glVertex3f(-1, 0, -1)
-        glTexCoord2f(0,1)
-        glVertex3f(1, 0, -1)
-        glTexCoord2f(0,0)
-        glVertex3f(1, 0, 1)
-        glTexCoord2f(1,0)
-        glVertex3f(-1,0,1)
+        if not "back" in self.hide_faces:
+            glTexCoord2f(1,1)
+            glVertex3f(-1,1,0)
+            glTexCoord2f(0,1)
+            glVertex3f(1, 1, 0)
+            glTexCoord2f(0,0)
+            glVertex3f(1, -1, 0)
+            glTexCoord2f(1,0)
+            glVertex3f(-1, -1, 0)
+        if not "front" in self.hide_faces:
+            glTexCoord2f(1,0)
+            glVertex3f(-1, -1, 0)
+            glTexCoord2f(0,0)
+            glVertex3f(1, -1, 0)
+            glTexCoord2f(0,1)
+            glVertex3f(1, 1, 0)
+            glTexCoord2f(1,1)
+            glVertex3f(-1, 1, 0)
         glEnd()
         self.display_list.end()
 
@@ -213,18 +242,19 @@ class Quad(Cube, BaseSceneObject):
 class Plane(Quad):
     """Like a Quad, except the texture is tiled on the face, which increases performance over a lot of quads tiled"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
-                 colorize=(1,1,1,1), texture=None, tile=1):
+                 colorize=(1,1,1,1), texture=None, tile=1, hide_faces=[]):
         """Create the Plane
            size of the plane
            pos is the position of the quad
            rotation is the rotation of the quad
            colorize is the color of the quad
            texture can be None, a string filename of an image to load or a data.Texture object - entire texture is mapped to the face
-           tile is the number of times to tile the texture across the Plane"""
+           tile is the number of times to tile the texture across the Plane,
+           hide_faces are the same as for a Quad"""
 
         self.tile = tile
 
-        Quad.__init__(self, size, pos, rotation, colorize, texture)
+        Quad.__init__(self, size, pos, rotation, colorize, texture, hide_faces)
 
     def _compile(self):
         """Compile Plane into a data.DisplayList"""
@@ -236,23 +266,24 @@ class Plane(Quad):
 
         glBegin(GL_QUADS)
         glNormal3f(0,1,0)
-        glTexCoord2f(self.tile,0)
-        glVertex3f(-1,0,1)
-        glTexCoord2f(0,0)
-        glVertex3f(1, 0, 1)
-        glTexCoord2f(0,self.tile)
-        glVertex3f(1, 0, -1)
-        glTexCoord2f(self.tile,self.tile)
-        glVertex3f(-1, 0, -1)
-
-        glTexCoord2f(self.tile,self.tile)
-        glVertex3f(-1, 0, -1)
-        glTexCoord2f(0, self.tile)
-        glVertex3f(1, 0, -1)
-        glTexCoord2f(0,0)
-        glVertex3f(1, 0, 1)
-        glTexCoord2f(self.tile, 0)
-        glVertex3f(-1,0,1)
+        if not "back" in self.hide_faces:
+            glTexCoord2f(self.tile,0)
+            glVertex3f(-1,1,0)
+            glTexCoord2f(0,0)
+            glVertex3f(1, 1, 0)
+            glTexCoord2f(0,self.tile)
+            glVertex3f(1, -1, -0)
+            glTexCoord2f(self.tile,self.tile)
+            glVertex3f(-1, -1, -0)
+        if not "front" in self.hide_faces:
+            glTexCoord2f(self.tile,self.tile)
+            glVertex3f(-1, -1, -0)
+            glTexCoord2f(0, self.tile)
+            glVertex3f(1, -1, -0)
+            glTexCoord2f(0,0)
+            glVertex3f(1, 1, 0)
+            glTexCoord2f(self.tile, 0)
+            glVertex3f(-1,1,0)
         glEnd()
         self.display_list.end()
 
@@ -340,6 +371,8 @@ class Sphere(BaseSceneObject):
             texture = Texture(texture)
         if texture:
             self.texture = texture
+        else:
+            self.texture = BlankTexture()
         self.detail = detail
         self.scale = 1
 
@@ -358,6 +391,8 @@ class Sphere(BaseSceneObject):
     def _compile(self):
         """Compile the Sphere into a data.DisplayList"""
         self.display_list.begin()
+        #Pyweek change - set rotation for faces to be correct!
+        glRotatef(-90,1,0,0)
         Sphere = gluNewQuadric()
         gluQuadricTexture(Sphere, GLU_TRUE)
         gluSphere(Sphere, 1, self.detail, self.detail)
@@ -430,3 +465,141 @@ class Skyball(Sphere):
         n.scale = self.scale
         n.display_list = self.display_list
         return n
+
+
+#Pyweek changes:
+import math3d, math
+class Pyramid(BaseSceneObject):
+    """A geometric pyramid that can be colored and textured"""
+    def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
+                 colorize=(1,1,1,1), texture=None, hide_faces=[]):
+        BaseSceneObject.__init__(self)
+
+        self.hide_faces = hide_faces
+
+        self.size = size
+        self.pos = pos
+        self.rotation = rotation
+        if type(texture) is type(""):
+            texture = Texture(texture)
+        if texture:
+            self.texture = texture
+        else:
+            self.texture = BlankTexture()
+        self.colorize = colorize
+
+        self.scale = 1
+
+        self.display_list = data.DisplayList()
+
+        self._compile()
+
+    def _compile(self):
+        """Compile the cube's rendering into a data.DisplayList"""
+        self.display_list.begin()
+
+        top = (0,0.5,0)
+        bottomleft = (-math.sqrt(3)*0.25,-0.5,0.25)
+        bottomright = (math.sqrt(3)*0.25,-0.5,0.25)
+        bottomback = (0,-0.5,-0.5)
+
+        tpoints = [[bottomleft,bottomright,bottomback],
+                   [top, bottomleft, bottomright],
+                   [top, bottomright, bottomback],
+                   [top, bottomback, bottomleft]]
+
+        ttp = []
+        if not "bottom" in self.hide_faces:
+            ttp.append(tpoints[0])
+        if not "front" in self.hide_faces:
+            ttp.append(tpoints[1])
+        if not "right" in self.hide_faces:
+            ttp.append(tpoints[2])
+        if not "left" in self.hide_faces:
+            ttp.append(tpoints[3])
+
+        glBegin(GL_TRIANGLES)
+        for i in ttp:
+            coords = ((0.5,1), (0,0), (1,0))
+
+            glNormal3f(*math3d.calcTriNormal(i[0],i[1],i[2],False))
+
+            for p in xrange(3):
+                glTexCoord2fv(coords[p])
+                glVertex3f(*i[p])
+        glEnd()
+
+        self.display_list.end()
+
+    def render(self, camera=None):
+        """Render the cube
+           camera is None or the camera object the scene is using to render this object"""
+        glPushMatrix()
+        x, y, z = self.pos
+        glTranslatef(x, y, -z)
+        a, b, c = self.rotation
+        glRotatef(a, 1, 0, 0)
+        glRotatef(b, 0, 1, 0)
+        glRotatef(c, 0, 0, 1)
+        glScalef(self.size,self.size,self.size)
+        try:
+            glScalef(*self.scale)
+        except:
+            glScalef(self.scale, self.scale, self.scale)
+        glColor(*self.colorize)
+        self.texture.bind()
+        if self.outline:
+            misc.outline(self.display_list, self.outline_color, self.outline_size)
+        self.display_list.render()
+        glPopMatrix()
+
+class DoublePyramid(Pyramid):
+    """A geometric double-pyramid that can be colored and textured"""
+    def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
+                 colorize=(1,1,1,1), texture=None, hide_faces=[]):
+        Pyramid.__init__(self, size, pos, rotation, colorize, texture, hide_faces)
+
+    def _compile(self):
+        """Compile the cube's rendering into a data.DisplayList"""
+        self.display_list.begin()
+
+        top = (0,0.5,0)
+        bottom = (0,-0.5,0)
+        midleft = (-math.sqrt(3)*0.25,0,0.25)
+        midright = (math.sqrt(3)*0.25,0,0.25)
+        midback = (0,0,-0.5)
+
+        tpoints = [[top, midleft, midright],
+                   [top, midright, midback],
+                   [top, midback, midleft],
+
+                   [bottom,midright,midleft],
+                   [bottom,midleft,midback],
+                   [bottom,midback,midright]]
+        ttp = []
+        if not "topfront" in self.hide_faces:
+            ttp.append(tpoints[0])
+        if not "topright" in self.hide_faces:
+            ttp.append(tpoints[1])
+        if not "topleft" in self.hide_faces:
+            ttp.append(tpoints[2])
+
+        if not "bottomfront" in self.hide_faces:
+            ttp.append(tpoints[3])
+        if not "bottomright" in self.hide_faces:
+            ttp.append(tpoints[4])
+        if not "bottomleft" in self.hide_faces:
+            ttp.append(tpoints[5])
+
+        glBegin(GL_TRIANGLES)
+        for i in ttp:
+            coords = ((0.5,1), (0,0), (1,0))
+
+            glNormal3f(*math3d.calcTriNormal(i[0],i[1],i[2],False))
+
+            for p in xrange(3):
+                glTexCoord2fv(coords[p])
+                glVertex3f(*i[p])
+        glEnd()
+
+        self.display_list.end()

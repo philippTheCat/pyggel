@@ -640,12 +640,15 @@ class Widget(object):
 
     def handle_mouseup(self, button, name):
         """Handle a mouse release event from the App."""
+        #Pyweek change:
+        #modification so hovering after holding/releasing works
         self._mhover = self._collidem()
         if name == "left":
             if self._mhold and self._mhover:
-                self._mhold = False
                 self.dispatch.fire("click")
+                self._mhold = False
                 return True
+            self._mhold = False
 
     def handle_mousehold(self, button, name):
         """Handle a mouse hold event from the App."""

@@ -73,6 +73,12 @@ class Texture(object):
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
                      GL_UNSIGNED_BYTE, tdata)
 
+        if ANI_AVAILABLE:
+            try:
+                glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,glGetFloat(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT))
+            except:
+                pass
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
@@ -175,9 +181,10 @@ class VertexArray(object):
 
         self.max_size = max_size
 
-        self.verts = numpy.empty((max_size, 3), dtype=object)
-        self.colors = numpy.empty((max_size, 4), dtype=object)
-        self.texcs = numpy.empty((max_size, 2), dtype=object)
+        self.verts = numpy.zeros((max_size, 3), "f")
+        self.colors = numpy.zeros((max_size, 4), "f")
+        self.texcs = numpy.zeros((max_size, 2), "f")
+        self.norms = numpy.array([[0,1,0]]*max_size, "f")
 
     def render(self):
         """Render the array"""
@@ -186,16 +193,216 @@ class VertexArray(object):
         glEnableClientState(GL_VERTEX_ARRAY)
         glEnableClientState(GL_COLOR_ARRAY)
         glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+        glEnableClientState(GL_NORMAL_ARRAY)
 
         glVertexPointer(3, GL_FLOAT, 0, self.verts)
         glColorPointer(4, GL_FLOAT, 0, self.colors)
         glTexCoordPointer(2, GL_FLOAT, 0, self.texcs)
+        glNormalPointer(3, GL_FLOAT, 0, self.norms)
 
         glDrawArrays(self.render_type, 0, self.max_size)
 
         glDisableClientState(GL_VERTEX_ARRAY)
         glDisableClientState(GL_COLOR_ARRAY)
         glDisableClientState(GL_TEXTURE_COORD_ARRAY)
+        glDisableClientState(GL_NORMAL_ARRAY)
+
+    def reset_verts(self, data):
+        self.verts = numpy.array(data, "f")
+
+    def reset_colors(self, data):
+        self.colors = numpy.array(data, "f")
+
+    def reset_texcs(self, data):
+        self.texcs = numpy.array(data, "f")
+
+    def reset_norms(self, data):
+        self.norms = numpy.array(data, "f")
+
+    def update_verts(self, index, new):
+        self.verts[index] = new
+
+    def update_colors(self, index, new):
+        self.colors[index] = new
+
+    def update_texcs(self, index, new):
+        self.texcs[index] = new
+
+    def update_norms(self, index, new):
+        self.norms[index] = new
+
+class VBOArray(object):
+    def __init__(self, render_type=None, max_size=100, usage="static", cache_changes=False):
+        """Create the array
+           render_type is the OpenGL constant used in rendering, ie GL_POLYGON, GL_TRINAGLES, etc.
+           max_size is the size of the array
+           usage can be static, dynamic or stream (affecting render vs. modify speeds)
+           cache_changes makes any changes between renderings be stored,
+               and then only one modification is performed.
+               NOTE: doing this actually modifies the entire buffer data, just efficiently
+                     so this is only recommended if you are modifying a tremendous amount of points each frame!"""
+
+        if not VBO_AVAILABLE:
+            raise AttributeError("Vertex buffer objects not available!")
+
+        self.usage = ("GL_"+usage+"_DRAW").upper()
+        uses = {"GL_STATIC_DRAW":GL_STATIC_DRAW,
+                "GL_DYNAMIC_DRAW":GL_DYNAMIC_DRAW,
+                "GL_STREAM_DRAW":GL_STREAM_DRAW}
+        self.usage_gl = uses[self.usage]
+
+        self.cache_changes = cache_changes
+        self._cached_cv = []
+        self._cached_cc = []
+        self._cached_ct = []
+        self._cached_cn = []
+
+        if render_type is None:
+            render_type = GL_QUADS
+        self.render_type = render_type
+        self.texture = BlankTexture()
+
+        self.max_size = max_size
+
+        self.verts = vbo.VBO(numpy.zeros((max_size, 3), "f"), self.usage)
+        self.colors = vbo.VBO(numpy.zeros((max_size, 4), "f"), self.usage)
+        self.texcs = vbo.VBO(numpy.zeros((max_size, 2), "f"), self.usage)
+        self.norms = vbo.VBO(numpy.array([[0,1,0]]*max_size, "f"), self.usage)
+
+    def render(self):
+        """Render the array"""
+        if self.cache_changes:
+            if self._cached_cv or self._cached_cc or self._cached_ct:
+                for i in self._cached_cv:
+                    self.verts.data[i[0]] = i[1]
+                self.verts.bind()
+                glBufferData(GL_ARRAY_BUFFER, self.verts.data, self.usage_gl)
+                self._cached_cv = []
+
+                for i in self._cached_cc:
+                    self.colors.data[i[0]] = i[1]
+                self.colors.bind()
+                glBufferData(GL_ARRAY_BUFFER, self.colors.data, self.usage_gl)
+                self._cached_cc = []
+
+                for i in self._cached_ct:
+                    self.texcs.data[i[0]] = i[1]
+                self.texcs.bind()
+                glBufferData(GL_ARRAY_BUFFER, self.texcs.data, self.usage_gl)
+                self._cached_ct = []
+
+                for i in self._cached_cn:
+                    self.norms.data[i[0]] = i[1]
+                self.norms.bind()
+                glBufferData(GL_ARRAY_BUFFER, self.norms.data, self.usage_gl)
+                self._cached_cn = []
+        self.texture.bind()
+
+        self.verts.bind()
+        glEnableClientState(GL_VERTEX_ARRAY)
+        glVertexPointerf(self.verts)
+
+        self.colors.bind()
+        glEnableClientState(GL_COLOR_ARRAY)
+        glColorPointerf(self.colors)
+
+        self.texcs.bind()
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+        glTexCoordPointerf(self.texcs)
+
+        self.norms.bind()
+        glEnableClientState(GL_NORMAL_ARRAY)
+        glNormalPointerf(self.norms)
+
+        glDrawArrays(self.render_type, 0, self.max_size)
+
+        self.verts.unbind()
+        glDisableClientState(GL_VERTEX_ARRAY)
+        self.colors.unbind()
+        glDisableClientState(GL_COLOR_ARRAY)
+        self.texcs.unbind()
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY)
+        self.norms.unbind()
+        glDisableClientState(GL_NORMAL_ARRAY)
+
+    def reset_verts(self, data):
+        self.verts.set_array(numpy.array(data, "f"))
+
+    def reset_colors(self, data):
+        self.colors.set_array(numpy.array(data, "f"))
+
+    def reset_texcs(self, data):
+        self.texcs.set_array(numpy.array(data, "f"))
+
+    def reset_norms(self, data):
+        self.norms.set_array(numpy.array(data, "f"))
+
+    def update_verts(self, index, new):
+        if self.cache_changes:
+            self._cached_cv.append([index, new])
+        else:
+            self.verts.bind()
+            #index multiplier is
+            #4*len(new) - so since verts have 3 points, we get 12
+            glBufferSubData(GL_ARRAY_BUFFER, 12*index, numpy.array(new, "f"))
+            self.verts.data[index] = new
+
+    def update_colors(self, index, new):
+        if self.cache_changes:
+            self._cached_cc.append([index, new])
+        else:
+            self.colors.bind()
+            glBufferSubData(GL_ARRAY_BUFFER, 16*index, numpy.array(new, "f"))
+            self.colors.data[index] = new
+
+    def update_texcs(self, index, new):
+        if self.cache_changes:
+            self._cached_ct.append([index, new])
+        else:
+            self.texcs.bind()
+            glBufferSubData(GL_ARRAY_BUFFER, 8*index, numpy.array(new, "f"))
+            self.texcs.data[index] = new
+
+    def update_norms(self, index, new):
+        if self.cache_changes:
+            self._cached_cn.append([index, new])
+        else:
+            self.norms.bind()
+            glBufferSubData(GL_ARRAY_BUFFER, 12*index, numpy.array(new, "f"))
+            self.norms.data[index] = new
+
+    def __del__(self):
+        bufs = []
+        for i in (self.verts, self.colors, self.texcs, self.norms):
+            try:
+                i.delete()
+            except:
+                pass
+
+def get_best_array_type(render_type=None, max_size=100,
+                        opt=0):
+    """This function returns the best possible array type for what you need.
+       render_type is the OpenGL constant used in rendering, ie GL_POLYGON, GL_TRINAGLES, etc.
+       max_size is the number of individual points in the array
+       opt is how the array is optimized, starting at 0 for fast access to 5 for fast rendering
+           5 also makes use of a cached VBO (if possible) - so it is very fast rendering and modifying
+           *if* you are modifying a very large number of points - otherwise it is slower at modifying"""
+
+    assert opt >= 0 and opt <= 5
+
+    if not VBO_AVAILABLE:
+        return VertexArray(render_type, max_size)
+
+    if opt == 0:
+        return VertexArray(render_type, max_size)
+    elif opt == 1:
+        return VBOArray(render_type, max_size, "stream")
+    elif opt == 2:
+        return VBOArray(render_type, max_size, "dynamic")
+    elif opt == 3:
+        return VBOArray(render_type, max_size, "static")
+    else:
+        return VBOArray(render_type, max_size, "static", True)
 
 class FrameBuffer(object):
     """An object contains functions to render to a texture instead of to the main display.
@@ -205,7 +412,7 @@ class FrameBuffer(object):
            size must be the (x,y) size of the buffer, will round up to the next power of two
            clear_color must be the (r,g,b) or (r,g,b,a) color of the background of the texture"""
         view.require_init()
-        if not FBO_AVAILABLE:
+        if not (FBO_AVAILABLE and bool(glGenRenderbuffersEXT)):
             raise AttributeError("Frame buffer objects not available!")
 
         _x, _y = size
@@ -221,9 +428,6 @@ class FrameBuffer(object):
 
         self.texture = BlankTexture(self.size, self.clear_color)
 
-        if not bool(glGenRenderbuffersEXT):
-            print("glGenRenderbuffersEXT doesn't exist")
-            exit()
         self.rbuffer = glGenRenderbuffersEXT(1)
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT,
                               self.rbuffer)
@@ -334,6 +538,12 @@ class TextureBuffer(object):
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0,0,self.size[0], self.size[1], 0)
 
         glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT)
+
+def RenderBuffer(*args, **kwargs):
+    """Returns FrameBuffer if available, or texture buffer if not."""
+    if FBO_AVAILABLE:
+        return FrameBuffer(*args, **kwargs)
+    return TextureBuffer(*args, **kwargs)
 
 class Material(object):
     """A simple class to store a color and texture for an object."""

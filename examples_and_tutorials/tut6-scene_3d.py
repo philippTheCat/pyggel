@@ -93,9 +93,7 @@ def main():
     c = pyggel.geometry.Cube(1, pos=(-6, 6, 20), texture=tex) #this one copies the texture for each face
 
     d = pyggel.geometry.Quad(1, pos=(-4, 6, 20), texture=tex) #this will look exactly like the cubes, because it is facing us...
-    d.rotation=(90,0,0) #so it faces us
     e = pyggel.geometry.Plane(10, pos=(-6, -6, 20), texture=tex, tile=10)
-    e.rotation=(90,0,0)
     f = pyggel.geometry.Sphere(1, pos=(2, 6, 20), texture=tex)
 
     scene.add_3d((a,b,c,d,e,f))

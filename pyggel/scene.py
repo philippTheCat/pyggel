@@ -81,6 +81,8 @@ class Tree(object):
         self.skybox = None
         self.lights = []
 
+        self.render_3d_after = []
+
 class Scene(object):
     """A simple scene class used to store, render, pick and manipulate objects."""
     def __init__(self):
@@ -163,6 +165,20 @@ class Scene(object):
                             pick = i
             glEnable(GL_DEPTH_TEST)
 
+            glEnable(GL_ALPHA_TEST)
+            glClear(GL_DEPTH_BUFFER_BIT)
+            for i in self.graph.render_3d_after:
+                if i.dead_remove_from_scene:
+                    self.graph.render_3d_after.remove(i)
+                if i.visible:
+                    i.render(camera)
+                    if self.pick and i.pickable:
+                        dep = glReadPixelsf(mpx, mpy, 1, 1, GL_DEPTH_COMPONENT)[0][0]
+                        if dep < last_depth:
+                            last_depth = dep
+                            pick = i
+            glDisable(GL_ALPHA_TEST)
+
             for i in self.graph.lights:
                 i.hide()
             if camera:
@@ -210,6 +226,17 @@ class Scene(object):
     def remove_3d(self, ele):
         """Remove a 3d object from the scene."""
         self.graph.render_3d.remove(ele)
+
+    def add_3d_after(self, ele):
+        """Add a 3d, non-blended, depth-tested object or list of objects to the scene."""
+        if not hasattr(ele, "__iter__"):
+            ele = [ele]
+        for i in ele:
+            self.graph.render_3d_after.append(i)
+
+    def remove_3d_after(self, ele):
+        """Remove a 3d object from the scene."""
+        self.graph.render_3d_after.remove(ele)
 
     def add_3d_blend(self, ele):
         """Add a 3d, blended, depth-tested object or list of objects to the scene."""

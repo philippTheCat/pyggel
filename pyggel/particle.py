@@ -1,5 +1,5 @@
 """
-pyggle.particle
+pyggel.particle
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The particle module contains classes for creating and rendering particle effects.
@@ -36,7 +36,7 @@ class Particle3D(object):
         """Update the particle."""
         self.behavior.particle_update(self)
 
-    def render(self, camera):
+    def render(self, camera=None):
         """Render the particle.
            camera must be None or the camera object the scene is using"""
         self.update()
@@ -77,7 +77,7 @@ class Emitter3D(BaseSceneObject):
         """Update the emitter."""
         self.behavior.emitter_update()
 
-    def render(self, camera):
+    def render(self, camera=None):
         """Render and update all particles.
            camera must be None of the camera the scene is using"""
         self.update()
@@ -205,17 +205,9 @@ class ParticlePoint(object):
     def update(self):
         """Update the particle."""
         self.behavior.particle_update(self)
-        x, y, z = self.pos
-        r, g, b, a = self.colorize
 
-        self.parent.vertex_array.verts[self.index][0] = x
-        self.parent.vertex_array.verts[self.index][1] = y
-        self.parent.vertex_array.verts[self.index][2] = z
-
-        self.parent.vertex_array.colors[self.index][0] = r
-        self.parent.vertex_array.colors[self.index][1] = g
-        self.parent.vertex_array.colors[self.index][2] = b
-        self.parent.vertex_array.colors[self.index][3] = a
+        self.parent.array.update_verts(self.index, self.pos)
+        self.parent.array.update_colors(self.index, self.colorize)
 
 class EmitterPoint(BaseSceneObject):
     """A more complex particle emitter, that stores all particles in a vertex array."""
@@ -231,7 +223,7 @@ class EmitterPoint(BaseSceneObject):
         self.empty_spaces = []
         self.last_number = 0
 
-        self.vertex_array = data.VertexArray(GL_POINTS, self.behavior.max_particles)
+        self.array = data.get_best_array_type(GL_POINTS, self.behavior.max_particles, 5)
 
         self.pickable = False
         self.particle_type = ParticlePoint
@@ -271,7 +263,7 @@ class EmitterPoint(BaseSceneObject):
         """Update the emitter."""
         self.behavior.emitter_update()
 
-    def render(self, camera):
+    def render(self, camera=None):
         """Render and update all particles.
            camera must be None of the camera the scene is using"""
         self.update()
@@ -279,7 +271,7 @@ class EmitterPoint(BaseSceneObject):
         for i in self.particles:
             if i:
                 i.update()
-        self.vertex_array.render()
+        self.array.render()
 
 
 class BehaviorPoint(object):

@@ -19,3 +19,15 @@ try:
     FBO_AVAILABLE = True
 except:
     FBO_AVAILABLE = False
+
+try:
+    from OpenGL.arrays import vbo
+    VBO_AVAILABLE = bool(vbo.get_implementation())
+except:
+    VBO_AVAILABLE = False
+
+try:
+    from OpenGL.GL.EXT.texture_filter_anisotropic import *
+    ANI_AVAILABLE = True
+except:
+    ANI_AVAILABLE = False

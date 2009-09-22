@@ -58,20 +58,20 @@ def OBJ(filename, pos=(0,0,0), rotation=(0,0,0), colorize=(1,1,1,1)):
                     cur_mtl.set_color(map(float, values[1:]))
         elif values[0] == 'f':
             face = []
-            texcoords = []
+            texcs = []
             norms = []
             for v in values[1:]:
                 w = v.split('/')
                 face.append(int(w[0]))
                 if len(w) >= 2 and len(w[1]) > 0:
-                    texcoords.append(int(w[1]))
+                    texcs.append(int(w[1]))
                 else:
-                    texcoords.append(0)
+                    texcs.append(0)
                 if len(w) >= 3 and len(w[2]) > 0:
                     norms.append(int(w[2]))
                 else:
                     norms.append(0)
-            objs[-1].faces.append((face, norms, texcoords))
+            objs[-1].faces.append((face, norms, texcs))
 
     fin = []
     for i in objs:
