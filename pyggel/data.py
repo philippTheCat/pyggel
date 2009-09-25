@@ -195,10 +195,10 @@ class VertexArray(object):
         glEnableClientState(GL_TEXTURE_COORD_ARRAY)
         glEnableClientState(GL_NORMAL_ARRAY)
 
-        glVertexPointer(3, GL_FLOAT, 0, self.verts)
-        glColorPointer(4, GL_FLOAT, 0, self.colors)
-        glTexCoordPointer(2, GL_FLOAT, 0, self.texcs)
-        glNormalPointer(3, GL_FLOAT, 0, self.norms)
+        glVertexPointerf(self.verts)
+        glColorPointerf(self.colors)
+        glTexCoordPointerf(self.texcs)
+        glNormalPointerf(self.norms)
 
         glDrawArrays(self.render_type, 0, self.max_size)
 

@@ -31,8 +31,8 @@ def get_points(size=(100,100)):
     for x in xrange(size[0]+1):
         array.append([])
         for y in xrange(size[1]+1):
-            array[x].append((x, rf(0,2), -y))
-            array[x].append((x+1, rf(0,2), -y))
+            array[x].append((x*5, rf(0,2), -y*5))
+            array[x].append(((x+1)*5, rf(0,2), -y*5))
 
     verts = []
     norms = []
@@ -70,7 +70,7 @@ def main():
                                   (1,1,1,1), (50,50,50,10),
                                   (0,0,0), True)
 
-    verts, norms, colors = get_points((100,100))
+    verts, norms, colors = get_points((130,130))
     how_many = len(verts)
 
 ##    vert_vbo = data.VBOArray(GL_TRIANGLES, len(verts), "static")
