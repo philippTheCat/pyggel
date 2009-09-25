@@ -231,6 +231,13 @@ class VertexArray(object):
     def update_norms(self, index, new):
         self.norms[index] = new
 
+    def resize(self, max_size):
+        self.verts = numpy.resize(self.verts, (max_size, 3))
+        self.colors = numpy.resize(self.colors, (max_size, 4))
+        self.norms = numpy.resize(self.norms, (max_size, 3))
+        self.texcs = numpy.resize(self.texcs, (max_size, 2))
+        self.max_size = max_size
+
 class VBOArray(object):
     def __init__(self, render_type=None, max_size=100, usage="static", cache_changes=False):
         """Create the array
@@ -316,13 +323,10 @@ class VBOArray(object):
 
         glDrawArrays(self.render_type, 0, self.max_size)
 
-        self.verts.unbind()
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
         glDisableClientState(GL_VERTEX_ARRAY)
-        self.colors.unbind()
         glDisableClientState(GL_COLOR_ARRAY)
-        self.texcs.unbind()
         glDisableClientState(GL_TEXTURE_COORD_ARRAY)
-        self.norms.unbind()
         glDisableClientState(GL_NORMAL_ARRAY)
 
     def reset_verts(self, data):
@@ -377,9 +381,23 @@ class VBOArray(object):
             try:
                 i.delete()
             except:
-                pass
+                pass #pyggel.quit() was called and we can no longer access the functions!
 
-def get_best_array_type(render_type=None, max_size=100,
+    def resize(self, max_size):
+        self.max_size = max_size
+        d = numpy.resize(self.verts.data, (max_size, 3))
+        self.verts.set_array(d)
+
+        d = numpy.resize(self.colors.data, (max_size, 4))
+        self.colors.set_array(d)
+
+        d = numpy.resize(self.texcs.data, (max_size, 2))
+        self.texcs.set_array(d)
+
+        d = numpy.resize(self.norms.data, (max_size, 3))
+        self.norms.set_array(d)
+
+def get_best_array_type(render_type=None, max_size=10,
                         opt=0):
     """This function returns the best possible array type for what you need.
        render_type is the OpenGL constant used in rendering, ie GL_POLYGON, GL_TRINAGLES, etc.

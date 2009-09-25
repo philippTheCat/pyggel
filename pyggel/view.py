@@ -332,4 +332,4 @@ def clear_screen(scene=None):
 def require_init():
     """Called if a function requires the view to have been init'd - raises TypeError if not."""
     if not screen.have_init:
-        raise TypeError, "view must be init'd before this action can occur (pyggel.init or pyggel.view.init)"
+        raise TypeError, "view.init must be called before this action can occur (pyggel.init or pyggel.view.init)"
