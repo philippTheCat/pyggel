@@ -89,7 +89,18 @@ def main():
 
     clock = pygame.time.Clock()
 
+    view_angle = 45
+    view_add = 0.2
+
     while 1:
+        view_angle += view_add
+        if view_angle >= 180:
+            view_angle = 179
+            view_add = -0.2
+        elif view_angle <= 45:
+            view_angle = 45
+            view_add = 0.2
+        pyggel.view.set_view_angle(view_angle)
         clock.tick(999)
         if have_vbo:
             pyggel.view.set_title("FPS with %s verts (using VBO): "%how_many+str(clock.get_fps()))

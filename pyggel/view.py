@@ -26,6 +26,7 @@ class _Screen(object):
         self.fog = True
         self.fog_color = (.5,.5,.5,.5)
 
+        self.view_angle = 45
         self.close_view = 0.1
         self.far_view = 100.0
 
@@ -285,9 +286,12 @@ def set2d():
     glLoadIdentity()
     glDisable(GL_DEPTH_TEST)
 
-def set_near_far_view(self, near=0.1, far=100.0):
+def set_near_far_view(near=0.1, far=100.0):
     screen.close_view = near
     screen.far_view = far
+
+def set_view_angle(angle=45):
+    screen.view_angle = angle
 
 def set3d():
     """Enable 3d rendering."""
@@ -295,7 +299,7 @@ def set3d():
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     glViewport(0,0,*screen_size)
-    gluPerspective(45, 1.0*screen_size[0]/screen_size[1], screen.close_view, screen.far_view)
+    gluPerspective(screen.view_angle, 1.0*screen_size[0]/screen_size[1], screen.close_view, screen.far_view)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     glEnable(GL_DEPTH_TEST)
