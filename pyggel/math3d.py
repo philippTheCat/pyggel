@@ -1,5 +1,5 @@
 """
-pyggle.math3d
+pyggel.math3d
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The math3d module contains general 3d math functions, as well as collision detection primitives.

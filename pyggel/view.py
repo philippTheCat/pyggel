@@ -1,5 +1,5 @@
 """
-pyggle.view
+pyggel.view
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The view module contains functions and objects used to manipulate initiation, settings,

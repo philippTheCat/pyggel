@@ -1,5 +1,5 @@
 """
-pyggle.include
+pyggel.include
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The include module imports all necessary libraries,

@@ -1,5 +1,5 @@
 """
-pyggle.gui
+pyggel.gui
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The gui module contains classes to create and use a simple Graphical User Interface.

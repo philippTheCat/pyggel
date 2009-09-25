@@ -1,5 +1,5 @@
 """
-pyggle.data
+pyggel.data
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The data module holds all classes used to create, store and access OpenGL data,

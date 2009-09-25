@@ -1,5 +1,5 @@
 """
-pyggle.scene
+pyggel.scene
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The scene module contains classes used to represent an entire group of renderable objects.

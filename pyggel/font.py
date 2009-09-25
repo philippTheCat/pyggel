@@ -1,5 +1,5 @@
 """
-pyggle.font
+pyggel.font
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The font module contains classes to display text images.

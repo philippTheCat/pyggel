@@ -1,5 +1,5 @@
 """
-pyggle.geometry
+pyggel.geometry
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The geometry module contains classes used to render 3d geometric primitives.

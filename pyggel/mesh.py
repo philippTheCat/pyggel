@@ -1,5 +1,5 @@
 """
-pyggle.mesh
+pyggel.mesh
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The mesh module contains mesh classes for different kinds of meshes, as well as loaders for various kinds of meshes.

@@ -1,5 +1,5 @@
 """
-pyggle.event
+pyggel.event
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The event module contains classes to grab and access events.

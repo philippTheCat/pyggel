@@ -1,5 +1,5 @@
 """
-pyggle.misc
+pyggel.misc
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The misc module contains various functions and classes that don't fit anywhere else.

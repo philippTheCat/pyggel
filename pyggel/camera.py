@@ -1,5 +1,5 @@
 """
-pyggle.camera
+pyggel.camera
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The camera module defines a Base camera class other cameras should inherit from, and two common cameras:
