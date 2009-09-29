@@ -7,7 +7,7 @@ A simple fire effect is included.
 """
 
 from include import *
-import data, image, misc, data
+import data, image, misc, data, view
 from scene import BaseSceneObject
 
 import random
@@ -268,10 +268,13 @@ class EmitterPoint(BaseSceneObject):
            camera must be None of the camera the scene is using"""
         self.update()
         glPointSize(self.behavior.point_size)
+        glDisable(GL_LIGHTING)
         for i in self.particles:
             if i:
                 i.update()
         self.array.render()
+        if view.screen.lighting:
+            glEnable(GL_LIGHTING)
 
 
 class BehaviorPoint(object):

@@ -83,7 +83,7 @@ def main():
 
     d = pyggel.geometry.Quad(1, pos=(1, 0, 0), texture=tex) #this will look exactly like the cubes, because it is facing us...
     e = pyggel.geometry.Plane(10, pos=(0, -7.5, 0), texture=tex, tile=10)
-    f = pyggel.geometry.Sphere(1, pos=(3, 0, 0), texture=tex)
+    f = pyggel.geometry.Sphere(1, pos=(3, 0, 0), texture=tex, show_inside=True)
 
     #Hey, those positions for the elements looks a lot nicer now, eh?
 

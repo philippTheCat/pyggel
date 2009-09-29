@@ -6,7 +6,7 @@ def main():
 
 ##    pyggel.view.set_lighting(False)
 
-    light = pyggel.light.Light((0,0,1), (0,0,0,0),
+    light = pyggel.light.Light((0,0,-5), (0,0,0,0),
                                   (1,1,1,1), (1,1,1,1),
                                   (0,0,0), True)
 
@@ -40,8 +40,9 @@ def main():
     box = pyggel.geometry.Cube(5, texture=data.Texture("data/ar.png"))
     box.pos = (0,0,5)
     box.rotation = list(box.rotation)
-    sphere = pyggel.geometry.Sphere(5, texture=data.Texture("data/ar.png"))
-    sphere.pos = (10, 0, 5)
+    sphere = pyggel.geometry.Sphere(5, texture=data.Texture("data/ar.png"),
+                                    show_inside=True)
+    sphere.pos = (10, 0, 0)
 
     emitter = particle.Emitter3D(particle.Fire3D, (0, 0, -2))
     emitter.behavior.image = image.Image3D("data/fire1.png")
@@ -134,8 +135,8 @@ def main():
 
         box.rotation[1] += 1
 
-        light.pos = camera.get_pos()
-        sphere.pos = camera.get_pos()
+##        light.pos = camera.get_pos()
+##        sphere.pos = camera.get_pos()
 
         pyggel.view.clear_screen(mscene)
         mscene.render(camera)

@@ -353,14 +353,14 @@ class Skybox(Cube):
 class Sphere(BaseSceneObject):
     """A geometric Sphere object that can be colored and textured"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
-                 colorize=(1,1,1,1), texture=None, detail=30):
+                 colorize=(1,1,1,1), texture=None, show_inside=False):
         """Create the Sphere
            size is the radius of the Sphere
            pos ithe position of the sphere
            rotation is the rotation of the sphere
            colorize is the color of the sphere
            texture can be None, a string filename of an image to load or a data.Texture object that will be mapped to the sphere
-           detail is the level of detail for the Sphere, higher = a more smooth sphere"""
+           show_inside indicates whether the inside of the sphere is rendered or not"""
         BaseSceneObject.__init__(self)
 
         self.size = size
@@ -373,8 +373,9 @@ class Sphere(BaseSceneObject):
             self.texture = texture
         else:
             self.texture = BlankTexture()
-        self.detail = detail
         self.scale = 1
+
+        self.show_inside = show_inside
 
         self.display_list = data.DisplayList()
 
@@ -390,7 +391,6 @@ class Sphere(BaseSceneObject):
 
     def _compile(self):
         self.display_list.begin()
-        glRotatef(-90, 1, 0, 0)
 
         verts = []
         texcs = []
@@ -402,19 +402,29 @@ class Sphere(BaseSceneObject):
             b *= 1.0
             for a in xrange(0, 360, space):
                 a *= 1.0
+                _v = []
+                _t = []
                 for i in xrange(2):
                     for j in xrange(2):
                         s1 = space*i
                         s2 = space*j
                         x=self.size * math.sin(math3d.safe_div(a+s1, 180)*math.pi) * math.sin(math3d.safe_div(b+s2, 180)*math.pi)
-                        y=self.size * math.cos(math3d.safe_div(a+s1, 180)*math.pi) * math.sin(math3d.safe_div(b+s2, 180)*math.pi)
-                        z=-self.size * math.cos(math3d.safe_div(b+s2, 180)*math.pi)
+                        z=self.size * math.cos(math3d.safe_div(a+s1, 180)*math.pi) * math.sin(math3d.safe_div(b+s2, 180)*math.pi)
+                        y=self.size * math.cos(math3d.safe_div(b+s2, 180)*math.pi)
                         u=math3d.safe_div(a+s1,360)
                         v=math3d.safe_div(b+s2,360)
-                        verts.append((x,y,z))
-                        texcs.append((u,v*2))
-                norms.extend([math3d.calcTriNormal(*verts[-3::])]*4)
-        glBegin(GL_TRIANGLE_STRIP)
+                        _v.append((x,y,z))
+                        _t.append((u,1-v*2))
+                verts.extend([_v[0], _v[1], _v[3], _v[0], _v[3], _v[2]])
+                texcs.extend([_t[0], _t[1], _t[3], _t[0], _t[3], _t[2]])
+                norms.extend([math3d.calcTriNormal(*verts[-6:-3])]*3)
+                norms.extend([math3d.calcTriNormal(*verts[-3::])]*3)
+                if self.show_inside:
+                    verts.extend(reversed(verts[-6::]))
+                    texcs.extend(reversed(texcs[-6::]))
+                    norms.extend([math3d.calcTriNormal(*verts[-6:-3])]*3)
+                    norms.extend([math3d.calcTriNormal(*verts[-3::])]*3)
+        glBegin(GL_TRIANGLES)
         for i in xrange(len(verts)):
             u,v = texcs[i]
             glTexCoord2f(u,v)
@@ -434,7 +444,6 @@ class Sphere(BaseSceneObject):
         glRotatef(a, 1, 0, 0)
         glRotatef(b, 0, 1, 0)
         glRotatef(c, 0, 0, 1)
-        glScalef(self.size, self.size, self.size)
         try:
             glScalef(*self.scale)
         except:
@@ -460,30 +469,25 @@ class Sphere(BaseSceneObject):
 
 class Skyball(Sphere):
     """A Skyball is like a Skybox - except it is a sphere intead of a cube"""
-    def __init__(self, texture=None, colorize=(1,1,1,1), detail=30):
+    def __init__(self, texture=None, colorize=(1,1,1,1)):
         """Create the Skyball
            texture can be None, a string filename or the data.Texture object to map to the Sphere"""
         Sphere.__init__(self, 1, colorize=colorize,
-                        texture=texture, detail=detail)
+                        texture=texture, show_inside=True)
 
     def render(self, camera):
         """Render the Skyball
            camera is the camera the scene is using"""
         glDisable(GL_LIGHTING)
         glDepthMask(GL_FALSE)
-        gb_cull = glGetBooleanv(GL_CULL_FACE)
-        glDisable(GL_CULL_FACE)
 
         glPushMatrix()
         camera.set_skybox_data()
-##        glRotatef(-90, 1, 0, 0)
         Sphere.render(self)
         glPopMatrix()
         glDepthMask(GL_TRUE)
         if view.screen.lighting:
             glEnable(GL_LIGHTING)
-        if gb_cull:
-            glEnable(GL_CULL_FACE)
 
     def copy(self):
         """Return a copy of teh Skyball - sharing the same dadta.DisplayList"""
