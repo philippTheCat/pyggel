@@ -269,20 +269,20 @@ class Plane(Quad):
         if not "back" in self.hide_faces:
             glTexCoord2f(self.tile,0)
             glVertex3f(-1,1,0)
-            glTexCoord2f(0,0)
-            glVertex3f(1, 1, 0)
-            glTexCoord2f(0,self.tile)
-            glVertex3f(1, -1, -0)
             glTexCoord2f(self.tile,self.tile)
+            glVertex3f(1, 1, 0)
+            glTexCoord2f(self.tile,0)
+            glVertex3f(1, -1, -0)
+            glTexCoord2f(0,0)
             glVertex3f(-1, -1, -0)
         if not "front" in self.hide_faces:
-            glTexCoord2f(self.tile,self.tile)
-            glVertex3f(-1, -1, -0)
-            glTexCoord2f(0, self.tile)
-            glVertex3f(1, -1, -0)
             glTexCoord2f(0,0)
-            glVertex3f(1, 1, 0)
+            glVertex3f(-1, -1, -0)
             glTexCoord2f(self.tile, 0)
+            glVertex3f(1, -1, -0)
+            glTexCoord2f(self.tile,self.tile)
+            glVertex3f(1, 1, 0)
+            glTexCoord2f(0, self.tile)
             glVertex3f(-1,1,0)
         glEnd()
         self.display_list.end()
@@ -389,13 +389,39 @@ class Sphere(BaseSceneObject):
         return self.pos
 
     def _compile(self):
-        """Compile the Sphere into a data.DisplayList"""
         self.display_list.begin()
-        #Pyweek change - set rotation for faces to be correct!
-        glRotatef(-90,1,0,0)
-        Sphere = gluNewQuadric()
-        gluQuadricTexture(Sphere, GLU_TRUE)
-        gluSphere(Sphere, 1, self.detail, self.detail)
+        glRotatef(-90, 1, 0, 0)
+
+        verts = []
+        texcs = []
+        norms = []
+
+        space=10
+
+        for b in xrange(0, 180, space):
+            b *= 1.0
+            for a in xrange(0, 360, space):
+                a *= 1.0
+                for i in xrange(2):
+                    for j in xrange(2):
+                        s1 = space*i
+                        s2 = space*j
+                        x=self.size * math.sin(math3d.safe_div(a+s1, 180)*math.pi) * math.sin(math3d.safe_div(b+s2, 180)*math.pi)
+                        y=self.size * math.cos(math3d.safe_div(a+s1, 180)*math.pi) * math.sin(math3d.safe_div(b+s2, 180)*math.pi)
+                        z=-self.size * math.cos(math3d.safe_div(b+s2, 180)*math.pi)
+                        u=math3d.safe_div(a+s1,360)
+                        v=math3d.safe_div(b+s2,360)
+                        verts.append((x,y,z))
+                        texcs.append((u,v*2))
+                norms.extend([math3d.calcTriNormal(*verts[-3::])]*4)
+        glBegin(GL_TRIANGLE_STRIP)
+        for i in xrange(len(verts)):
+            u,v = texcs[i]
+            glTexCoord2f(u,v)
+            glNormal3f(*norms[i])
+            x,y,z = verts[i]
+            glVertex3f(x,y,z)
+        glEnd()
         self.display_list.end()
 
     def render(self, camera=None):
@@ -450,7 +476,7 @@ class Skyball(Sphere):
 
         glPushMatrix()
         camera.set_skybox_data()
-        glRotatef(-90, 1, 0, 0)
+##        glRotatef(-90, 1, 0, 0)
         Sphere.render(self)
         glPopMatrix()
         glDepthMask(GL_TRUE)

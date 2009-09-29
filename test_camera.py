@@ -72,6 +72,7 @@ def main():
     quad = pyggel.geometry.Plane(50, (0,5,0),
                                  texture=data.Texture("data/tile_example.png"),
                                  tile=10)
+    quad.rotation=(90,0,0)
     mscene.add_3d(quad)
 
     eh = pyggel.event.Handler()
@@ -119,17 +120,17 @@ def main():
                 camera.posz += .1
         if "r" in eh.keyboard.active:
             if K_LEFT in eh.keyboard.active:
-                camera.roty -= .1
+                camera.roty -= .5
             if K_RIGHT in eh.keyboard.active:
-                camera.roty += .1
+                camera.roty += .5
             if K_DOWN in eh.keyboard.active:
-                camera.rotx += .1
+                camera.rotx += .5
             if K_UP in eh.keyboard.active:
-                camera.rotx -= .1
+                camera.rotx -= .5
             if "-" in eh.keyboard.active:
-                camera.rotz -= .1
+                camera.rotz -= .5
             if "=" in eh.keyboard.active:
-                camera.rotz += .1
+                camera.rotz += .5
 
         box.rotation[1] += 1
 
