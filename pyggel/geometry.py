@@ -353,14 +353,16 @@ class Skybox(Cube):
 class Sphere(BaseSceneObject):
     """A geometric Sphere object that can be colored and textured"""
     def __init__(self, size, pos=(0,0,0), rotation=(0,0,0),
-                 colorize=(1,1,1,1), texture=None, show_inside=False):
+                 colorize=(1,1,1,1), texture=None, show_inside=False,
+                 detail=10):
         """Create the Sphere
            size is the radius of the Sphere
            pos ithe position of the sphere
            rotation is the rotation of the sphere
            colorize is the color of the sphere
            texture can be None, a string filename of an image to load or a data.Texture object that will be mapped to the sphere
-           show_inside indicates whether the inside of the sphere is rendered or not"""
+           show_inside indicates whether the inside of the sphere is rendered or not
+           detail is the size of each section - lower = smoother/slower"""
         BaseSceneObject.__init__(self)
 
         self.size = size
@@ -374,6 +376,7 @@ class Sphere(BaseSceneObject):
         else:
             self.texture = BlankTexture()
         self.scale = 1
+        self.detail = detail
 
         self.show_inside = show_inside
 
@@ -396,7 +399,7 @@ class Sphere(BaseSceneObject):
         texcs = []
         norms = []
 
-        space=10
+        space=self.detail
 
         for b in xrange(0, 180, space):
             b *= 1.0
@@ -469,11 +472,13 @@ class Sphere(BaseSceneObject):
 
 class Skyball(Sphere):
     """A Skyball is like a Skybox - except it is a sphere intead of a cube"""
-    def __init__(self, texture=None, colorize=(1,1,1,1)):
+    def __init__(self, texture=None, colorize=(1,1,1,1), detail=5):
         """Create the Skyball
-           texture can be None, a string filename or the data.Texture object to map to the Sphere"""
+           texture can be None, a string filename or the data.Texture object to map to the Sphere
+           colorize is the color of teh skybox
+           detail is the same as Sphere.detail"""
         Sphere.__init__(self, 1, colorize=colorize,
-                        texture=texture, show_inside=True)
+                        texture=texture, show_inside=True, detail=detail)
 
     def render(self, camera):
         """Render the Skyball
