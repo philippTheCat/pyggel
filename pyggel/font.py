@@ -6,7 +6,7 @@ The font module contains classes to display text images.
 """
 
 from include import *
-import image, view, data, misc
+import image, view, data, misc, math3d
 from scene import BaseSceneObject
 
 class Font3D(object):
@@ -753,3 +753,234 @@ class MEFont(object):
            italic must be True/False - whether to italicize text
            bold must be True/False - whether to bold text"""
         return MEFontImage(self, text, color, linewrap, underline, italic, bold)
+
+class FastFontObject(BaseSceneObject):
+    def __init__(self, font, text, size, color=(1,1,1,1), bold=False, italic=False):
+        BaseSceneObject.__init__(self)
+        self.font = font
+        self.size = size
+        self._bold = bold
+        self._italic = italic
+        self._color = None
+
+        self.text_array = data.get_best_array_type(GL_TRIANGLES, 6*len(text), 5) #create array!
+        self.text_array.texture = self.font.font_tex
+
+        self.text = text
+        self.color = color
+
+    def set_text(self, text, color=(1,1,1,1)):
+        if numpy.array(color, "f").shape == (4,):
+            color = [color]*len(text)
+        self._text = text
+        self.color = color
+
+        new_size = len(text) * 6
+        if new_size != self.text_array.max_size:
+            self.text_array.resize(new_size)
+
+        x = 0
+        y = 0
+        max_size = 0
+        max_width = 0
+
+        g = self.size
+
+        fin_size = self.font.get_size(text, self.size, self.bold, self.italic)
+        x, y = -fin_size[0]*0.5, -fin_size[1]*0.5
+
+        if self.italic:
+            skew = g / 10.0
+        else:
+            skew = 0
+        if self.bold:
+            warp = g / 4.0
+            skew *= 2
+        else:
+            warp = 0
+
+        for i in xrange(len(text)):
+            ti = text[i]
+            ci = color[i]
+            if ti == "\n":
+                x = -fin_size[0]*0.5
+                y += max_size
+                max_size = 0
+                continue
+            tsx, tsy, tex, tey, w, h = self.font.font_mapping[ti]
+
+##            w = h = g
+            if w > h:
+                h = g * (h*1.0/w)
+                w = g
+            else:
+                w = g * (w*1.0/h)
+                h = g
+
+            self.text_array.update_verts(i*6, (x+skew,y,0))
+            self.text_array.update_verts(i*6+1, (x-skew,y+h,0))
+            self.text_array.update_verts(i*6+2, (x+w+warp-skew,y+h,0))
+            self.text_array.update_verts(i*6+3, (x+skew,y,0))
+            self.text_array.update_verts(i*6+4, (x+w+warp-skew,y+h,0))
+            self.text_array.update_verts(i*6+5, (x+w+skew+warp,y,0))
+
+            self.text_array.update_texcs(i*6, (tsx, 1-tsy))
+            self.text_array.update_texcs(i*6+1, (tsx, 1-tey))
+            self.text_array.update_texcs(i*6+2, (tex, 1-tey))
+            self.text_array.update_texcs(i*6+3, (tsx, 1-tsy))
+            self.text_array.update_texcs(i*6+4, (tex, 1-tey))
+            self.text_array.update_texcs(i*6+5, (tex, 1-tsy))
+
+            x += w+warp+skew
+            max_size = max((max_size, h))
+
+        self.width, self.height = fin_size
+
+        self.offset = self.width*0.5, self.height*0.5
+
+    def get_text(self):
+        return self._text
+
+    text = property(get_text, set_text)
+
+    def set_color(self, color=(1,1,1,1)):
+        if numpy.array(color, "f").shape == (4,): #single solid color
+            color = [color]*len(self.text)
+        if color == self._color:
+            return
+        self._color = color
+
+        for i in xrange(len(self.text)):
+            for j in xrange(6):
+                self.text_array.update_colors(i*6+j, color[i])
+
+    def get_color(self):
+        return self._color
+
+    color = property(get_color, set_color)
+
+    def set_bold(self, bold):
+        if bold == self._bold:
+            return
+        self._bold = bold
+        self.set_text(self.text, self.color)
+    def get_bold(self):
+        return self._bold
+
+    def set_italic(self, italic):
+        if italic == self._italic:
+            return
+        self._italic = italic
+        self.set_text(self.text, self.color)
+    def get_italic(self):
+        return self._italic
+
+    bold = property(get_bold, set_bold)
+    italic = property(get_italic, set_italic)
+
+    def render(self, camera=None):
+        ox, oy = self.offset
+        pos = self.pos
+
+        glPushMatrix()
+        glTranslatef(pos[0]+ox, pos[1]+oy, 0)
+
+        glRotatef(self.rotation[0], 1, 0, 0)
+        glRotatef(self.rotation[1], 0, 1, 0)
+        glRotatef(self.rotation[2], 0, 0, 1)
+
+        try:
+            glScalef(self.scale[0], self.scale[1], 1)
+        except:
+            glScalef(self.scale, self.scale, 1)
+
+        self.text_array.render()
+        glPopMatrix()
+
+class FastFont(object):
+    def __init__(self, filename=None):
+        view.require_init()
+
+        self.filename = filename
+        self.font_obj = pygame.font.Font(self.filename, 64)
+
+        self._build_tex()
+
+    def _build_tex(self):
+        chars = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./ " +\
+                '~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?'
+        mapping = {}
+        x = 0
+        y = 0
+        max_height = 0
+
+        pyg_im = pygame.Surface((512,512)).convert_alpha()
+        pyg_im.fill((0,0,0,0))
+
+        for i in chars:
+            g = self.font_obj.render(i, True, (255,255,255))
+            tdata = pygame.image.tostring(g, "RGBA", 1)
+            xs, ys = g.get_size()
+            if x + xs >= 512:
+                x = 0
+                y += max_height
+                max_height = 0
+            if y+ys >= 512:
+                print "error!", i
+
+            max_height = max((max_height, ys))
+
+            pyg_im.blit(g, (x,y))
+
+            mapping[i] = (math3d.safe_div(x, 512.0),#tex start x
+                          math3d.safe_div(y, 512.0),#tex start y
+                          math3d.safe_div(x+xs, 512.0),#tex end x
+                          math3d.safe_div(y+ys, 512.0),#tex end y
+                          xs,#width
+                          ys)#height
+
+            x += xs
+
+        self.font_tex = data.Texture(pyg_im)
+        self.font_mapping = mapping
+        self.font_image = image.Image(pyg_im)
+
+    def get_size(self, text, size, bold=False, italic=False):
+        x = y = max_size = max_width = 0
+        for i in xrange(len(text)):
+            ti = text[i]
+            if ti == "\n":
+                x = 0
+                y += max_size
+                max_size = 0
+                continue
+            tsx, tsy, tex, tey, w, h = self.font_mapping[ti]
+
+            if w > h:
+                h = size * (h*1.0/w)
+                w = size
+            else:
+                w = size * (w*1.0/h)
+                h = size
+
+            if italic:
+                w += size/10.0
+            if bold:
+                w += size/4.0
+                if italic:
+                    w += size/10.0
+
+            x += w
+            max_size = max((max_size, h))
+            max_width = max((max_width, x))
+
+        if italic:
+            w += size/10.0 #because it is subtracted on left of each glyph as well!
+            if bold:
+                w += size/10.0
+
+        return max_width, y+max_size
+
+    def make_text_image2D(self, text, size=32, color=(1,1,1,1), bold=False, italic=False):
+        return FastFontObject(self, text, size, color, bold, italic)
+            

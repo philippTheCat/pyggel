@@ -110,16 +110,18 @@ class Texture(object):
 class BlankTexture(Texture):
     """A cached, blank texture."""
     _all_loaded = {}
-    def __init__(self, size=(1,1), color=(1,1,1,1)):
+    def __init__(self, size=(1,1), color=(1,1,1,1), unique=False):
         """Create an empty data.Texture
            size must be a two part tuple representing the pixel size of the texture
-           color must be a four-part tuple representing the (RGBA 0-1) color of the texture"""
+           color must be a four-part tuple representing the (RGBA 0-1) color of the texture
+           unique controls whether this texture is cached and reused or not"""
         view.require_init() # It seems to need init on python2.6
         
         self.size = size
         self.filename = repr(size)+repr(color)
         self.gl_tex = None
-        if self.filename in self._all_loaded:
+        self.unique = unique
+        if (not unique) and self.filename in self._all_loaded:
             tex = self._all_loaded[self.filename][0]
 
             self.size = tex.size
@@ -141,7 +143,8 @@ class BlankTexture(Texture):
             self.gl_tex = glGenTextures(1)
             self._compile(i)
 
-            self._all_loaded[self.filename] = [self]
+            if not unique:
+                self._all_loaded[self.filename] = [self]
 
 class DisplayList(object):
     """An object to compile and store an OpenGL display list"""
