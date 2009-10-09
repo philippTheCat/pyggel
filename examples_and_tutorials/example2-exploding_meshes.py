@@ -16,7 +16,7 @@ def main():
 
     scene = pyggel.scene.Scene()
 
-    camera = pyggel.camera.LookAtCamera((0,0,0), distance=35)
+    scene.camera = pyggel.camera.LookAtCamera((0,0,0), distance=35)
 
     light = pyggel.light.Light((0,100,0), (0.5,0.5,0.5,1), (1,1,1,1),
                                (50,50,50,10), (0,0,0), True)
@@ -83,7 +83,7 @@ def main():
             exp.reset()
 
         pyggel.view.clear_screen()
-        scene.render(camera)
+        scene.render()
         pyggel.view.refresh_screen()
 
 main()

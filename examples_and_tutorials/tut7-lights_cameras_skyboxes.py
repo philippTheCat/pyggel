@@ -33,7 +33,7 @@ def main():
            always be at pos, any rotation is like turning your head, not like orbitting a planet."""
 
     #So, for our needs I think a LookAtCamera is best
-    camera = pyggel.camera.LookAtCamera((0,0,0), distance=20)
+    scene.camera = pyggel.camera.LookAtCamera((0,0,0), distance=20)
 
 
     """Now we need some light in our scene!
@@ -218,7 +218,7 @@ def main():
         #then, if there is a pick, let's make the object turn red...
 
         #first, we render the scene, this also returns our object
-        obj = scene.render(camera) #render the scene
+        obj = scene.render() #render the scene
         #Now, since we want to highlight the object the mouse is over, we gotta undo it too
         if last_obj:
             last_obj.colorize = (1,1,1,1)

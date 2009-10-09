@@ -73,7 +73,6 @@ def main():
     verts, norms, colors = get_points((130,130))
     how_many = len(verts)
 
-##    vert_vbo = data.VBOArray(GL_TRIANGLES, len(verts), "static")
     vert_vbo = data.get_best_array_type(GL_TRIANGLES, len(verts), 5)
     if pyggel.VBO_AVAILABLE and isinstance(vert_vbo, pyggel.data.VBOArray):
         have_vbo = True

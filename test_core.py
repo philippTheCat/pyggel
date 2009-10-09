@@ -77,6 +77,7 @@ def main():
     my_scene.add_3d(img7)
 
     my_scene.add_light(my_light)
+    my_scene.camera = camera
 
     clock = pygame.time.Clock()
 
@@ -147,9 +148,9 @@ def main():
 
         img5.visible = not img5.visible
 
-        pyggel.view.clear_screen()
+        pyggel.view.clear_screen(my_scene)
 
-        hit = my_scene.render(camera)
+        hit = my_scene.render()#camera)
         if last_hit:
             last_hit.outline = False
         if hit:

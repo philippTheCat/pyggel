@@ -4,15 +4,13 @@ from pyggel import *
 def main():
     pyggel.init(icon_image="data/ar.png")
 
-##    pyggel.view.set_lighting(False)
-
     light = pyggel.light.Light((0,0,-5), (0,0,0,0),
                                   (1,1,1,1), (1,1,1,1),
                                   (0,0,0), True)
 
     camera1 = pyggel.camera.LookFromCamera((0,0,-10))
     camera2 = pyggel.camera.LookAtCamera((0,0,5), distance=10)
-    camera = camera1
+
     font = pyggel.font.Font3D(None, 32)
     font2d = pyggel.font.Font(None, 32)
     img = font.make_text_image("Hello\nWorld: 3D", (1, 1, 0, 1))
@@ -51,6 +49,7 @@ def main():
     emitter2 = particle.EmitterPoint(particle.FirePoint, (2, 0, -2))
 
     mscene = pyggel.scene.Scene()
+    mscene.camera = camera1
     mscene.add_3d(img)
     mscene.add_3d(img2)
     mscene.add_3d(box)
@@ -90,10 +89,10 @@ def main():
             pyggel.quit()
             return None
         if K_RETURN in eh.keyboard.hit:
-            if camera == camera1:
-                camera = camera2
+            if mscene.camera == camera1:
+                mscene.camera = camera2
             else:
-                camera = camera1
+                mscene.camera = camera1
 
         if "s" in eh.keyboard.hit:
             if mscene.graph.skybox == skybox:
@@ -108,38 +107,35 @@ def main():
 
         if "m" in eh.keyboard.active:
             if K_LEFT in eh.keyboard.active:
-                camera.posx -= .1
+                mscene.camera.posx -= .1
             if K_RIGHT in eh.keyboard.active:
-                camera.posx += .1
+                mscene.camera.posx += .1
             if K_DOWN in eh.keyboard.active:
-                camera.posy -= .1
+                mscene.camera.posy -= .1
             if K_UP in eh.keyboard.active:
-                camera.posy += .1
+                mscene.camera.posy += .1
             if "-" in eh.keyboard.active:
-                camera.posz -= .1
+                mscene.camera.posz -= .1
             if "=" in eh.keyboard.active:
-                camera.posz += .1
+                mscene.camera.posz += .1
         if "r" in eh.keyboard.active:
             if K_LEFT in eh.keyboard.active:
-                camera.roty -= .5
+                mscene.camera.roty -= .5
             if K_RIGHT in eh.keyboard.active:
-                camera.roty += .5
+                mscene.camera.roty += .5
             if K_DOWN in eh.keyboard.active:
-                camera.rotx += .5
+                mscene.camera.rotx += .5
             if K_UP in eh.keyboard.active:
-                camera.rotx -= .5
+                mscene.camera.rotx -= .5
             if "-" in eh.keyboard.active:
-                camera.rotz -= .5
+                mscene.camera.rotz -= .5
             if "=" in eh.keyboard.active:
-                camera.rotz += .5
+                mscene.camera.rotz += .5
 
         box.rotation[1] += 1
 
-##        light.pos = camera.get_pos()
-##        sphere.pos = camera.get_pos()
-
         pyggel.view.clear_screen(mscene)
-        mscene.render(camera)
+        mscene.render()
         pyggel.view.refresh_screen()
 
 main()

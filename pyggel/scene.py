@@ -95,11 +95,13 @@ class Scene(object):
         self.render_buffer = None
 
         self.pick = False #can be true or false
+        self.camera = None
 
-    def render(self, camera=None, pick_pos=None):
+    def render(self, pick_pos=None):
         """Render all objects.
-           camera must no or the camera object used to render the scene
            Returns None or picked object if Scene.pick is True and an object is actually touching the mouse."""
+
+        camera = self.camera
         if self.render_buffer:
             self.render_buffer.enable()
         else:

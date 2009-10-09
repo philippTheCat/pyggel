@@ -53,6 +53,7 @@ def main():
     box.pos = (-5, 0, 0)
 
     my_scene = pyggel.scene.Scene()
+    my_scene.camera = camera
     my_scene.pick = True
     my_scene.add_2d(img)
     my_scene.add_2d(img2)
@@ -167,7 +168,7 @@ def main():
 
         pyggel.view.clear_screen()
 
-        hit = my_scene.render(camera)
+        hit = my_scene.render()#camera)
         if last_hit:
             last_hit.colorize = (1,1,1,1)
         if hit:

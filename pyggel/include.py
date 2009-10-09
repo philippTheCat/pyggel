@@ -31,3 +31,10 @@ try:
     ANI_AVAILABLE = True
 except:
     ANI_AVAILABLE = False
+
+already_warned = []
+def DepWarn(obj, reason):
+    if not obj.__class__.__name__ in already_warned:
+        print "Deprecation Warning (%s)\n\treason(s): %s"%(obj.__class__.__name__,
+                                                           reason)
+        already_warned.append(obj.__class__.__name__)

@@ -38,8 +38,11 @@ def main():
     my_scene.add_3d((box, box2, obj))
 
     my_scene.add_light(my_light)
+    my_scene.camera = camera
     fbo_scene.add_light(my_light)
+    fbo_scene.camera = fbo_camera
     tbo_scene.add_light(my_light)
+    tbo_scene.camera = fbo_camera
 
     clock = pygame.time.Clock()
 
@@ -87,14 +90,14 @@ def main():
 
         pyggel.view.clear_screen()
 
-        fbo_scene.render(fbo_camera)
+        fbo_scene.render()#fbo_camera)
 
-        tbo_scene.render(fbo_camera)
+        tbo_scene.render()#fbo_camera)
 
         box.texture = fbo_scene.render_buffer.texture
         box2.texture = tbo_scene.render_buffer.texture
 
-        my_scene.render(camera)
+        my_scene.render()#camera)
 
         pyggel.view.refresh_screen()
 main()

@@ -75,6 +75,7 @@ def main():
                                kill_when_finished=False)
 
     my_scene = pyggel.scene.Scene()
+    my_scene.camera = camera
     my_scene.add_3d(ani)
     my_scene.add_3d(ani2)
     my_scene.add_light(my_light)
@@ -130,9 +131,9 @@ def main():
 
         pyggel.view.clear_screen()
 
-        pyggel.view.set3d()
+##        pyggel.view.set3d()
 
-        my_scene.render(camera)
+        my_scene.render()#camera)
 
         pyggel.view.refresh_screen()
 main()

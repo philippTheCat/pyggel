@@ -16,6 +16,7 @@ class Font3D(object):
            filename can be None or the filename of the font to load (TTF)
            size is the size of the font"""
         view.require_init()
+        DepWarn(self, "MemLeaks, speed")
         self.filename = filename
         self.size = size
         self.fontname = str(self.filename) + ":" + str(self.size)
@@ -76,6 +77,7 @@ class FontImage(BaseSceneObject):
            italic must be True/False - whether the text is italic or not
            bold must be True/False - whether the text is bold or not"""
         BaseSceneObject.__init__(self)
+        DepWarn(self, "MemLeaks, speed")
 
         self._font = font
         self._text = text
@@ -394,6 +396,7 @@ class MEFontImage(BaseSceneObject):
            italic must be True/False - whether the text is italic or not
            bold must be True/False - whether the text is bold or not"""
         BaseSceneObject.__init__(self)
+        DepWarn(self, "MemLeaks, speed")
 
         self._font = font
         self.rotation = (0,0,0)
@@ -615,6 +618,7 @@ class Font(object):
            filename must be None or the filename of the font to load
            size is the size of the font"""
         view.require_init()
+        DepWarn(self, "MemLeaks, speed")
         self._filename = filename
         self._size = size
 
@@ -678,6 +682,8 @@ class MEFont(object):
            filename must be None or the filename of the font to load
            size is the size of the font"""
         view.require_init()
+
+        DepWarn(self, "MemLeaks, speed")
         self._filename = filename
         self._size = size
 
@@ -755,27 +761,43 @@ class MEFont(object):
         return MEFontImage(self, text, color, linewrap, underline, italic, bold)
 
 class FastFontObject(BaseSceneObject):
-    def __init__(self, font, text, size, color=(1,1,1,1), bold=False, italic=False):
+    def __init__(self, font, text, size, color=(1,1,1,1), bold=False, italic=False,
+                 linewrap=None, break_words=False):
         BaseSceneObject.__init__(self)
         self.font = font
         self.size = size
         self._bold = bold
         self._italic = italic
         self._color = None
+        self._linewrap = linewrap
+        self._break_words = break_words
 
-        self.text_array = data.get_best_array_type(GL_TRIANGLES, 6*len(text), 5) #create array!
+        self.text_array = data.get_best_array_type(GL_TRIANGLES, 6*(len(text)-text.count("\n")), 5) #create array!
         self.text_array.texture = self.font.font_tex
 
         self.text = text
         self.color = color
 
+    def get_next_index(self, text, i):
+        space = text.find(" ", i)
+        new = text.find("\n", i)
+        if (space, new) == (-1,-1):
+            return -1
+        if space == -1:
+            return new
+        if new == -1:
+            return space
+        return min((space, new))
+
     def set_text(self, text, color=(1,1,1,1)):
+        if text == "":
+            text = "\a"
         if numpy.array(color, "f").shape == (4,):
-            color = [color]*len(text)
+            color = [color]*(len(text)-text.count("\n"))
         self._text = text
         self.color = color
 
-        new_size = len(text) * 6
+        new_size = (len(text)-text.count("\n")) * 6
         if new_size != self.text_array.max_size:
             self.text_array.resize(new_size)
 
@@ -784,10 +806,14 @@ class FastFontObject(BaseSceneObject):
         max_size = 0
         max_width = 0
 
+        LW = self.linewrap
+        BW = self.break_words
+
         g = self.size
 
-        fin_size = self.font.get_size(text, self.size, self.bold, self.italic)
-        x, y = -fin_size[0]*0.5, -fin_size[1]*0.5
+        fin_size = self.font.get_size(text, g, self.bold, self.italic, LW)
+        xf2, yf2 = fin_size[0]*0.5, fin_size[1]*0.5
+        x, y = -xf2, -yf2
 
         if self.italic:
             skew = g / 10.0
@@ -799,23 +825,33 @@ class FastFontObject(BaseSceneObject):
         else:
             warp = 0
 
+        last = None
+
         for i in xrange(len(text)):
             ti = text[i]
             ci = color[i]
             if ti == "\n":
-                x = -fin_size[0]*0.5
+                x = -xf2
                 y += max_size
                 max_size = 0
+                last = ti
                 continue
-            tsx, tsy, tex, tey, w, h = self.font.font_mapping[ti]
-
-##            w = h = g
-            if w > h:
-                h = g * (h*1.0/w)
-                w = g
+            if LW and last in (" ", "\n") and self.get_next_index(text, i)>=0 and\
+               self.font.get_size(text[i:self.get_next_index(text, i)], g, self.bold, self.italic)[0]+xf2 > LW:
+                x = -xf2
+                y += max_size
+                max_size = 0
+            elif LW and BW and x+xf2 > LW:
+                x = -xf2
+                y += max_size
+                max_size = 0
+            if ti in self.font.renderable:
+                tsx, tsy, tex, tey, w, h = self.font.font_mapping[ti]
             else:
-                w = g * (w*1.0/h)
-                h = g
+                tsx, tsy, tex, tey, w, h = self.font.font_mapping["\a"]
+
+            w = g * (w*1.0/h)
+            h = g
 
             self.text_array.update_verts(i*6, (x+skew,y,0))
             self.text_array.update_verts(i*6+1, (x-skew,y+h,0))
@@ -834,6 +870,8 @@ class FastFontObject(BaseSceneObject):
             x += w+warp+skew
             max_size = max((max_size, h))
 
+            last = ti
+
         self.width, self.height = fin_size
 
         self.offset = self.width*0.5, self.height*0.5
@@ -845,12 +883,12 @@ class FastFontObject(BaseSceneObject):
 
     def set_color(self, color=(1,1,1,1)):
         if numpy.array(color, "f").shape == (4,): #single solid color
-            color = [color]*len(self.text)
+            color = [color]*(len(self.text)-self.text.count("\n"))
         if color == self._color:
             return
         self._color = color
 
-        for i in xrange(len(self.text)):
+        for i in xrange(len(self.text)-self.text.count("\n")):
             for j in xrange(6):
                 self.text_array.update_colors(i*6+j, color[i])
 
@@ -878,6 +916,26 @@ class FastFontObject(BaseSceneObject):
     bold = property(get_bold, set_bold)
     italic = property(get_italic, set_italic)
 
+    def set_linewrap(self, linewrap):
+        if linewrap == self._linewrap:
+            return
+        self._linewrap = linwrap
+        self.set_text(self.text, self.color)
+    def get_linewrap(self):
+        return self._linewrap
+
+    linewrap = property(get_linewrap, set_linewrap)
+
+    def set_break_words(self, break_words):
+        if break_words == self._break_words:
+            return
+        self._break_words = break_words
+        self.set_text(self.text, self.color)
+    def get_break_words(self):
+        return self._break_words
+
+    break_words = property(get_break_words, set_break_words)
+
     def render(self, camera=None):
         ox, oy = self.offset
         pos = self.pos
@@ -897,18 +955,70 @@ class FastFontObject(BaseSceneObject):
         self.text_array.render()
         glPopMatrix()
 
+    def copy(self):
+        a = FastFontObject(self.font, self.text, self.size, self.color, self.bold, self.italic, self.linewrap, self.break_words)
+        a.pos = self.pos
+        a.scale = self.scale
+        a.rotation = self.rotation
+        a.visible = self.visible
+        a.pickable = self.pickable
+        a.outline = self.outline
+        a.outline_size = self.outline_size
+        a.outline_color = self.outline_color
+        return a
+
+class FastFontObject3D(FastFontObject):
+    def __init__(self, font, text, size=1, color=(1,1,1,1), bold=False, italic=False,
+                 linewrap=None, break_words=False):
+        FastFontObject.__init__(self, font, text, size, color, bold, italic, linewrap, break_words)
+
+    def render(self, camera=None):
+        pos = self.pos
+        glPushMatrix()
+        glTranslatef(pos[0], pos[1], -pos[2])
+        if camera:
+            camera.set_facing_matrix()
+        glRotatef(self.rotation[0], 1, 0, 0)
+        glRotatef(self.rotation[1], 0, 1, 0)
+        glRotatef(self.rotation[2], 0, 0, 1)
+
+        try:
+            glScalef(self.scale[0], -self.scale[1], 1)
+        except:
+            glScalef(self.scale, -self.scale, 1)
+
+        if view.screen.lighting:
+            glDisable(GL_LIGHTING)
+        self.text_array.render()
+        if view.screen.lighting:
+            glEnable(GL_LIGHTING)
+        glPopMatrix()
+
+    def copy(self):
+        a = FastFontObject3D(self.font, self.text, self.size, self.color, self.bold, self.italic, self.linewrap, self.break_words)
+        a.pos = self.pos
+        a.scale = self.scale
+        a.rotation = self.rotation
+        a.visible = self.visible
+        a.pickable = self.pickable
+        a.outline = self.outline
+        a.outline_size = self.outline_size
+        a.outline_color = self.outline_color
+        return a
+
 class FastFont(object):
-    def __init__(self, filename=None):
+    renderable = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./ " +\
+                 '~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?'
+    def __init__(self, filename=None, internal_font_size=64):
         view.require_init()
 
         self.filename = filename
-        self.font_obj = pygame.font.Font(self.filename, 64)
+        self.font_obj = pygame.font.Font(self.filename, internal_font_size)
 
         self._build_tex()
 
     def _build_tex(self):
-        chars = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./ " +\
-                '~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?'
+        chars = self.renderable + "\a"
         mapping = {}
         x = 0
         y = 0
@@ -926,7 +1036,7 @@ class FastFont(object):
                 y += max_height
                 max_height = 0
             if y+ys >= 512:
-                print "error!", i
+                raise Exception("Ran out of room for Font texture map - reduce internal_font_size when creating font.")
 
             max_height = max((max_height, ys))
 
@@ -945,7 +1055,7 @@ class FastFont(object):
         self.font_mapping = mapping
         self.font_image = image.Image(pyg_im)
 
-    def get_size(self, text, size, bold=False, italic=False):
+    def get_size(self, text, size, bold=False, italic=False, linewrap=None):
         x = y = max_size = max_width = 0
         for i in xrange(len(text)):
             ti = text[i]
@@ -954,14 +1064,17 @@ class FastFont(object):
                 y += max_size
                 max_size = 0
                 continue
-            tsx, tsy, tex, tey, w, h = self.font_mapping[ti]
-
-            if w > h:
-                h = size * (h*1.0/w)
-                w = size
+            if linewrap and x > linewrap:
+                x = 0
+                y += max_size
+                max_size = 0
+            if ti in self.font_mapping:
+                tsx, tsy, tex, tey, w, h = self.font_mapping[ti]
             else:
-                w = size * (w*1.0/h)
-                h = size
+                tsx, tsy, tex, tey, w, h = self.font_mapping["\a"]
+
+            w = size * (w*1.0/h)
+            h = size
 
             if italic:
                 w += size/10.0
@@ -975,12 +1088,15 @@ class FastFont(object):
             max_width = max((max_width, x))
 
         if italic:
-            w += size/10.0 #because it is subtracted on left of each glyph as well!
+            max_width += size/10.0 #because it is subtracted on left of each glyph as well!
             if bold:
-                w += size/10.0
+                max_width += size/10.0
 
         return max_width, y+max_size
 
-    def make_text_image2D(self, text, size=32, color=(1,1,1,1), bold=False, italic=False):
-        return FastFontObject(self, text, size, color, bold, italic)
+    def make_text_image2D(self, text, size=32, color=(1,1,1,1), bold=False, italic=False, linewrap=None, break_words=False):
+        return FastFontObject(self, text, size, color, bold, italic, linewrap, break_words)
+
+    def make_text_image3D(self, text, size=0.1, color=(1,1,1,1), bold=False, italic=False, linewrap=None, break_words=False):
+        return FastFontObject3D(self, text, size, color, bold, italic, linewrap, break_words)
             
