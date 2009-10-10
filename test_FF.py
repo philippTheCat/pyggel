@@ -20,9 +20,10 @@ def main():
     r = pyggel.misc.randfloat
     for i in s:
         c.append((r(0.2,1), r(0.2,1), r(0.2,1), 1))
-    text = font.make_text_image2D(s, color=c, italic=True, bold=True, linewrap=150)
+##    c = (1,1,1,1)
+    text = font.make_text_image2D(s, color=c, underline=True, italic=True, bold=True, linewrap=150)
 
-    text3d = font.make_text_image3D(s, color=c, italic=True, bold=True, linewrap=150)
+    text3d = font.make_text_image3D(s, color=c, underline=True, italic=True, bold=True, linewrap=1)
 
     scene.add_2d(text)
     scene.add_3d(text3d)

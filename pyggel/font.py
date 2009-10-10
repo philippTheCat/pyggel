@@ -55,8 +55,6 @@ class FontImage(BaseSceneObject):
         if new_size != self.text_array.max_size:
             self.text_array.resize(new_size)
 
-        x = 0
-        y = 0
         max_size = 0
         max_width = 0
 
@@ -64,8 +62,12 @@ class FontImage(BaseSceneObject):
         BW = self.break_words
 
         g = self.size
+        if self.underline:
+            ug = self.size * 0.1
+        else:
+            ug = 0
 
-        fin_size = self.font.get_size(text, g, self.bold, self.italic, LW)
+        fin_size = self.font.get_size(text, g, self.underline, self.italic, self.bold, LW)
         xf2, yf2 = fin_size[0]*0.5, fin_size[1]*0.5
         x, y = -xf2, -yf2
 
@@ -91,31 +93,40 @@ class FontImage(BaseSceneObject):
         for i in xrange(len(text)):
             ti = text[i]
             if ti == "\n":
-                uverts.extend([(-xf2,y+max_size,0), (-xf2,y+max_size+1,0), (x,y+max_size+1,0),
-                              (-xf2,y+max_size,0), (x,y+max_size+1,0), (x,y+max_size,0)])
-                utexcs.extend([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)])
+                if self.underline:
+                    if last:
+                        x -= w + warp + skew
+                    uverts.extend([(-xf2,y+max_size,0), (-xf2,y+max_size+ug,0), (x,y+max_size+ug,0),
+                                  (-xf2,y+max_size,0), (x,y+max_size+ug,0), (x,y+max_size,0)])
+                    utexcs.extend([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)])
                 self.underline_count += 1
                 x = -xf2
-                y += max_size
+                y += max_size+ug
                 max_size = 0
                 last = ti
                 continue
             if LW and last in (" ", "\n") and self.get_next_index(text, i)>=0 and\
-               self.font.get_size(text[i:self.get_next_index(text, i)], g, self.bold, self.italic)[0]+xf2 > LW:
-                uverts.extend([(-xf2,y+max_size,0), (-xf2,y+max_size+1,0), (x,y+max_size+1,0),
-                              (-xf2,y+max_size,0), (x,y+max_size+1,0), (x,y+max_size,0)])
-                utexcs.extend([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)])
+               self.font.get_size(text[i:self.get_next_index(text, i)], g, self.underline, self.italic, self.bold)[0]+xf2 > LW:
+                if self.underline:
+                    if last:
+                        x -= w + warp + skew
+                    uverts.extend([(-xf2,y+max_size,0), (-xf2,y+max_size+ug,0), (x,y+max_size+ug,0),
+                                  (-xf2,y+max_size,0), (x,y+max_size+ug,0), (x,y+max_size,0)])
+                    utexcs.extend([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)])
                 self.underline_count += 1
                 x = -xf2
-                y += max_size
+                y += max_size+ug
                 max_size = 0
             elif LW and BW and x+xf2 > LW:
-                uverts.extend([(-xf2,y+max_size,0), (-xf2,y+max_size+1,0), (x,y+max_size+1,0),
-                              (-xf2,y+max_size,0), (x,y+max_size+1,0), (x,y+max_size,0)])
-                utexcs.extend([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)])
+                if self.underline:
+                    if last:
+                        x -= w + warp + skew
+                    uverts.extend([(-xf2,y+max_size,0), (-xf2,y+max_size+ug,0), (x,y+max_size+ug,0),
+                                  (-xf2,y+max_size,0), (x,y+max_size+ug,0), (x,y+max_size,0)])
+                    utexcs.extend([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)])
                 self.underline_count += 1
                 x = -xf2
-                y += max_size
+                y += max_size+ug
                 max_size = 0
             if ti in self.font.renderable:
                 tsx, tsy, tex, tey, w, h = self.font.font_mapping[ti]
@@ -145,9 +156,10 @@ class FontImage(BaseSceneObject):
             last = ti
 
         #so we have the last underline!
-        uverts.extend([(-xf2,y+max_size,0), (-xf2,y+max_size+1,0), (x,y+max_size+1,0),
-                      (-xf2,y+max_size,0), (x,y+max_size+1,0), (x,y+max_size,0)])
-        utexcs.extend([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)])
+        if self.underline:
+            uverts.extend([(-xf2,y+max_size,0), (-xf2,y+max_size+ug,0), (x,y+max_size+ug,0),
+                          (-xf2,y+max_size,0), (x,y+max_size+ug,0), (x,y+max_size,0)])
+            utexcs.extend([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)])
         self.underline_count += 1
 
         self.text_array.reset_verts(verts+uverts)
@@ -168,17 +180,24 @@ class FontImage(BaseSceneObject):
         ltex = len(self.text) - self.text.count("\n")
         if t.shape == (4,): #single solid color
             color = [color]*ltex
-        elif t.shape[0] < ltex:
-            color += [color[0]] * ltex-len(color)
+            t = numpy.array(color, "f")
+        if t.shape[0] < ltex:
+            color += [color[0]] * (ltex-t.shape[0])
+            t = numpy.array(color, "f")
+        if t.shape[0] > ltex:
+            color = color[0:ltex]
+            t = numpy.array(color, "f")
         if self.underline:
             color += [color[0]]*self.underline_count
+            t = numpy.array(color, "f")
+
         if color == self._color:
             return
         self._color = color
 
         _c = []
 
-        for i in xrange(len(self.text)-self.text.count("\n")):
+        for i in xrange(len(color)):
             for j in xrange(6):
                 _c.append(color[i])
         self.text_array.reset_colors(_c)
@@ -359,18 +378,22 @@ class Font(object):
         self.font_mapping = mapping
         self.font_image = image.Image(pyg_im)
 
-    def get_size(self, text, size, bold=False, italic=False, linewrap=None):
+    def get_size(self, text, size, underline=False, italic=False, bold=False, linewrap=None):
         x = y = max_size = max_width = 0
+        if underline:
+            ug = size *0.1
+        else:
+            ug = 0
         for i in xrange(len(text)):
             ti = text[i]
             if ti == "\n":
                 x = 0
-                y += max_size
+                y += max_size+ug
                 max_size = 0
                 continue
             if linewrap and x > linewrap:
                 x = 0
-                y += max_size
+                y += max_size+ug
                 max_size = 0
             if ti in self.font_mapping:
                 tsx, tsy, tex, tey, w, h = self.font_mapping[ti]
@@ -396,7 +419,7 @@ class Font(object):
             if bold:
                 max_width += size/10.0
 
-        return max_width, y+max_size
+        return max_width, y+max_size+ug
 
     def make_text_image2D(self, text, color=(1,1,1,1), underline=False, italic=False,
                           bold=False, linewrap=None, break_words=False, override_size=None):
