@@ -212,15 +212,19 @@ class VertexArray(object):
 
     def reset_verts(self, data):
         self.verts = numpy.array(data, "f")
+        self.max_size = len(data)
 
     def reset_colors(self, data):
         self.colors = numpy.array(data, "f")
+        self.max_size = len(data)
 
     def reset_texcs(self, data):
         self.texcs = numpy.array(data, "f")
+        self.max_size = len(data)
 
     def reset_norms(self, data):
         self.norms = numpy.array(data, "f")
+        self.max_size = len(data)
 
     def update_verts(self, index, new):
         self.verts[index] = new
@@ -334,15 +338,19 @@ class VBOArray(object):
 
     def reset_verts(self, data):
         self.verts.set_array(numpy.array(data, "f"))
+        self.max_size = len(data)
 
     def reset_colors(self, data):
         self.colors.set_array(numpy.array(data, "f"))
+        self.max_size = len(data)
 
     def reset_texcs(self, data):
         self.texcs.set_array(numpy.array(data, "f"))
+        self.max_size = len(data)
 
     def reset_norms(self, data):
         self.norms.set_array(numpy.array(data, "f"))
+        self.max_size = len(data)
 
     def update_verts(self, index, new):
         if self.cache_changes:

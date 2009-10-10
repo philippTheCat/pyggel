@@ -29,11 +29,7 @@ class Theme(object):
         g = {}
         for a in self.theme["Fonts"]:
             b = self.theme["Fonts"][a]
-            g[a] = (font.Font(b["fontfile"], b["fontsize"]),
-                    font.MEFont(b["fontfile"], b["fontsize"]))
-            for i in b["images"]:
-                g[a][0].add_image(i, self.data(b["images"][i]))
-                g[a][1].add_image(i, self.data(b["images"][i]))
+            g[a] = font.Font(b["fontfile"], b["fontsize"])
         self.app.update_fonts(g)
 
     def load(self, filename):
@@ -380,7 +376,7 @@ class App(BaseSceneObject):
 
         self.dispatch = event.Dispatcher()
 
-        self.fonts = {"default":(font.Font(), font.MEFont())}
+        self.fonts = {"default":(font.Font(), font.font())}
         self.theme = Theme(self)
 
         self.packer = Packer(self, size=view.screen.screen_size_2d)
@@ -403,16 +399,8 @@ class App(BaseSceneObject):
             self.event_handler.all_guis.remove(self)
 
     def get_font(self, name):
-        """Return theme Font and MEFont bound to name."""
+        """Return theme Font and font bound to name."""
         return self.fonts[name]
-
-    def get_regfont(self, name):
-        """Return theme Font bound to name."""
-        return self.fonts[name][0]
-
-    def get_mefont(self, name):
-        """Return theme MEFont bound to name."""
-        return self.fonts[name][1]
 
     def update_fonts(self, fonts):
         """Sets all App/Theme fonts to fonts.
@@ -568,7 +556,7 @@ class Widget(object):
         if font in (tdef, None):
             font = self.app.theme.get(self, "font")
         self.theme = self.app.theme
-        self.font, self.mefont = self.app.fonts[font]
+        self.font = self.app.fonts[font]
 
         self.dispatch = event.Dispatcher()
 
@@ -1296,11 +1284,11 @@ class Input(Widget):
             font_bold = self.theme.get(self, "font-bold")
 
         self.text = start_text
-        self.image = self.mefont.make_text_image(self.text, font_color, None, font_underline, font_italic, font_bold)
+        self.image = self.font.make_text_image(self.text, font_color, None, font_underline, font_italic, font_bold)
 
         self.font_colors = (font_color, font_color_inactive)
 
-        self.size = (width, self.mefont.pygame_font.get_height())
+        self.size = (width, self.font.font_size)
 
         self.cursor_pos = len(self.text)
         self.cursor_image = _image.Animation(((self.font.make_text_image("|",color=font_color), .5),
@@ -1324,7 +1312,7 @@ class Input(Widget):
     force_pos_update.__doc__ = Widget.force_pos_update.__doc__
 
     def can_handle_key(self, key, string):
-        if string and string in self.mefont.acceptable:
+        if string and string in self.font.renderable:
             return True
         if key in (K_LEFT, K_RIGHT, K_END, K_HOME, K_DELETE,
                    K_BACKSPACE, K_RETURN):
@@ -1494,10 +1482,10 @@ class MoveBar(Widget):
         self.child = child
         if self.child:
             self.child.override_pos = True
-            self.size = (self.child.size[0]-self.child.tsize[0]*2, self.mefont.pygame_font.get_height())
+            self.size = (self.child.size[0]-self.child.tsize[0]*2, self.font.font_size)
             self.child.pos = (self.pos[0], self.pos[1]+self.size[1])
         else:
-            self.size = (width, self.mefont.pygame_font.get_height())
+            self.size = (width, self.font.font_size)
 
         if background_image:
             self.background, self.size, self.tsize, self.tshift = self.load_background(background_image)
@@ -1881,7 +1869,8 @@ class Menu(Button):
                 ic = pygame.image.load(self.sub_icon).convert_alpha()
                 ic = pygame.transform.flip(ic, True, False)
             else:
-                ic = self.mefont.glyphs[""]["<"].copy()
+##                ic = self.font.glyphs[""]["<"].copy()
+                ic = self.font.make_text_image2D("<")
             x = Icon(frame, image=ic)
             Spacer(frame, (1,0))
             need_space = True
@@ -1936,7 +1925,7 @@ class Menu(Button):
                 if self.sub_icon:
                     ic = self.sub_icon
                 else:
-                    ic = self.mefont.glyphs[""][">"].copy()
+                    ic = self.font.make_text_image2D(">")
                 x = Icon(frame, image=ic)
                 NewLine(frame)
                 if c.size[0]+space_size > w:

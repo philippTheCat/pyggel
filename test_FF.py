@@ -14,7 +14,7 @@ def main():
 
     eh = pyggel.event.Handler()
 
-    font = pyggel.font.FastFont()
+    font = pyggel.font.Font()
     s = "Hello World! Testing-123 Come on!"
     c = []
     r = pyggel.misc.randfloat
@@ -60,7 +60,7 @@ def main():
         if K_w in eh.keyboard.active:
             scene.camera.posz += .1
 
-        text.rotate(0,0,0.2)
+        text.rotate(0,0,0.02)
 
         pyggel.view.clear_screen()
         scene.render()#camera)
