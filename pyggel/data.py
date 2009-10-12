@@ -45,12 +45,9 @@ class Texture(object):
 
             self._compile(image)
             if self.filename:
-                self._all_loaded[self.filename] = self
+                self._all_loaded[self.filename] = self.size, self.gl_tex
         else:
-            tex = self._all_loaded[self.filename]
-
-            self.size = tex.size
-            self.gl_tex = tex.gl_tex
+            self.size, self.gl_tex = self._all_loaded[self.filename]
 
     def _compile(self, image):
         """Compiles image data into texture data"""
@@ -93,18 +90,6 @@ class Texture(object):
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
             Texture.bound = self
 
-##    def __del__(self):
-##        """Clear the texture data"""
-##        if self.filename in self._all_loaded and\
-##           self != self._all_loaded[self.filename]:
-##            self._all_loaded[self.filename].remove(self)
-##            if not self._all_loaded[self.filename]:
-##                del self._all_loaded[self.filename]
-##                try:
-##                    glDeleteTextures([self.gl_tex])
-##                except:
-##                    pass #already cleared...
-
 
 class BlankTexture(Texture):
     """A cached, blank texture."""
@@ -121,10 +106,7 @@ class BlankTexture(Texture):
         self.gl_tex = None
         self.unique = unique
         if (not unique) and self.filename in self._all_loaded:
-            tex = self._all_loaded[self.filename]
-
-            self.size = tex.size
-            self.gl_tex = tex.gl_tex
+            self.size, self.gl_tex = self._all_loaded[self.filename]
         else:
             i = pygame.Surface(size)
             if len(color) == 4:
@@ -142,7 +124,7 @@ class BlankTexture(Texture):
             self._compile(i)
 
             if not unique:
-                self._all_loaded[self.filename] = self
+                self._all_loaded[self.filename] = self.size, self.gl_tex
 
 class DisplayList(object):
     """An object to compile and store an OpenGL display list"""
