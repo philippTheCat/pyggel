@@ -10,12 +10,12 @@ import image, view, data, misc, math3d
 from scene import BaseSceneObject
 
 class FontImage(BaseSceneObject):
-    def __init__(self, font, text, size, color=(1,1,1,1),
+    def __init__(self, font, text, char_height, color=(1,1,1,1),
                  underline=False, italic=False, bold=False,
                  linewrap=None, break_words=False):
         BaseSceneObject.__init__(self)
         self.font = font
-        self.size = size
+        self.char_height = char_height
         self._bold = bold
         self._italic = italic
         self._underline = underline
@@ -35,17 +35,6 @@ class FontImage(BaseSceneObject):
         self.text = text
         self.color = color
 
-    def get_next_index(self, text, i):
-        space = text.find(" ", i)
-        new = text.find("\n", i)
-        if (space, new) == (-1,-1):
-            return -1
-        if space == -1:
-            return new
-        if new == -1:
-            return space
-        return min((space, new))
-
     def set_text(self, text, color=(1,1,1,1)):
         if text == "":
             text = "\a"
@@ -61,22 +50,22 @@ class FontImage(BaseSceneObject):
         LW = self.linewrap
         BW = self.break_words
 
-        g = self.size
+        g = self.char_height
         if self.underline:
-            ug = self.size * 0.1
+            ug = self.char_height * 0.1
         else:
             ug = 0
 
-        fin_size = self.font.get_size(text, g, self.underline, self.italic, self.bold, LW)
+        fin_size = self.font.get_size_from_obj_atts(self, self.text)
         xf2, yf2 = fin_size[0]*0.5, fin_size[1]*0.5
         x, y = -xf2, -yf2
 
         if self.italic:
-            skew = g / 10.0
+            skew = g * 0.1
         else:
             skew = 0
         if self.bold:
-            warp = g / 4.0
+            warp = g * 0.25
             skew *= 2
         else:
             warp = 0
@@ -88,7 +77,7 @@ class FontImage(BaseSceneObject):
 
         uverts = [] #so we always put them last!
         utexcs = []
-        self.underline_count = 0
+        self.underline_count = 1
 
         for i in xrange(len(text)):
             ti = text[i]
@@ -105,8 +94,8 @@ class FontImage(BaseSceneObject):
                 max_size = 0
                 last = ti
                 continue
-            if LW and last in (" ", "\n") and self.get_next_index(text, i)>=0 and\
-               self.font.get_size(text[i:self.get_next_index(text, i)], g, self.underline, self.italic, self.bold)[0]+xf2 > LW:
+            if LW and last in (" ", "\n") and self.font.get_next_index(text, i)>=0 and\
+               self.font.get_size(text[i:self.font.get_next_index(text, i)], g, self.underline, self.italic, self.bold)[0]+xf2+x > LW:
                 if self.underline:
                     if last:
                         x -= w + warp + skew
@@ -160,13 +149,13 @@ class FontImage(BaseSceneObject):
             uverts.extend([(-xf2,y+max_size,0), (-xf2,y+max_size+ug,0), (x,y+max_size+ug,0),
                           (-xf2,y+max_size,0), (x,y+max_size+ug,0), (x,y+max_size,0)])
             utexcs.extend([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)])
-        self.underline_count += 1
 
         self.text_array.reset_verts(verts+uverts)
         self.text_array.reset_texcs(texcs+utexcs)
         self.color = color
 
         self.width, self.height = fin_size
+        self.size = fin_size
 
         self.offset = self.width*0.5, self.height*0.5
 
@@ -275,7 +264,9 @@ class FontImage(BaseSceneObject):
         glPopMatrix()
 
     def copy(self):
-        a = FontImage(self.font, self.text, self.size, self.color, self.italic, self.bold, self.linewrap, self.break_words)
+        a = FontImage(self.font, self.text, self.char_height, self.color,
+                      self.underline, self.italic, self.bold,
+                      self.linewrap, self.break_words)
         a.pos = self.pos
         a.scale = self.scale
         a.rotation = self.rotation
@@ -286,11 +277,18 @@ class FontImage(BaseSceneObject):
         a.outline_color = self.outline_color
         return a
 
+    def get_width(self):
+        return self.width
+    def get_height(self):
+        return self.height
+    def get_size(self):
+        return self.size
+
 class FontImage3D(FontImage):
-    def __init__(self, font, text, size=1, color=(1,1,1,1),
+    def __init__(self, font, text, char_height=1, color=(1,1,1,1),
                  underline=False, italic=False, bold=False,
                  linewrap=None, break_words=False):
-        FontImage.__init__(self, font, text, size, color, underline, italic, bold, linewrap, break_words)
+        FontImage.__init__(self, font, text, char_height, color, underline, italic, bold, linewrap, break_words)
 
     def render(self, camera=None):
         pos = self.pos
@@ -315,7 +313,9 @@ class FontImage3D(FontImage):
         glPopMatrix()
 
     def copy(self):
-        a = FontImage3D(self.font, self.text, self.size, self.color, self.italic, self.bold, self.linewrap, self.break_words)
+        a = FontImage3D(self.font, self.text, self.char_height, self.color,
+                        self.underline, self.italic, self.bold,
+                        self.linewrap, self.break_words)
         a.pos = self.pos
         a.scale = self.scale
         a.rotation = self.rotation
@@ -329,13 +329,13 @@ class FontImage3D(FontImage):
 class Font(object):
     renderable = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./ " +\
                  '~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?'
-    def __init__(self, filename=None, font_size=32, font_size3d=0.1, internal_font_size=64):
+    def __init__(self, filename=None, font_char_height=32, font_char_height3d=0.1, internal_font_size=64):
         view.require_init()
 
         self.filename = filename
         self.font_obj = pygame.font.Font(self.filename, internal_font_size)
-        self.font_size = font_size
-        self.font_size3d = font_size3d
+        self.font_char_height = font_char_height
+        self.font_char_height3d = font_char_height3d
 
         self._build_tex()
 
@@ -378,62 +378,98 @@ class Font(object):
         self.font_mapping = mapping
         self.font_image = image.Image(pyg_im)
 
-    def get_size(self, text, size, underline=False, italic=False, bold=False, linewrap=None):
-        x = y = max_size = max_width = 0
+    def get_size_from_obj_atts(self, obj, text):
+        return self.get_size(text, obj.char_height, obj.underline, obj.italic, obj.bold, obj.linewrap, obj.break_words)
+
+    def get_next_index(self, text, i):
+        space = text.find(" ", i)
+        new = text.find("\n", i)
+        if (space, new) == (-1,-1):
+            return -1
+        if space == -1:
+            return new
+        if new == -1:
+            return space
+        return min((space, new))
+
+    def get_size(self, text, char_height, underline=False, italic=False, bold=False, linewrap=None, break_words=False):
+        max_size = 0
+        max_width = 0
+
+        LW = linewrap
+        BW = break_words
+
+        g = char_height
         if underline:
-            ug = size *0.1
+            ug = char_height * 0.1
         else:
             ug = 0
+
+        x = y = 0
+
+        if italic:
+            skew = g * 0.1
+        else:
+            skew = 0
+        if bold:
+            warp = g * 0.25
+            skew *= 2
+        else:
+            warp = 0
+
+        last = None
+
+        underline_count = 1
+
         for i in xrange(len(text)):
             ti = text[i]
             if ti == "\n":
+                underline_count += 1
                 x = 0
                 y += max_size+ug
                 max_size = 0
+                last = ti
                 continue
-            if linewrap and x > linewrap:
+            if LW and last in (" ", "\n") and self.get_next_index(text, i)>=0 and\
+               self.get_size(text[i:self.get_next_index(text, i)], g, underline, italic, bold)[0]+x > LW:
+                underline_count += 1
                 x = 0
                 y += max_size+ug
                 max_size = 0
-            if ti in self.font_mapping:
+            elif LW and BW and x > LW:
+                underline_count += 1
+                x = 0
+                y += max_size+ug
+                max_size = 0
+            if ti in self.renderable:
                 tsx, tsy, tex, tey, w, h = self.font_mapping[ti]
             else:
                 tsx, tsy, tex, tey, w, h = self.font_mapping["\a"]
 
-            w = size * (w*1.0/h)
-            h = size
+            w = g * (w*1.0/h)
+            h = g
 
-            if italic:
-                w += size/10.0
-            if bold:
-                w += size/4.0
-                if italic:
-                    w += size/10.0
-
-            x += w
+            x += w+warp+skew
             max_size = max((max_size, h))
-            max_width = max((max_width, x))
+            max_width = max((max_width, x - (w+warp+skew)))
 
-        if italic:
-            max_width += size/10.0 #because it is subtracted on left of each glyph as well!
-            if bold:
-                max_width += size/10.0
+            last = ti
 
-        return max_width, y+max_size+ug
+        return max_width, max_size+y+ug
 
     def make_text_image2D(self, text, color=(1,1,1,1), underline=False, italic=False,
-                          bold=False, linewrap=None, break_words=False, override_size=None):
-        if override_size:
-            size = override_size
+                          bold=False, linewrap=None, break_words=False, override_char_height=None):
+        if override_char_height:
+            size = override_char_height
         else:
-            size = self.font_size
+            size = self.font_char_height
         return FontImage(self, text, size, color, underline, italic, bold, linewrap, break_words)
 
     def make_text_image3D(self, text, color=(1,1,1,1), underline=False, italic=False,
-                          bold=False, linewrap=None, break_words=False, override_size=None):
-        if override_size:
-            size = override_size
+                          bold=False, linewrap=None, break_words=False, override_char_height=None):
+        if override_char_height:
+            size = override_char_height
         else:
-            size = self.font_size3d
+            size = self.font_char_height3d
         return FontImage3D(self, text, size, color, underline, italic, bold, linewrap, break_words)
             

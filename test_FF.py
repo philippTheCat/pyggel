@@ -22,10 +22,12 @@ def main():
         c.append((r(0.2,1), r(0.2,1), r(0.2,1), 1))
 ##    c = (1,1,1,1)
     text = font.make_text_image2D(s, color=c, underline=True, italic=True, bold=True, linewrap=150)
+    text2 = text.copy()
+    text2.pos = text.get_size()
 
     text3d = font.make_text_image3D(s, color=c, underline=True, italic=True, bold=True, linewrap=1)
 
-    scene.add_2d(text)
+    scene.add_2d((text,text2))
     scene.add_3d(text3d)
 
     clock = pygame.time.Clock()

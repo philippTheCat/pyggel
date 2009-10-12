@@ -23,10 +23,6 @@ def main():
     newapp = pyggel.gui.App(eh)
     newapp.theme = app.theme
     app.activate() #first one ;)
-    regfont = app.get_regfont("default")
-    mefont = app.get_mefont("default")
-    regfont.add_image(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
-    mefont.add_image(":P", pyggel.image.GridSpriteSheet("data/ar.png", (3,3)))
     app.packer.packtype="center"
     scene.add_2d(app)
     scene.add_2d(newapp)

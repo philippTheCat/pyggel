@@ -1,8 +1,7 @@
 "Fonts":{
     "default":{
         "fontfile":None,
-        "fontsize":32,
-        "images":{"XD":"smiley.gif"}
+        "fontsize":32
         }
     },
 "App":{

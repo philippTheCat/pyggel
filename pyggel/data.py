@@ -45,13 +45,12 @@ class Texture(object):
 
             self._compile(image)
             if self.filename:
-                self._all_loaded[self.filename] = [self]
+                self._all_loaded[self.filename] = self
         else:
-            tex = self._all_loaded[self.filename][0]
+            tex = self._all_loaded[self.filename]
 
             self.size = tex.size
             self.gl_tex = tex.gl_tex
-            self._all_loaded[self.filename].append(self)
 
     def _compile(self, image):
         """Compiles image data into texture data"""
@@ -94,17 +93,17 @@ class Texture(object):
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
             Texture.bound = self
 
-    def __del__(self):
-        """Clear the texture data"""
-        if self.filename in self._all_loaded and\
-           self in self._all_loaded[self.filename]:
-            self._all_loaded[self.filename].remove(self)
-            if not self._all_loaded[self.filename]:
-                del self._all_loaded[self.filename]
-                try:
-                    glDeleteTextures([self.gl_tex])
-                except:
-                    pass #already cleared...
+##    def __del__(self):
+##        """Clear the texture data"""
+##        if self.filename in self._all_loaded and\
+##           self != self._all_loaded[self.filename]:
+##            self._all_loaded[self.filename].remove(self)
+##            if not self._all_loaded[self.filename]:
+##                del self._all_loaded[self.filename]
+##                try:
+##                    glDeleteTextures([self.gl_tex])
+##                except:
+##                    pass #already cleared...
 
 
 class BlankTexture(Texture):
@@ -122,11 +121,10 @@ class BlankTexture(Texture):
         self.gl_tex = None
         self.unique = unique
         if (not unique) and self.filename in self._all_loaded:
-            tex = self._all_loaded[self.filename][0]
+            tex = self._all_loaded[self.filename]
 
             self.size = tex.size
             self.gl_tex = tex.gl_tex
-            self._all_loaded[self.filename].append(self)
         else:
             i = pygame.Surface(size)
             if len(color) == 4:
@@ -144,7 +142,7 @@ class BlankTexture(Texture):
             self._compile(i)
 
             if not unique:
-                self._all_loaded[self.filename] = [self]
+                self._all_loaded[self.filename] = self
 
 class DisplayList(object):
     """An object to compile and store an OpenGL display list"""
