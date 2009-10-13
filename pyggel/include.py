@@ -12,7 +12,13 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-import numpy
+class MissingModule(Exception):
+    pass
+
+try:
+    import numpy
+except:
+    raise MissingModule("Numpy - you can get it from: http://sourceforge.net/projects/numpy/files/")
 
 try:
     from OpenGL.GL.EXT.framebuffer_object import *
@@ -31,6 +37,14 @@ try:
     ANI_AVAILABLE = True
 except:
     ANI_AVAILABLE = False
+
+try:
+    import Image as PIL
+    PIL_AVAILABLE = True
+except:
+    PIL_AVAILABLE = False
+    print "PIL not found - animated gif images not supported!"
+    print "\tYou can download PIL from: http://www.pythonware.com/products/pil/"
 
 already_warned = []
 def DepWarn(obj, reason):
