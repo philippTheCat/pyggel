@@ -29,6 +29,8 @@ class Image(BaseSceneObject):
 
         self.pos = pos
 
+        self.unique = True
+
         if type(filename) is type(""):
             self._load_file()
         elif isinstance(filename, type(self)):
@@ -37,17 +39,17 @@ class Image(BaseSceneObject):
             self._image_size = filename._image_size
             self._altered_image_size = filename._altered_image_size
             self.rect = self._pimage.get_rect()
-            self.to_be_blitted = list(filename.to_be_blitted)
             self.display_list = filename.display_list
             self.texture = filename.texture
             self.offset = filename.offset
             loaded = True
+            self.unique = False
+            filename.unique = False
         else:
             self.compile_from_surface(filename)
             self.filename = None
             loaded = True
 
-        self.to_be_blitted = []
         self.rotation = rotation
         self.scale = scale
         self.colorize = colorize
@@ -90,6 +92,7 @@ class Image(BaseSceneObject):
         self._texturize(self._pimage2)
         self.rect = self._pimage.get_rect()
         self._compile()
+        self.unique = False
 
     def compile_from_surface(self, surf):
         """Prepare surf to be stored in a Texture and DisplayList"""
@@ -110,10 +113,13 @@ class Image(BaseSceneObject):
 
         self._texturize(self._pimage2)
         self._compile()
+        self.unique = True
 
     def _texturize(self, image):
         """Bind image to a data.Texture"""
-        self.texture = data.Texture(image)
+        if isinstance(self.texture, data.BlankTexture):
+            self.texture = data.ModifiableTexture()
+        self.texture.update_image(image)
 
     def _compile(self):
         """Compile the Image into a data.DisplayList"""
@@ -150,17 +156,6 @@ class Image(BaseSceneObject):
 
         self.display_list.end()
 
-    def blit(self, other, pos):
-        """Blit another image to this one at pos offset - ONLY allowing an image to blitted once
-           other is another image.Image
-           pos is the x,y offset of the blit"""
-        self.remove_blit(other)
-        self.to_be_blitted.append([other, pos])
-
-    def blit_again(self, other, pos):
-        """Same as blit, except you can blit the same image multiple times"""
-        self.to_be_blitted.append([other, pos])
-
     def render(self, camera=None):
         """Render the image
            camera can be None or the camera the scene is using"""
@@ -190,17 +185,6 @@ class Image(BaseSceneObject):
             misc.outline(self.display_list, self.outline_color, self.outline_size, True)
         self.display_list.render()
         glPopMatrix()
-        if self.to_be_blitted:
-            view.screen.push_clip2d((int(pos[0]), int(pos[1])), (int(w), int(h)))
-            for i in self.to_be_blitted:
-                x, y = i[1]
-                x += pos[0]
-                y += pos[1]
-                o = i[0].pos
-                i[0].pos = (x, y)
-                i[0].render()
-                i[0].pos = o
-            view.screen.pop_clip()
 
     def get_width(self):
         """Return the width in pixels of the image"""
@@ -219,25 +203,21 @@ class Image(BaseSceneObject):
         self.rect.center = self.offset[0] + self.pos[0], self.offset[1] + self.pos[1]
         return self.rect
 
-    def clear_blits(self):
-        """Remove all blits from the image"""
-        self.to_be_blitted = []
-
-    def remove_blit(self, image):
-        """Remove all blits of image from the Image"""
-        for i in self.to_be_blitted:
-            if i[0] == image:
-                self.to_be_blitted.remove(i)
-
     def sub_image(self, topleft, size):
         """Return a new Image object representing a smaller region of this Image."""
         image = self._pimage.subsurface(topleft, size)
         return Image(image, self.pos, self.rotation, self.scale, self.colorize)
 
+    def __del__(self):
+        if self.texture.unique:
+            try:
+                self.texture.release_gl()
+            except:
+                pass
+
 
 class Image3D(Image):
     """A billboarded 3d image"""
-    _all_loaded = {}
     def __init__(self, filename, pos=(0,0,0),
                  rotation=(0,0,0), scale=1,
                  colorize=(1,1,1,1)):
@@ -291,13 +271,8 @@ class Image3D(Image):
             glEnable(GL_LIGHTING)
         glPopMatrix()
 
-    def blit(self, *args, **kwargs):
+    def test_on_screen(self, *args, **kwargs):
         print "Image3D does not support this function!"
-
-    clear_blits = blit
-    remove_blit = blit
-    blit_again = blit
-    test_on_screen = blit
 
     def copy(self):
         """Return a copy og the Image - sharing the same data.DisplayList"""

@@ -199,7 +199,7 @@ class RFontImage(BaseSceneObject):
                     downdent += newh
                     newh = 0
                 elif i == " " and linewrap and indent and (indent + self.font.pygame_font.get_size(word+" ")[0] > linewrap):
-                    i = image.image(self.font.pygame_font.render(word, True, (255,255,255)))
+                    i = image.Image(self.font.pygame_font.render(word, True, (255,255,255)))
                     i.colorize = self.color
                     i.pos = (indent, downdent)
                     w, h = i.get_size()
