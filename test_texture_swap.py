@@ -28,10 +28,10 @@ def main():
                                                10)))
 
     font = pyggel.font.MEFont()
-    font3d = pyggel.font.Font3D()
+    font3d = pyggel.font.Font(font_char_height3d=0.3)
     img4 = font.make_text_image("Hello World: 2D", (1, 1, 0), underline=True, italic=True, bold=True)
     img4.pos = (50,50)
-    img5 = font3d.make_text_image("Hello World: 3D", (0, 1, 1))
+    img5 = font3d.make_text_image3D("Hello World: 3D", (0, 1, 1))
     img5.scale = 2
 
     img6 = pyggel.image.GIFImage("data/smiley.gif", pos=(150, 150))

@@ -1,5 +1,5 @@
 """
-pyggel.gui
+pyggle.gui
 This library (PYGGEL) is licensed under the LGPL by Matthew Roe and PYGGEL contributors.
 
 The gui module contains classes to create and use a simple Graphical User Interface.
@@ -29,7 +29,11 @@ class Theme(object):
         g = {}
         for a in self.theme["Fonts"]:
             b = self.theme["Fonts"][a]
-            g[a] = font.Font(b["fontfile"], b["fontsize"])
+            g[a] = (font.RFont(b["fontfile"], b["fontsize"]),
+                    font.MEFont(b["fontfile"], b["fontsize"]))
+            for i in b["images"]:
+                g[a][0].add_image(i, self.data(b["images"][i]))
+                g[a][1].add_image(i, self.data(b["images"][i]))
         self.app.update_fonts(g)
 
     def load(self, filename):
@@ -376,7 +380,7 @@ class App(BaseSceneObject):
 
         self.dispatch = event.Dispatcher()
 
-        self.fonts = {"default":font.Font()}
+        self.fonts = {"default":(font.RFont(), font.MEFont())}
         self.theme = Theme(self)
 
         self.packer = Packer(self, size=view.screen.screen_size_2d)
@@ -399,12 +403,20 @@ class App(BaseSceneObject):
             self.event_handler.all_guis.remove(self)
 
     def get_font(self, name):
-        """Return theme Font and font bound to name."""
+        """Return theme RFont and MEFont bound to name."""
         return self.fonts[name]
+
+    def get_regfont(self, name):
+        """Return theme RFont bound to name."""
+        return self.fonts[name][0]
+
+    def get_mefont(self, name):
+        """Return theme MEFont bound to name."""
+        return self.fonts[name][1]
 
     def update_fonts(self, fonts):
         """Sets all App/Theme fonts to fonts.
-           fonts must be a dict of {"name":(Font, MEFont)} obejcts"""
+           fonts must be a dict of {"name":(RFont, MEFont)} obejcts"""
         self.fonts = fonts
         for i in self.widgets:
             if i.widget_name in ("Frame", "Window"):
@@ -532,7 +544,7 @@ class Widget(object):
         """Create the widget
            app must be the App/Frame/Window this widget is attached to
            pos must be None (to use app.packer) or the (x,y) pos of the widget
-           font must be tdef/None or the Font to use
+           font must be tdef/None or the (RFont, MEFont) fonts to use
            image_border must be tdef or the pixel size of the border tiles of the background image (if any)
            special_name must be None or the name used to grab a value different from widget_name from the theme"""
         self.app = app
@@ -556,7 +568,7 @@ class Widget(object):
         if font in (tdef, None):
             font = self.app.theme.get(self, "font")
         self.theme = self.app.theme
-        self.font = self.app.fonts[font]
+        self.font, self.mefont = self.app.fonts[font]
 
         self.dispatch = event.Dispatcher()
 
@@ -628,15 +640,12 @@ class Widget(object):
 
     def handle_mouseup(self, button, name):
         """Handle a mouse release event from the App."""
-        #Pyweek change:
-        #modification so hovering after holding/releasing works
         self._mhover = self._collidem()
         if name == "left":
             if self._mhold and self._mhover:
-                self.dispatch.fire("click")
                 self._mhold = False
+                self.dispatch.fire("click")
                 return True
-            self._mhold = False
 
     def handle_mousehold(self, button, name):
         """Handle a mouse hold event from the App."""
@@ -733,7 +742,7 @@ class Frame(App, Widget):
            pos must be None (to use app.packer) or the (x,y) pos of the widget
            size must be tdef or the (x,y) size of the frame
            background_image must be tdef or the filename of the image to use as the background
-           font must be tdef/None or the Font to use
+           font must be tdef/None or the (RFont, MEFont) fonts to use
            image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
            special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, pos, font, image_border, special_name)
@@ -885,7 +894,7 @@ class Label(Widget):
            background_image must be tdef or the filename of the image to use as the background
            font_color must be tdef or the (R,G,B,A)(0-1) color of the text
            font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text for when the widget is not focused
-           font must be tdef/None or the Font to use
+           font must be tdef/None or the (RFont, MEFont) fonts to use
            font_underline must be tdef or True/False - whether text is underlined
            font_italic must be tdef or True/False - whether text is italic
            font_bold must be tdef or True/False - whether text is bold
@@ -912,9 +921,9 @@ class Label(Widget):
         self.font_color_inactive = font_color_inactive
 
         self.text = text
-        self.image = self.font.make_text_image2D(self.text, font_color, font_underline, font_italic, font_bold)
+        self.image = self.font.make_text_image(self.text, font_color, None, font_underline, font_italic, font_bold)
         self.image.color = self.font_color_inactive
-##        self.image.compile()
+        self.image.compile()
         self.size = self.image.get_size()
         if background_image:
             self.background, self.size, self.tsize, self.tshift = self.load_background(background_image)
@@ -951,7 +960,7 @@ class Button(Widget):
            background_image must be tdef or the filename of the image to use as the background
            background_image_hover must be tdef or the filename of the image to use as the background when mouse is hovering
            background_image_click must be tdef or the filename of the image to use as the background when the button is clicked
-           font must be tdef/None or the Font to use
+           font must be tdef/None or the (RFont, MEFont) fonts to use
            font_color must be tdef or the (R,G,B,A)(0-1) color of the text
            font_color_hover must be tdef or the (R,G,B,A)(0-1) color of the text when mouse is hovering
            font_color_click must be tdef or the (R,G,B,A)(0-1) color of the text when the button is clicked
@@ -1002,14 +1011,14 @@ class Button(Widget):
             font_bold_click = self.theme.get(self, "font-bold-click")
 
         self.text = text
-        self.ireg = self.font.make_text_image2D(self.text, font_color, font_underline, font_italic, font_bold)
-        self.ihov = self.font.make_text_image2D(self.text, font_color_hover, font_underline_hover, font_italic_hover, font_bold_hover)
-        self.icli = self.font.make_text_image2D(self.text, font_color_click, font_underline_click, font_italic_click, font_bold_click)
-##        self.ireg.compile()
-##        self.ihov.compile()
-##        self.icli.compile()
+        self.ireg = self.font.make_text_image(self.text, font_color, None, font_underline, font_italic, font_bold)
+        self.ihov = self.font.make_text_image(self.text, font_color_hover, None, font_underline_hover, font_italic_hover, font_bold_hover)
+        self.icli = self.font.make_text_image(self.text, font_color_click, None, font_underline_click, font_italic_click, font_bold_click)
+        self.ireg.compile()
+        self.ihov.compile()
+        self.icli.compile()
         self.image = self.ireg
-        self.size = self.image.size
+        self.size = self.image.get_size()
 
         for i in callbacks:
             self.dispatch.bind("click", i)
@@ -1058,7 +1067,7 @@ class Checkbox(Widget):
            pos must be None (to use app.packer) or the (x,y) pos of the widget
            background_image must be tdef or the filename of the image to use as the image when state is 0
            check_image must be tdef or the filename of the image to use as the image when state is 1
-           font must be tdef/None or the Font to use
+           font must be tdef/None or the (RFont, MEFont) fonts to use
            image_border must be tdef or the pixel size of the border tiles of teh background image (if any)
            special_name must be None or the name used to grab a value different from widget_name from the theme"""
         Widget.__init__(self, app, pos, font, image_border, special_name)
@@ -1076,16 +1085,16 @@ class Checkbox(Widget):
             except:
                 self.off = _image.Image(off)
         else:
-            self.off = self.font.make_text_image2D("( )")
-##            self.off.compile()
+            self.off = self.font.make_text_image("( )")
+            self.off.compile()
         if on:
             try:
                 self.on = _image.Image(self.theme.data(on))
             except:
                 self.on = _image.Image(on)
         else:
-            self.on = self.font.make_text_image2D("(!)")
-##            self.on.compile()
+            self.on = self.font.make_text_image("(!)")
+            self.on.compile()
         self.image = self.off
 
         self.state = 0
@@ -1124,7 +1133,7 @@ class Radio(Frame):
            background_image must be tdef or the filename of the image to use as the background
            option_background_image must be tdef or the filename of the image to use as the background for each option check
            option_check_image must be tdef or the filename of the image to use as the check_image for each option check
-           font must be tdef/None or the Font to use
+           font must be tdef/None or the (RFont, MEFont) fonts to use
            font_color must be tdef or the (R,G,B,A)(0-1) color of the text
            font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text when inactive
            font_underline must be tdef or True/False - whether text is underlined
@@ -1256,7 +1265,7 @@ class Input(Widget):
            width must be tdef or the max pixel width of the text input box
            pos must be None (to use app.packer) or the (x,y) pos of the widget
            background_image must be tdef or the filename of the image to use as the background
-           font must be tdef/None or the Font to use
+           font must be tdef/None or the (RFont, MEFont) fonts to use
            font_color must be tdef or the (R,G,B,A)(0-1) color of the text
            font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text when inactive
            font_underline must be tdef or True/False - whether text is underlined
@@ -1284,15 +1293,17 @@ class Input(Widget):
             font_bold = self.theme.get(self, "font-bold")
 
         self.text = start_text
-        self.image = self.font.make_text_image2D(self.text, font_color, font_underline, font_italic, font_bold)
+        self.image = self.mefont.make_text_image(self.text, font_color, None, font_underline, font_italic, font_bold)
 
         self.font_colors = (font_color, font_color_inactive)
 
-        self.size = (width, self.font.font_char_height)
+        self.size = (width, self.mefont.pygame_font.get_height())
 
         self.cursor_pos = len(self.text)
-        self.cursor_image = _image.Animation(((self.font.make_text_image2D("|",color=font_color), .5),
-                                              (self.font.make_text_image2D("|",color=font_color_inactive), .5)))
+        self.cursor_image = _image.Animation(((self.font.make_text_image("|",color=font_color), .5),
+                                              (self.font.make_text_image("|",color=font_color_inactive), .5)))
+        for i in self.cursor_image.frames:
+            i[0].compile()
         self.cwidth = int(self.cursor_image.get_width()/2)
         self.xwidth = self.size[0] - self.cwidth*2
         if background_image:
@@ -1310,7 +1321,7 @@ class Input(Widget):
     force_pos_update.__doc__ = Widget.force_pos_update.__doc__
 
     def can_handle_key(self, key, string):
-        if string and string in self.font.renderable:
+        if string and string in self.mefont.acceptable:
             return True
         if key in (K_LEFT, K_RIGHT, K_END, K_HOME, K_DELETE,
                    K_BACKSPACE, K_RETURN):
@@ -1371,7 +1382,15 @@ class Input(Widget):
         """Calculate the position of the text cursor - ie, where in the text are we typing... and the text offset."""
         tx, ty = self.pos
         if self.text and self.cursor_pos:
-            w1 = self.image.font.get_size_from_obj_atts(self.image, self.text[0:self.cursor_pos])[0]
+            g1 = self.image.glyphs[0:self.cursor_pos]
+            g2 = self.image.glyphs[self.cursor_pos+1::]
+
+            w1 = 0
+            w2 = 0
+            for i in g1:
+                w1 += i.get_width()
+            for i in g2:
+                w2 += i.get_width()
 
             tp = tx + self.xwidth - w1 + self.tsize[0]
             if tp > self.pos[0]:
@@ -1435,7 +1454,7 @@ class MoveBar(Widget):
            pos must be the (x,y) pos of the widget
            width must be tdef or the width of the widget
            background_image must be tdef or the filename of the image to use as the background
-           font must be tdef/None or the Font to use
+           font must be tdef/None or the (RFont, MEFont) fonts to use
            font_color must be tdef or the (R,G,B,A)(0-1) color of the text
            font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text when inactive
            font_underline must be tdef or True/False - whether text is underlined
@@ -1472,10 +1491,10 @@ class MoveBar(Widget):
         self.child = child
         if self.child:
             self.child.override_pos = True
-            self.size = (self.child.size[0]-self.child.tsize[0]*2, self.font.font_char_height)
+            self.size = (self.child.size[0]-self.child.tsize[0]*2, self.mefont.pygame_font.get_height())
             self.child.pos = (self.pos[0], self.pos[1]+self.size[1])
         else:
-            self.size = (width, self.font.font_char_height)
+            self.size = (width, self.mefont.pygame_font.get_height())
 
         if background_image:
             self.background, self.size, self.tsize, self.tshift = self.load_background(background_image)
@@ -1484,16 +1503,15 @@ class MoveBar(Widget):
             y += self.tsize[1]*2-1
             self.child.pos = (x, y)
 
-        self.image = self.font.make_text_image2D(title, font_color, font_underline, font_italic, font_bold)
-        self.set_title(title)
-
+        i = self.font.make_text_image(title, font_color, font_underline, font_italic, font_bold)
+        if i.get_width() > self.size[0] - self.tsize[0]*2:
+            while title and self.font.make_text_image(title+"...", font_color, font_underline, font_italic, font_bold).get_width() >\
+                  self.size[0] - self.tsize[0]*2:
+                title = title[0:-1]
+            i = self.font.make_text_image(title+"...", font_color, font_underline, font_italic, font_bold)
+        self.image = i
+        self.image.compile()
         self.pack()
-
-    def set_title(self, title):
-        self.title = title
-        while title and self.font.get_size_from_obj_atts(self.image, title+"...")[0] > self.size[0]:
-            title = title[0:-1]
-        self.image.text = title+"..."
 
     def handle_mousemotion(self, change):
         _retval = Widget.handle_mousemotion(self, change)
@@ -1541,7 +1559,7 @@ class Window(MoveBar):
            pos must be the (x,y) pos of the widget
            background_image must be tdef or the filename of the image to use as the background for the frame
            movebar_background_image must be tdef or the filename of the image to use as the background for the movebar
-           font must be tdef/None or the Font to use
+           font must be tdef/None or the (RFont, MEFont) fonts to use
            font_color must be tdef or the (R,G,B,A)(0-1) color of the text
            font_color_inactive must be tdef or the (R,G,B,A)(0-1) color of the text when inactive
            font_underline must be tdef or True/False - whether text is underlined
@@ -1629,7 +1647,7 @@ class Menu(Button):
            sub_background_image must be tdef or the filename of the image to use as the background for each sub-menu option
            sub_background_image_hover must be tdef or the filename of the image to use as the background when mouse is hovering for each sub-menu option
            sub_background_image_click must be tdef or the filename of the image to use as the background when the button is clicked for each sub-menu option
-           font must be tdef/None or the Font to use
+           font must be tdef/None or the (RFont, MEFont) fonts to use
            font_color must be tdef or the (R,G,B,A)(0-1) color of the text for the menu button
            font_color_hover must be tdef or the (R,G,B,A)(0-1) color of the text when mouse is hovering for the menu button
            font_color_click must be tdef or the (R,G,B,A)(0-1) color of the text when the button is clicked for the menu button
@@ -1860,7 +1878,7 @@ class Menu(Button):
                 ic = pygame.image.load(self.sub_icon).convert_alpha()
                 ic = pygame.transform.flip(ic, True, False)
             else:
-                ic = self.font.make_text_image2D("<")
+                ic = self.mefont.glyphs[""]["<"].copy()
             x = Icon(frame, image=ic)
             Spacer(frame, (1,0))
             need_space = True
@@ -1915,7 +1933,7 @@ class Menu(Button):
                 if self.sub_icon:
                     ic = self.sub_icon
                 else:
-                    ic = self.font.make_text_image2D(">")
+                    ic = self.mefont.glyphs[""][">"].copy()
                 x = Icon(frame, image=ic)
                 NewLine(frame)
                 if c.size[0]+space_size > w:

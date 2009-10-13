@@ -11,15 +11,15 @@ def main():
     camera1 = pyggel.camera.LookFromCamera((0,0,-10))
     camera2 = pyggel.camera.LookAtCamera((0,0,5), distance=10)
 
-    font = pyggel.font.Font3D(None, 32)
-    font2d = pyggel.font.Font(None, 32)
-    img = font.make_text_image("Hello\nWorld: 3D", (1, 1, 0, 1))
+    font = pyggel.font.Font(None, 32)
+    font2d = pyggel.font.RFont(None, 32)
+    img = font.make_text_image3D("Hello\nWorld: 3D", (1, 1, 0, 1))
     img.scale = 5
-    img2 = font.make_text_image("Hello World: 3D X2!!!", (0, 1, 1, 1))
+    img2 = font.make_text_image3D("Hello World: 3D X2!!!", (0, 1, 1, 1))
     img2.pos = (0, .7, 0)
     img3 = img2.copy()
     img3.pos = (0, 0, 0)
-    img4 = font.make_text_image("Testy...123...", (0, 1, 0, 1))
+    img4 = font.make_text_image3D("Testy...123...", (0, 1, 0, 1))
     img4.pos = (0, -1, 0)
     img5 = img4.copy()
 

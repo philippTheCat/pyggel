@@ -40,8 +40,8 @@ def main():
     img5.pos = (6, 3, 20)
 
     #now the fonts
-    font = pyggel.font.Font3D(None, 32) #sorry, no mefonts for 3d, and no embedded images/linewraps either, though newlines still work
-    text1 = font.make_text_image("test?", italic=True)
+    font = pyggel.font.Font(font_char_height3d=1) #see tut5-scene_2d.py for 3d fonts...
+    text1 = font.make_text_image3D("test?", italic=True)
     text1.pos = (-2, 3, 20)
 
     scene.add_3d((img, img2, img3, img4, img5)) #these images don't have perpixel alpha, so they are ok to go in base 3d class

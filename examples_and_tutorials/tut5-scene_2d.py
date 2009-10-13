@@ -77,11 +77,13 @@ def main():
     #with these you simply tell it how many frames in the (x,y) direction there are, and it figures out the rest.
 
     #ok, so now that we have some images, lets do some text!
-    """With text you have 2 different options in PYGGEL, which you choose will depend on the situation.
-       Regular Font objects create text that is very fast to render, but changing the text is very slow.
+    """With text you have 3 different options in PYGGEL, which you choose will depend on the situation.
+       Regular Font objects (RFont) create text that is very fast to render, but changing the text is very slow.
        MEFont objects create text that is quite a bit slower to render, but changing text takes almost no time at all.
-       The usage for both fonts is identical:
-           font = pyggel.font.Font/MEFont creates the font. It takes two optional arguments, filename and size.
+       And you have the Font class - it is very fast for both rendering and modifying - and supports 3d text output as well,
+           but they do not support embedded images, and are slower than the other fonts in some circumstances.
+       The usage for the first two fonts is identical:
+           font = pyggel.font.RFont/MEFont creates the font. It takes two optional arguments, filename and size.
                filename must be None or the filename of the font to load,
                size is the, well, size of the font :)
            font.add_image(name, img) - adds an embedded image for the text to use, like a smiley,
@@ -93,10 +95,30 @@ def main():
                    and any names of embedded images found are converted into the images
                color - the (r,g,b,a) color of the text, with values bound to 0-1
                linewrap - None or the pixel width for each line of text (text only broken at newlines and spaces, so might overrun
-               underline, italic and bold - the attributes of the text, True or False for each"""
-    font = pyggel.font.Font(None, 32)
+               underline, italic and bold - the attributes of the text, True or False for each
+       The usage for the Font object is as follows:
+           font = pyggel.font.Font(filename, font_char_height=32, font_char_height=0.1, internal_font_size=64)
+               filename can be None or the filename of the font to load
+               font_char_height is the max height of each character in text
+               font_char_height3d is the max height of each character in 3d text
+               internal_font_size controls how big the absolute font size, for rendering on the texture map
+                   if it is too large an Exception will be thrown, indicating you need to decrease size
+           font.make_text_image2D(text, color=(1,1,1,1), underline=False, italic=False, bold=False,
+                                  linewrap=None, break_words=False, override_char_height=None)
+               #Creates/returns a 2d font image
+               text is the text to render
+               color can be 1 single color, or a list of colors for each character in the text
+                   NOTE: if underlining, the underlines color is the first color in the list!
+               underline, italic, bold control the view of the text
+               linewrap can be None or the width for each line of text
+               break_words - if True will not care about breaking words for line wrap
+                             if False will try and break the lines up intelligently,
+                             keeping words together where possible.
+               override_char_height can be None or the new font_char_height for this text to use
+           font.make_text_image3D - same as make_text_image except for 3d rendering"""
+    font = pyggel.font.RFont(None, 32)
     mefont = pyggel.font.MEFont(None, 32)
-    #but wait - do we want some imbedded images?
+    #but wait - do we want some embedded images?
     font.add_image(":)", img4.copy())
     mefont.add_image(":)", img4.copy())
     text1 = font.make_text_image("test?:)", italic=True)

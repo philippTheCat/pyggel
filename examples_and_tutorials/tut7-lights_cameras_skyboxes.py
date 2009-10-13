@@ -63,8 +63,8 @@ def main():
     img4.pos = (-3,5,0)
 
     #now the fonts
-    font = pyggel.font.Font3D(None, 32) #sorry, no mefonts for 3d, and no embedded images/linewraps either, though newlines still work
-    text1 = font.make_text_image("test?", italic=True)
+    font = pyggel.font.Font(font_char_height3d=1)
+    text1 = font.make_text_image3D("test?", italic=True)
     text1.pos = (0, 5, 0)
 
     scene.add_3d((img, img4)) #these images don't have perpixel alpha, so they are ok to go in base 3d class
@@ -175,31 +175,31 @@ def main():
            lets actually do something!"""
 
         if K_LEFT in event_handler.keyboard.active: #rotate view!
-            camera.roty -= .5
+            scene.camera.roty -= .5
         if K_RIGHT in event_handler.keyboard.active:
-            camera.roty += .5
+            scene.camera.roty += .5
         if K_UP in event_handler.keyboard.active:
-            camera.rotx -= .5
+            scene.camera.rotx -= .5
         if K_DOWN in event_handler.keyboard.active:
-            camera.rotx += .5
+            scene.camera.rotx += .5
         if K_1 in event_handler.keyboard.active:
-            camera.rotz -= .5
+            scene.camera.rotz -= .5
         if "2" in event_handler.keyboard.active: #just to throw you off ;)
-            camera.rotz += .5
+            scene.camera.rotz += .5
 
         if "=" in event_handler.keyboard.active: #move closer/farther out
-            camera.distance -= .1
+            scene.camera.distance -= .1
         if "-" in event_handler.keyboard.active:
-            camera.distance += .1
+            scene.camera.distance += .1
 
         if "a" in event_handler.keyboard.active: #move the camera!
-            camera.posx -= .1
+            scene.camera.posx -= .1
         if K_d in event_handler.keyboard.active:
-            camera.posx += .1
+            scene.camera.posx += .1
         if K_s in event_handler.keyboard.active:
-            camera.posz -= .1
+            scene.camera.posz -= .1
         if K_w in event_handler.keyboard.active:
-            camera.posz += .1
+            scene.camera.posz += .1
 
         if " " in event_handler.keyboard.hit: #swap the skybox so we can see the different ones in action!
             if scene.graph.skybox == skybox:
