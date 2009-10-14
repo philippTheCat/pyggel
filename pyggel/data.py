@@ -9,34 +9,103 @@ like textures, display lists and vertex arrays.
 from include import *
 import view
 
+def max_tex_size():
+    view.require_init()
+
+    abs_max = 2**13 #max pygame can handle for surfaces!
+
+    size = glGetIntegerv(GL_MAX_TEXTURE_SIZE)
+
+    return min((size, abs_max))
+
 class Texture(object):
     """An object to load and store an OpenGL texture"""
     bound = None
+    repeating = False
     _all_loaded = {}
-    def __init__(self, filename=None):
+    _dead_textures = []
+    def __init__(self, filename=None, repeat=False, fill_color=(1,1,1,1), fill_size=(2,2), fill_unique=False):
         """Create a texture
-           filename can be be a filename for an image, or a pygame.Surface object"""
+           filename can be be a filename for an image, or a pygame.Surface object
+           repeat controls whether the texture repeats when values overflow the 0-1 range
+           fill_color is the color the texture will be filled with if filename is None
+           fill_size is the size the texture will be if filename is None
+           fill_unique controls whether the texture is unique if filename is None"""
         view.require_init()
         self.filename = filename
         self.unique = False
 
-        self.gl_tex = glGenTextures(1)
+        self.gl_tex = None
+        self.make_gl_tex()
 
         self.size = (0,0)
+        self.unique = True
 
-        if type(filename) is type(""):
+        self.size_mult = (1,1)
+
+        self.repeat = repeat
+
+        if not filename:
+            self.filename = "BlankTexture: %s | %s"%(fill_color, fill_size)
+            self.make_blank(fill_color, fill_size, fill_unique)
+        elif type(filename) is type(""):
             self._load_file()
         else:
             self.filename = "UniqueTexture: %s"%self.gl_tex
-            self.unique = True
             self._compile(filename)
+
+    def make_gl_tex(self):
+        if not self.gl_tex:
+            if Texture._dead_textures:
+                self.gl_tex = Texture._dead_textures.pop()
+            else:
+                self.gl_tex = glGenTextures(1)
+
+    def make_blank(self, color, size, unique):
+        if (not unique) and self.filename in Texture._all_loaded:
+            self.gl_tex, self.size, self.size_mult = Texture._all_loaded[self.filename]
+        else:
+            self.fill(color, size)
+            if not unique:
+                Texture._all_loaded[self.filename] = self.to_atts()
+        self.unique = unique
+
+    def fill(self, color=(1,1,1,1), size=(2,2)):
+        if not self.unique:
+            raise Exception("Texture must be unique to modify it!")
+
+        self.make_gl_tex()
+
+        i = pygame.Surface(size).convert_alpha()
+        if len(color) == 4:
+            r,g,b,a = color
+        else:
+            r,g,b = color
+            a = 1
+
+        if max((r,g,b,a)) <= 1:
+            r*=255
+            g*=255
+            b*=255
+            a*=255
+        i.fill((r,g,b,a))
+
+        self._compile(i)
+
+    def update_image(self, image):
+        if not self.unique:
+            raise Exception("Texture must be unique to modify it!")
+        self.make_gl_tex()
+        if type(image) is type(""):
+            image = pygame.image.load(image)
+        self._compile(image)
 
     def _get_next_biggest(self, x, y):
         """Get the next biggest power of two x and y sizes"""
-        if x == y == 1:
+        if x == y == 2:
             return x, y
-        nw = 16
-        nh = 16
+        nw = 2
+        nh = 2
         while nw < x:
             nw *= 2
         while nh < y:
@@ -45,114 +114,83 @@ class Texture(object):
 
     def _load_file(self):
         """Loads file"""
-        if not self.filename in Texture._all_loaded:
+        if self.filename in Texture._all_loaded:
+            if self.unique:
+                self.free_texture(self.gl_tex)
+            self.gl_tex, self.size, self.size_mult = Texture._all_loaded[self.filename]
+        else:
             image = pygame.image.load(self.filename)
+            self.make_gl_tex()
 
             self._compile(image)
-            if self.filename:
-                Texture._all_loaded[self.filename] = self.size, self.gl_tex
-        else:
-            self.size, self.gl_tex = Texture._all_loaded[self.filename]
+            Texture._all_loaded[self.filename] = self.to_atts()
+
+        self.unique = False
 
     def _compile(self, image):
         """Compiles image data into texture data"""
+        self.make_gl_tex()
 
         size = self._get_next_biggest(*image.get_size())
+        maxs = max_tex_size()
+        if size != image.get_size():
+            if size[0]<maxs and size[1]<maxs:
+                new = pygame.Surface(size).convert_alpha()
+                new.fill((0,0,0,0))
+                new.blit(image, (0,0))
+            else:
+                new = pygame.transform.scale(image, min((maxs, size[0])), min((maxs, size[1])))
+        else:
+            new = image
 
-        image = pygame.transform.scale(image, size)
-
-        tdata = pygame.image.tostring(image, "RGBA", 1)
+        tdata = pygame.image.tostring(new, "RGBA", 1)
         
         glBindTexture(GL_TEXTURE_2D, self.gl_tex)
 
-        xx, xy = size
-        self.size = size
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xx, xy, 0, GL_RGBA,
+        w1, h1 = image.get_size()
+        w2, h2 = new.get_size()
+        self.size_mult = 1.0*w1/w2, 1.0*h1/h2
+        self.size = w1, h1
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0, GL_RGBA,
                      GL_UNSIGNED_BYTE, tdata)
-
-        if ANI_AVAILABLE:
-            try:
-                glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,glGetFloat(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT))
-            except:
-                pass
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
 
     def bind(self):
         """Binds the texture for usage"""
         if not Texture.bound == self.gl_tex:
             glBindTexture(GL_TEXTURE_2D, self.gl_tex)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
             Texture.bound = self.gl_tex
+        if not Texture.repeating == self.repeat:
+            if self.repeat:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT)
+            else:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
+            Texture.repeating = self.repeat
 
-    def release_gl(self):
-        try:
-            glDeleteTextures([self.gl_tex])
-        except:
-            pass
+    def free_texture(self, name):
+        if not name in Texture._dead_textures:
+            Texture._dead_textures.append(name)
 
-        try:
-            del Texture._all_loaded[self.filename]
-        except:
-            pass
+    def __del__(self):
+        if self.unique:
+            self.free_texture(self.gl_tex)
 
-class ModifiableTexture(Texture):
-    def __init__(self):
-        view.require_init()
-
-        self.gl_tex = glGenTextures(1)
-        self.size = 0,0
-        self.unique = True
-        self.filename = "UniqueTexture: %s"%self.gl_tex
-
-    def update_image(self, image):
-        if type(image) is type(""):
-            image = pygame.image.load(image)
-        self._compile(image)
+    def to_atts(self):
+        return self.gl_tex, self.size, self.size_mult
 
 
 class BlankTexture(Texture):
     """A cached, blank texture."""
-    _all_loaded = {}
     def __init__(self, size=(1,1), color=(1,1,1,1), unique=False):
         """Create an empty data.Texture
            size must be a two part tuple representing the pixel size of the texture
            color must be a four-part tuple representing the (RGBA 0-1) color of the texture
            unique controls whether this texture is cached and reused or not"""
-        view.require_init() # It seems to need init on python2.6
-        
-        self.size = size
-        self.filename = repr(size)+repr(color)
-        self.gl_tex = None
-        self.unique = unique
-        if (not unique) and self.filename in BlankTexture._all_loaded:
-            self.size, self.gl_tex = BlankTexture._all_loaded[self.filename]
-        else:
-            i = pygame.Surface(size)
-            if len(color) == 4:
-                r, g, b, a = color
-            else:
-                r, g, b = color
-                a = 1
-            r *= 255
-            g *= 255
-            b *= 255
-            a *= 255
-            i.fill((r,g,b,a))
-            
-            self.gl_tex = glGenTextures(1)
-            self._compile(i)
-
-            if not unique:
-                BlankTexture._all_loaded[self.filename] = self.size, self.gl_tex
+        Texture.__init__(self, None, False, color, size, unique)
 
 class DisplayList(object):
     """An object to compile and store an OpenGL display list"""
