@@ -134,6 +134,8 @@ class Game(object):
         #parse ze level
         static, self.walls._objects = level_parse(self, self.scene)
         self.scene.add_3d(pyggel.misc.StaticObjectGroup(static))
+
+        self.scene.camera = self.camera
         
         #Used for bobbing up and down. No I will not be less vague.
         self.frame = 0
@@ -231,7 +233,7 @@ class Game(object):
         
         #And pyggel doth draw.
         pyggel.view.clear_screen()
-        self.scene.render(self.camera)
+        self.scene.render()
         pyggel.view.refresh_screen()
 
     def main_loop(self):

@@ -32,10 +32,16 @@ class Image(BaseSceneObject):
             self.filename = filename
             self.texture = data.Texture(filename)
 
+        self._compile()
+
         self.pos = pos
         self.rotation = rotation
         self.scale = scale
         self.colorize = colorize
+
+    def test_on_screen(self):
+        """Return whether the image is onscreen or not"""
+        return view.screen.rect2d.colliderect(self.get_rect())
 
     def copy(self):
         """Return a copy of the image"""

@@ -183,13 +183,6 @@ def init(screen_size=None, screen_size_2d=None,
     set_background_color()
 
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    if ANI_AVAILABLE:
-        try:
-            glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAX_ANISOTROPY_EXT,glGetFloat(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT))
-        except:
-            pass
 
     glFrontFace(GL_CCW)
     glCullFace(GL_BACK)

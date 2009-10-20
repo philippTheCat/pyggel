@@ -17,9 +17,6 @@ def main():
     img.colorize=(1,0,0,1)
     img2 = pyggel.image.Image("data/ar.png", pos=(50,0))
     img2.colorize=(1,1,1,0.5)
-    img2sub = img2.sub_image((0,0), (15, 15))
-    img2sub.colorize=(1, 0, 0, 1)
-    img2sub.pos = (600, 400)
     img3d = []
     for x in xrange(10):
         img3d.append(pyggel.image.Image3D("data/tile_example.png",
@@ -42,8 +39,6 @@ def main():
                                     100),
                            True)
 
-    img.blit(img2, (0, 0))
-
     obj = pyggel.mesh.OBJ("data/bird_plane.obj")
     obj.scale = .5
     obj2 = obj.copy()
@@ -64,7 +59,6 @@ def main():
     my_scene.pick = True
     my_scene.add_2d(img)
     my_scene.add_2d(img2)
-    my_scene.add_2d(img2sub)
     my_scene.add_2d(img4)
     my_scene.add_2d(img6)
 
@@ -99,10 +93,7 @@ def main():
             return None
         if "left" in meh.mouse.hit:
             if img.get_rect().collidepoint(pyggel.view.screen.get_mouse_pos2d()):
-                if img.to_be_blitted:
-                    img.clear_blits()
-                else:
-                    img.blit(img2, (0,0))
+                print 32
         if "right" in meh.mouse.hit:
             cur = view.screen.cursor
             if cur.running:
